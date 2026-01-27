@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
+import SRSearchModal, { SRData } from '@/components/popup/SRSearchModal';
 
 // 화면설계서 UI-G-01-07-03 기준 탭 타입
 type TabType = 'MAIN' | 'CARGO' | 'OTHER';
@@ -257,6 +258,9 @@ function BLSeaRegisterContent() {
   const [searchModalType, setSearchModalType] = useState<CodeType>('customer');
   const [searchTargetCallback, setSearchTargetCallback] = useState<((item: CodeItem) => void) | null>(null);
 
+  // S/R 검색 팝업 상태
+  const [showSRSearchModal, setShowSRSearchModal] = useState(false);
+
   // 검색 팝업 열기
   const openCodeSearchModal = (codeType: CodeType, callback: (item: CodeItem) => void) => {
     setSearchModalType(codeType);
@@ -270,6 +274,31 @@ function BLSeaRegisterContent() {
       searchTargetCallback(item);
     }
     setShowCodeSearchModal(false);
+  };
+
+  // S/R 선택 처리 - S/R 데이터를 B/L 폼에 반영
+  const handleSRSelect = (sr: SRData) => {
+    setMainData(prev => ({
+      ...prev,
+      srNo: sr.srNo,
+      bookingNo: sr.bookingNo || '',
+      shipperName: sr.shipper || '',
+      shipperAddress: sr.shipperAddress || '',
+      consigneeName: sr.consignee || '',
+      consigneeAddress: sr.consigneeAddress || '',
+      notifyName: sr.notifyParty || '',
+      portOfLoading: sr.pol || '',
+      portOfDischarge: sr.pod || '',
+      etd: sr.cargoReadyDate || sr.etd || '',
+    }));
+    setCargoData(prev => ({
+      ...prev,
+      packageQty: sr.packageQty || 0,
+      packageUnit: sr.packageType || 'PKG',
+      grossWeight: sr.grossWeight || 0,
+      measurement: sr.volume || sr.measurement || 0,
+    }));
+    setShowSRSearchModal(false);
   };
 
   // 화면닫기 핸들러
@@ -669,6 +698,16 @@ function BLSeaRegisterContent() {
                   className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
                   placeholder="S/R NO"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowSRSearchModal(true)}
+                  className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                  title="S/R 검색"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
                 <button
                   disabled={!isSaved}
                   className={`px-3 text-sm rounded-lg ${isSaved ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]' : 'bg-[var(--surface-200)] text-[var(--muted)]'}`}
@@ -2019,6 +2058,12 @@ function BLSeaRegisterContent() {
         onClose={() => setShowCodeSearchModal(false)}
         onSelect={handleCodeSelect}
         codeType={searchModalType}
+      />
+
+      <SRSearchModal
+        isOpen={showSRSearchModal}
+        onClose={() => setShowSRSearchModal(false)}
+        onSelect={handleSRSelect}
       />
     </div>
   );

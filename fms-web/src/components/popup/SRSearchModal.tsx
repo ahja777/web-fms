@@ -1,26 +1,35 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 
 // S/R 데이터 타입
 export interface SRData {
   id: string;
   srNo: string;
-  bookingNo: string;
+  bookingNo?: string;
   shipper: string;
+  shipperAddress?: string;
   consignee: string;
-  carrier: string;
+  consigneeAddress?: string;
+  notifyParty?: string;
+  carrier?: string;
   pol: string;
-  polName: string;
+  polName?: string;
   pod: string;
-  podName: string;
-  etd: string;
-  eta: string;
-  status: 'Draft' | 'Confirmed' | 'Shipped' | 'Completed';
-  containerType: string;
-  containerQty: number;
+  podName?: string;
+  etd?: string;
+  eta?: string;
+  cargoReadyDate?: string;
+  status: string;
+  containerType?: string;
+  containerQty?: number;
+  packageQty?: number;
+  packageType?: string;
   grossWeight: number;
-  measurement: number;
+  measurement?: number;
+  volume?: number;
+  commodityDesc?: string;
+  customerName?: string;
 }
 
 interface SRSearchModalProps {
@@ -29,20 +38,21 @@ interface SRSearchModalProps {
   onSelect: (sr: SRData) => void;
 }
 
-// 샘플 S/R 데이터
+// 샘플 S/R 데이터 (API 실패시 폴백)
 const sampleSRs: SRData[] = [
-  { id: '1', srNo: 'SR-2026-0001', bookingNo: 'BK-2026-0001', shipper: '삼성전자', consignee: 'Samsung America Inc.', carrier: 'HMM', pol: 'KRPUS', polName: '부산', pod: 'USLAX', podName: '로스앤젤레스', etd: '2026-01-25', eta: '2026-02-10', status: 'Confirmed', containerType: '40HC', containerQty: 2, grossWeight: 18500, measurement: 68 },
-  { id: '2', srNo: 'SR-2026-0002', bookingNo: 'BK-2026-0002', shipper: 'LG전자', consignee: 'LG Electronics USA', carrier: 'MAERSK', pol: 'KRPUS', polName: '부산', pod: 'USNYC', podName: '뉴욕', etd: '2026-01-26', eta: '2026-02-12', status: 'Shipped', containerType: '40GP', containerQty: 1, grossWeight: 12000, measurement: 45 },
-  { id: '3', srNo: 'SR-2026-0003', bookingNo: 'BK-2026-0003', shipper: '현대자동차', consignee: 'Hyundai Motor Europe', carrier: 'MSC', pol: 'KRINC', polName: '인천', pod: 'DEHAM', podName: '함부르크', etd: '2026-01-27', eta: '2026-02-20', status: 'Draft', containerType: '45HC', containerQty: 3, grossWeight: 25000, measurement: 95 },
-  { id: '4', srNo: 'SR-2026-0004', bookingNo: 'BK-2026-0004', shipper: 'SK하이닉스', consignee: 'SK Hynix Japan', carrier: 'ONE', pol: 'KRPUS', polName: '부산', pod: 'JPYOK', podName: '요코하마', etd: '2026-01-28', eta: '2026-01-30', status: 'Confirmed', containerType: '20GP', containerQty: 5, grossWeight: 35000, measurement: 120 },
-  { id: '5', srNo: 'SR-2026-0005', bookingNo: 'BK-2026-0005', shipper: '포스코', consignee: 'POSCO Singapore', carrier: 'EVERGREEN', pol: 'KRPUS', polName: '부산', pod: 'SGSIN', podName: '싱가포르', etd: '2026-01-29', eta: '2026-02-05', status: 'Completed', containerType: '40HC', containerQty: 4, grossWeight: 80000, measurement: 200 },
+  { id: '1', srNo: 'SR-2026-0001', bookingNo: 'BK-2026-0001', shipper: '삼성전자', consignee: 'Samsung America Inc.', carrier: 'HMM', pol: 'KRPUS', polName: '부산', pod: 'USLAX', podName: '로스앤젤레스', etd: '2026-01-25', eta: '2026-02-10', status: 'CONFIRMED', containerType: '40HC', containerQty: 2, grossWeight: 18500, measurement: 68 },
+  { id: '2', srNo: 'SR-2026-0002', bookingNo: 'BK-2026-0002', shipper: 'LG전자', consignee: 'LG Electronics USA', carrier: 'MAERSK', pol: 'KRPUS', polName: '부산', pod: 'USNYC', podName: '뉴욕', etd: '2026-01-26', eta: '2026-02-12', status: 'PENDING', containerType: '40GP', containerQty: 1, grossWeight: 12000, measurement: 45 },
+  { id: '3', srNo: 'SR-2026-0003', bookingNo: 'BK-2026-0003', shipper: '현대자동차', consignee: 'Hyundai Motor Europe', carrier: 'MSC', pol: 'KRINC', polName: '인천', pod: 'DEHAM', podName: '함부르크', etd: '2026-01-27', eta: '2026-02-20', status: 'DRAFT', containerType: '45HC', containerQty: 3, grossWeight: 25000, measurement: 95 },
+  { id: '4', srNo: 'SR-2026-0004', bookingNo: 'BK-2026-0004', shipper: 'SK하이닉스', consignee: 'SK Hynix Japan', carrier: 'ONE', pol: 'KRPUS', polName: '부산', pod: 'JPYOK', podName: '요코하마', etd: '2026-01-28', eta: '2026-01-30', status: 'CONFIRMED', containerType: '20GP', containerQty: 5, grossWeight: 35000, measurement: 120 },
+  { id: '5', srNo: 'SR-2026-0005', bookingNo: 'BK-2026-0005', shipper: '포스코', consignee: 'POSCO Singapore', carrier: 'EVERGREEN', pol: 'KRPUS', polName: '부산', pod: 'SGSIN', podName: '싱가포르', etd: '2026-01-29', eta: '2026-02-05', status: 'CONFIRMED', containerType: '40HC', containerQty: 4, grossWeight: 80000, measurement: 200 },
 ];
 
-const statusConfig = {
-  Draft: { label: '작성중', color: '#6B7280', bgColor: '#F3F4F6' },
-  Confirmed: { label: '확정', color: '#059669', bgColor: '#D1FAE5' },
-  Shipped: { label: '선적', color: '#D97706', bgColor: '#FEF3C7' },
-  Completed: { label: '완료', color: '#2563EB', bgColor: '#DBEAFE' },
+const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
+  DRAFT: { label: '작성중', color: '#6B7280', bgColor: '#F3F4F6' },
+  PENDING: { label: '대기', color: '#9333EA', bgColor: '#F3E8FF' },
+  CONFIRMED: { label: '확정', color: '#059669', bgColor: '#D1FAE5' },
+  SHIPPED: { label: '선적', color: '#D97706', bgColor: '#FEF3C7' },
+  COMPLETED: { label: '완료', color: '#2563EB', bgColor: '#DBEAFE' },
 };
 
 export default function SRSearchModal({
@@ -50,6 +60,8 @@ export default function SRSearchModal({
   onClose,
   onSelect,
 }: SRSearchModalProps) {
+  const [allData, setAllData] = useState<SRData[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [shipper, setShipper] = useState('');
   const [carrier, setCarrier] = useState('');
@@ -58,21 +70,68 @@ export default function SRSearchModal({
   const [dateTo, setDateTo] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // API에서 S/R 목록 조회
+  const fetchSRList = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/sr/sea');
+      if (response.ok) {
+        const data = await response.json();
+        // API 데이터를 SRData 형식으로 변환
+        const mapped: SRData[] = data.map((item: any) => ({
+          id: String(item.id),
+          srNo: item.srNo || '',
+          bookingNo: item.bookingNo || '',
+          shipper: item.shipperName || '',
+          shipperAddress: item.shipperAddress || '',
+          consignee: item.consigneeName || '',
+          consigneeAddress: item.consigneeAddress || '',
+          notifyParty: item.notifyParty || '',
+          pol: item.pol || '',
+          pod: item.pod || '',
+          cargoReadyDate: item.cargoReadyDate || '',
+          status: item.status || 'DRAFT',
+          packageQty: item.packageQty || 0,
+          packageType: item.packageType || '',
+          grossWeight: item.grossWeight || 0,
+          volume: item.volume || 0,
+          commodityDesc: item.commodityDesc || '',
+          customerName: item.customerName || '',
+        }));
+        setAllData(mapped.length > 0 ? mapped : sampleSRs);
+      } else {
+        setAllData(sampleSRs);
+      }
+    } catch (error) {
+      console.error('Failed to fetch S/R list:', error);
+      setAllData(sampleSRs);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchSRList();
+      setSelectedId(null);
+    }
+  }, [isOpen, fetchSRList]);
+
   const filteredData = useMemo(() => {
-    return sampleSRs.filter(sr => {
+    return allData.filter(sr => {
       if (searchText && !sr.srNo.toLowerCase().includes(searchText.toLowerCase()) &&
-          !sr.bookingNo.toLowerCase().includes(searchText.toLowerCase())) return false;
+          !(sr.bookingNo || '').toLowerCase().includes(searchText.toLowerCase())) return false;
       if (shipper && !sr.shipper.includes(shipper)) return false;
       if (carrier && sr.carrier !== carrier) return false;
       if (status && sr.status !== status) return false;
-      if (dateFrom && sr.etd < dateFrom) return false;
-      if (dateTo && sr.etd > dateTo) return false;
+      if (dateFrom && (sr.cargoReadyDate || '') < dateFrom) return false;
+      if (dateTo && (sr.cargoReadyDate || '') > dateTo) return false;
       return true;
     });
-  }, [searchText, shipper, carrier, status, dateFrom, dateTo]);
+  }, [allData, searchText, shipper, carrier, status, dateFrom, dateTo]);
 
   const handleSelect = () => {
-    const selected = sampleSRs.find(sr => sr.id === selectedId);
+    const selected = allData.find(sr => sr.id === selectedId);
     if (selected) {
       onSelect(selected);
       resetForm();
@@ -201,17 +260,26 @@ export default function SRSearchModal({
             <thead className="bg-gray-100 sticky top-0">
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-gray-600">S/R 번호</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">부킹번호</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">화주</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">선사</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">POL</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">POD</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">ETD</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600">고객사</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600">Shipper</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600">Consignee</th>
+                <th className="px-3 py-2 text-center font-medium text-gray-600">POL</th>
+                <th className="px-3 py-2 text-center font-medium text-gray-600">POD</th>
+                <th className="px-3 py-2 text-center font-medium text-gray-600">Cargo Ready</th>
                 <th className="px-3 py-2 text-center font-medium text-gray-600">상태</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+                      로딩 중...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-3 py-8 text-center text-gray-400">
                     검색 결과가 없습니다.
@@ -219,7 +287,7 @@ export default function SRSearchModal({
                 </tr>
               ) : (
                 filteredData.map(sr => {
-                  const statusStyle = statusConfig[sr.status];
+                  const statusStyle = statusConfig[sr.status] || statusConfig.DRAFT;
                   return (
                     <tr
                       key={sr.id}
@@ -228,12 +296,12 @@ export default function SRSearchModal({
                       onDoubleClick={() => handleRowDoubleClick(sr)}
                     >
                       <td className="px-3 py-2 font-medium text-blue-600">{sr.srNo}</td>
-                      <td className="px-3 py-2">{sr.bookingNo}</td>
-                      <td className="px-3 py-2">{sr.shipper}</td>
-                      <td className="px-3 py-2">{sr.carrier}</td>
-                      <td className="px-3 py-2">{sr.polName}</td>
-                      <td className="px-3 py-2">{sr.podName}</td>
-                      <td className="px-3 py-2">{sr.etd}</td>
+                      <td className="px-3 py-2 text-sm">{sr.customerName || '-'}</td>
+                      <td className="px-3 py-2 text-sm">{sr.shipper || '-'}</td>
+                      <td className="px-3 py-2 text-sm">{sr.consignee || '-'}</td>
+                      <td className="px-3 py-2 text-center text-sm">{sr.pol || '-'}</td>
+                      <td className="px-3 py-2 text-center text-sm">{sr.pod || '-'}</td>
+                      <td className="px-3 py-2 text-center text-sm">{sr.cargoReadyDate || sr.etd || '-'}</td>
                       <td className="px-3 py-2 text-center">
                         <span
                           className="px-2 py-0.5 rounded-full text-xs font-medium"
