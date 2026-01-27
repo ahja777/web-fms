@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-인터지스 통합물류플랫폼 구축사업의 FMS(Forwarder Management System) 프로젝트입니다.
+통합물류플랫폼 구축사업의 Logistics 플랫폼 프로젝트입니다.
 Cloud 기반 통합 물류 Platform으로 포워딩/창고관리/운송관리/가시성관리/정산관리 등 국제 수출입 포워더 全 영역의 통합 기능을 제공합니다.
 
 ## Directory Structure

@@ -85,7 +85,25 @@
       "WebSearch",
       "WebFetch(domain:www.kcins.co.kr)",
       "Bash(pipx install:*)",
-      "Skill(frontend-design:frontend-design)"
+      "Skill(frontend-design:frontend-design)",
+      "mcp__excel-mcp-server__excel_describe_sheets",
+      "mcp__excel-mcp-server__excel_read_sheet",
+      "Bash(iconv:*)",
+      "Skill(sc:design)",
+      "Bash(dir:*)",
+      "Bash(copy \"c:\\\\Claude_AI\\\\backdata\\\\케이씨에스_로고_2026-01-26 135153.jpg\" \"C:\\\\Claude_AI\\\\fms-web\\\\public\\\\images\\\\kcs-logo.jpg\")",
+      "Bash(python3:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(gh repo create:*)",
+      "WebFetch(domain:www.kebhana.com)",
+      "WebFetch(domain:www.hanabank.com)",
+      "WebFetch(domain:biz.kebhana.com)",
+      "Bash(cd:*)",
+      "Bash(pushd \"C:\\\\Claude_AI\\\\fms-web\")",
+      "Bash(npm run lint)",
+      "Bash(echo:*)",
+      "Bash(\"C:\\\\Claude_AI\\\\fms-web\\\\src\\\\app\\\\logis\\\\booking\\\\sea\\\\[id]\\\\page.tsx\")",
+      "Bash(find:*)"
     ]
   }
 }
