@@ -1,0 +1,275 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+
+interface CostPayment {
+  id: string;
+  paymentNo: string;
+  paymentDate: string;
+  blNo: string;
+  customerName: string;
+  costType: string;
+  description: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  dueDate: string;
+  status: 'pending' | 'approved' | 'paid' | 'cancelled';
+}
+
+interface SearchFilters {
+  startDate: string;
+  endDate: string;
+  blNo: string;
+  costType: string;
+  customerName: string;
+  status: string;
+}
+
+const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
+  pending: { label: '대기', color: '#6B7280', bgColor: '#F3F4F6' },
+  approved: { label: '승인', color: '#2563EB', bgColor: '#DBEAFE' },
+  paid: { label: '결제완료', color: '#059669', bgColor: '#D1FAE5' },
+  cancelled: { label: '취소', color: '#DC2626', bgColor: '#FEE2E2' },
+};
+
+const sampleData: CostPayment[] = [
+  { id: '1', paymentNo: 'CP-2026-0001', paymentDate: '2026-01-15', blNo: 'HBL2026010001', customerName: '삼성전자', costType: 'THC', description: 'Terminal Handling Charge', amount: 150000, currency: 'KRW', paymentMethod: '계좌이체', dueDate: '2026-01-20', status: 'paid' },
+  { id: '2', paymentNo: 'CP-2026-0002', paymentDate: '2026-01-15', blNo: 'HBL2026010002', customerName: 'LG전자', costType: 'CFS', description: 'CFS Charge', amount: 85000, currency: 'KRW', paymentMethod: '계좌이체', dueDate: '2026-01-22', status: 'approved' },
+  { id: '3', paymentNo: 'CP-2026-0003', paymentDate: '2026-01-14', blNo: 'HBL2026010003', customerName: '현대자동차', costType: 'D/O', description: 'D/O Fee', amount: 50000, currency: 'KRW', paymentMethod: '카드', dueDate: '2026-01-21', status: 'pending' },
+  { id: '4', paymentNo: 'CP-2026-0004', paymentDate: '2026-01-14', blNo: 'HBL2026010004', customerName: 'SK하이닉스', costType: '통관수수료', description: 'Customs Clearance Fee', amount: 120000, currency: 'KRW', paymentMethod: '계좌이체', dueDate: '2026-01-19', status: 'paid' },
+  { id: '5', paymentNo: 'CP-2026-0005', paymentDate: '2026-01-13', blNo: 'HBL2026010005', customerName: '포스코', costType: 'THC', description: 'Terminal Handling Charge', amount: 180000, currency: 'KRW', paymentMethod: '계좌이체', dueDate: '2026-01-18', status: 'cancelled' },
+  { id: '6', paymentNo: 'CP-2026-0006', paymentDate: '2026-01-12', blNo: 'HBL2026010006', customerName: '삼성전자', costType: 'CFS', description: 'CFS Charge', amount: 95000, currency: 'KRW', paymentMethod: '카드', dueDate: '2026-01-17', status: 'paid' },
+];
+
+const initialFilters: SearchFilters = {
+  startDate: '',
+  endDate: '',
+  blNo: '',
+  costType: '',
+  customerName: '',
+  status: '',
+};
+
+export default function CostPaymentPage() {
+  const router = useRouter();
+  const [showCloseModal, setShowCloseModal] = useState(false);
+
+  // 화면닫기 핸들러
+  const handleCloseClick = () => {
+    setShowCloseModal(true);
+  };
+
+  const handleConfirmClose = () => {
+    setShowCloseModal(false);
+    router.back();
+  };
+
+  // 브라우저 뒤로가기 버튼 처리
+  useCloseConfirm({
+    showModal: showCloseModal,
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
+  });
+
+  const [allData] = useState<CostPayment[]>(sampleData);
+  const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+  const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [searchMessage, setSearchMessage] = useState<string>('');
+
+  const filteredList = useMemo(() => {
+    return allData.filter(item => {
+      if (appliedFilters.blNo && !item.blNo.toLowerCase().includes(appliedFilters.blNo.toLowerCase())) return false;
+      if (appliedFilters.customerName && !item.customerName.toLowerCase().includes(appliedFilters.customerName.toLowerCase())) return false;
+      if (appliedFilters.costType && item.costType !== appliedFilters.costType) return false;
+      if (appliedFilters.status && item.status !== appliedFilters.status) return false;
+      if (appliedFilters.startDate && item.paymentDate < appliedFilters.startDate) return false;
+      if (appliedFilters.endDate && item.paymentDate > appliedFilters.endDate) return false;
+      return true;
+    });
+  }, [allData, appliedFilters]);
+
+  const totalAmount = filteredList.reduce((sum, p) => sum + p.amount, 0);
+  const paidAmount = filteredList.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
+
+  const handleSearch = () => {
+    setAppliedFilters({ ...filters });
+    setSelectedIds(new Set());
+    setSearchMessage(`검색 완료: ${filteredList.length}건이 조회되었습니다.`);
+    setTimeout(() => setSearchMessage(''), 3000);
+  };
+
+  const handleReset = () => {
+    setFilters(initialFilters);
+    setAppliedFilters(initialFilters);
+    setSelectedIds(new Set());
+    setSearchMessage('검색 조건이 초기화되었습니다.');
+    setTimeout(() => setSearchMessage(''), 3000);
+  };
+
+  const handleFilterChange = (field: keyof SearchFilters, value: string) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleRowSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === filteredList.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filteredList.map(item => item.id)));
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--background)]">
+      <Sidebar />
+      <div className="ml-72">
+        <Header title="부대비용결제관리" subtitle="부대비용관리  부대비용결제관리" showCloseButton={false} />
+        <main className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex gap-2">
+              <button className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">비용등록</button>
+              <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
+            </div>
+          </div>
+
+          {searchMessage && (
+            <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
+          )}
+
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="card p-4">
+              <p className="text-sm text-[var(--muted)] mb-1">총 비용</p>
+              <p className="text-2xl font-bold">{totalAmount.toLocaleString()} KRW</p>
+            </div>
+            <div className="card p-4 cursor-pointer hover:shadow-lg" onClick={() => { setFilters(prev => ({ ...prev, status: 'paid' })); setAppliedFilters(prev => ({ ...prev, status: 'paid' })); }}>
+              <p className="text-sm text-[var(--muted)] mb-1">결제완료</p>
+              <p className="text-2xl font-bold text-[#059669]">{paidAmount.toLocaleString()} KRW</p>
+            </div>
+            <div className="card p-4 cursor-pointer hover:shadow-lg" onClick={() => { setFilters(prev => ({ ...prev, status: 'pending' })); setAppliedFilters(prev => ({ ...prev, status: 'pending' })); }}>
+              <p className="text-sm text-[var(--muted)] mb-1">미결제</p>
+              <p className="text-2xl font-bold text-[#EA580C]">{(totalAmount - paidAmount).toLocaleString()} KRW</p>
+            </div>
+            <div className="card p-4">
+              <p className="text-sm text-[var(--muted)] mb-1">결제율</p>
+              <p className="text-2xl font-bold">{totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0}%</p>
+            </div>
+          </div>
+
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
+            <div className="p-4 grid grid-cols-4 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">등록일자</label>
+                <div className="flex items-center gap-2">
+                  <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <span>~</span>
+                  <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">B/L 번호</label>
+                <input type="text" value={filters.blNo} onChange={(e) => handleFilterChange('blNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="B/L No" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">비용유형</label>
+                <select value={filters.costType} onChange={(e) => handleFilterChange('costType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option value="">전체</option>
+                  <option value="THC">THC</option>
+                  <option value="CFS">CFS</option>
+                  <option value="D/O">D/O</option>
+                  <option value="통관수수료">통관수수료</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">고객사</label>
+                <input type="text" value={filters.customerName} onChange={(e) => handleFilterChange('customerName', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="고객사명" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">상태</label>
+                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option value="">전체</option>
+                  <option value="pending">대기</option>
+                  <option value="approved">승인</option>
+                  <option value="paid">결제완료</option>
+                  <option value="cancelled">취소</option>
+                </select>
+              </div>
+            </div>
+            <div className="p-4 flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+              <h3 className="font-bold">부대비용 목록 ({filteredList.length}건)</h3>
+              {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[var(--surface-100)]">
+                  <tr>
+                    <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
+                    <th className="p-3 text-left text-sm">결제번호</th>
+                    <th className="p-3 text-left text-sm">등록일자</th>
+                    <th className="p-3 text-left text-sm">B/L No</th>
+                    <th className="p-3 text-left text-sm">고객사</th>
+                    <th className="p-3 text-left text-sm">비용유형</th>
+                    <th className="p-3 text-left text-sm">내역</th>
+                    <th className="p-3 text-right text-sm">금액</th>
+                    <th className="p-3 text-left text-sm">결제방법</th>
+                    <th className="p-3 text-center text-sm">결제기한</th>
+                    <th className="p-3 text-center text-sm">상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredList.length === 0 ? (
+                    <tr><td colSpan={11} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
+                  ) : (
+                    filteredList.map((row) => (
+                      <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
+                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
+                        <td className="p-3 text-[#2563EB] font-medium">{row.paymentNo}</td>
+                        <td className="p-3 text-sm">{row.paymentDate}</td>
+                        <td className="p-3 text-sm">{row.blNo}</td>
+                        <td className="p-3 text-sm">{row.customerName}</td>
+                        <td className="p-3 text-sm font-medium">{row.costType}</td>
+                        <td className="p-3 text-sm">{row.description}</td>
+                        <td className="p-3 text-sm text-right font-semibold">{row.amount.toLocaleString()} {row.currency}</td>
+                        <td className="p-3 text-sm">{row.paymentMethod}</td>
+                        <td className="p-3 text-sm text-center">{row.dueDate}</td>
+                        <td className="p-3 text-center">
+                          <span className="px-2 py-1 rounded-full text-xs" style={{ color: statusConfig[row.status].color, backgroundColor: statusConfig[row.status].bgColor }}>{statusConfig[row.status].label}</span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* 화면 닫기 확인 모달 */}
+      <CloseConfirmModal
+        isOpen={showCloseModal}
+        onClose={() => setShowCloseModal(false)}
+        onConfirm={handleConfirmClose}
+      />
+    </div>
+  );
+}

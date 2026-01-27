@@ -1,0 +1,40 @@
+/**
+ * 목록 페이지 경로 상수
+ * 화면닫기 시 이동할 목록 페이지 경로를 정의합니다.
+ */
+export const LIST_PATHS = {
+  // Dashboard
+  DASHBOARD: '/',
+
+  // Booking
+  BOOKING_SEA: '/logis/booking/sea',
+  BOOKING_AIR: '/logis/booking/air',
+
+  // Quote
+  QUOTE_SEA: '/logis/quote/sea',
+  QUOTE_AIR: '/logis/quote/air',
+  QUOTE_REQUEST: '/logis/quote/request',
+
+  // Schedule
+  SCHEDULE_SEA: '/logis/schedule/sea',
+  SCHEDULE_AIR: '/logis/schedule/air',
+
+  // Import B/L
+  IMPORT_BL_SEA: '/logis/import-bl/sea',
+  IMPORT_BL_AIR: '/logis/import-bl/air',
+
+  // S/R, S/N
+  SR_SEA: '/logis/sr/sea',
+  SN_SEA: '/logis/sn/sea',
+
+  // Customs & AMS
+  CUSTOMS_SEA: '/logis/customs/sea',
+  AMS_SEA: '/logis/ams/sea',
+  MANIFEST_SEA: '/logis/manifest/sea',
+
+  // Shipment
+  SHIPMENT: '/logis/shipment',
+} as const;
+
+export type ListPathKey = keyof typeof LIST_PATHS;
+export type ListPath = typeof LIST_PATHS[ListPathKey];
