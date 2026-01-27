@@ -19,7 +19,8 @@ nul
 
 # production
 /build
-
+node_modules
+.next
 # misc
 .DS_Store
 *.pem
