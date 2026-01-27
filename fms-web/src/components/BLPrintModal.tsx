@@ -436,7 +436,7 @@ function BLFormTemplate({ data }: { data: BLData }) {
               <div className="text-[10px]">{data.weight.toLocaleString()}</div>
             </td>
             <td style={{ width: '13%', padding: '6px', verticalAlign: 'top', textAlign: 'right' }}>
-              <div className="text-[10px]">{data.measurement ? data.measurement.toFixed(3) : ''}</div>
+              <div className="text-[10px]">{data.measurement ? Number(data.measurement).toFixed(3) : ''}</div>
             </td>
           </tr>
         </tbody>

@@ -2,15 +2,16 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import * as XLSX from 'xlsx';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { LIST_PATHS } from '@/constants/paths';
-import { ReportPrintModal } from '@/components/reports';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import EmailModal from '@/components/EmailModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
+import BLPrintModal, { BLData as PrintBLData } from '@/components/BLPrintModal';
 
 // 화면설계서 UI-G-01-07-02 기준 검색조건 인터페이스
 interface SearchFilters {
@@ -99,6 +100,40 @@ const initialFilters: SearchFilters = {
   branchType: '',
 };
 
+// 정렬 설정 인터페이스
+interface SortConfig {
+  key: keyof SeaBL | null;
+  direction: 'asc' | 'desc';
+}
+
+// 컬럼 라벨 정의
+const columnLabels: Record<string, string> = {
+  obDate: 'O/B.Date',
+  arDate: 'A/R.Date',
+  jobNo: 'JOB.NO.',
+  srNo: 'S/R NO.',
+  mblNo: 'M.B/L NO.',
+  hblNo: 'H.B/L NO.',
+  lcNo: 'L/C NO.',
+  poNo: 'P/O NO.',
+  type: 'TYPE',
+  dc: 'D/C',
+  ln: 'L/N',
+  pc: 'PC',
+  inco: 'INCO',
+};
+
+// 정렬 아이콘 컴포넌트
+const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof SeaBL; sortConfig: SortConfig }) => {
+  const isActive = sortConfig.key === columnKey;
+  return (
+    <span className="inline-flex flex-col ml-1" style={{ fontSize: '10px', lineHeight: '6px' }}>
+      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
+      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    </span>
+  );
+};
+
 export default function BLSeaPage() {
   const router = useRouter();
   const [allData, setAllData] = useState<SeaBL[]>(initialSampleData);
@@ -115,6 +150,12 @@ export default function BLSeaPage() {
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
   const [searchModalType, setSearchModalType] = useState<CodeType>('customer');
   const [searchTargetField, setSearchTargetField] = useState<keyof SearchFilters>('shipperCode');
+
+  // 정렬 상태
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
+
+  // B/L 출력 관련 state
+  const [printData, setPrintData] = useState<PrintBLData | null>(null);
 
   // 화면닫기 핸들러
   const handleConfirmClose = () => {
@@ -162,6 +203,53 @@ export default function BLSeaPage() {
     });
   }, [allData, appliedFilters]);
 
+  // 정렬된 데이터
+  const sortedList = useMemo(() => {
+    if (!sortConfig.key) return filteredList;
+    return [...filteredList].sort((a, b) => {
+      const aValue = a[sortConfig.key!];
+      const bValue = b[sortConfig.key!];
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      let comparison = 0;
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        comparison = aValue - bValue;
+      } else {
+        comparison = String(aValue).localeCompare(String(bValue), 'ko');
+      }
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }, [filteredList, sortConfig]);
+
+  // 정렬 핸들러
+  const handleSort = (key: keyof SeaBL) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  // 정렬 가능한 헤더 컴포넌트
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof SeaBL; label: string; className?: string }) => (
+    <th
+      className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
+      onClick={() => handleSort(columnKey)}
+    >
+      <span className="inline-flex items-center">
+        {label}
+        <SortIcon columnKey={columnKey} sortConfig={sortConfig} />
+      </span>
+    </th>
+  );
+
+  // 정렬 상태 텍스트
+  const getSortStatusText = () => {
+    if (!sortConfig.key) return '';
+    const label = columnLabels[sortConfig.key] || sortConfig.key;
+    const direction = sortConfig.direction === 'asc' ? '오름차순' : '내림차순';
+    return ` | 정렬: ${label} ${direction}`;
+  };
+
   // 핸들러
   const handleSearch = useCallback(() => {
     setAppliedFilters({ ...filters });
@@ -174,6 +262,7 @@ export default function BLSeaPage() {
     setAppliedFilters(initialFilters);
     setSelectedIds(new Set());
     setSelectedRow(null);
+    setSortConfig({ key: null, direction: 'asc' });
   }, []);
 
   const handleFilterChange = (field: keyof SearchFilters, value: string) => {
@@ -262,18 +351,118 @@ export default function BLSeaPage() {
     }
   };
 
-  // 출력
+  // 출력 (BLPrintModal 사용)
   const handlePrint = () => {
     if (selectedIds.size === 0) {
       setShowSelectionAlert(true);
       return;
     }
-    setShowPrintModal(true);
+    if (selectedIds.size > 1) {
+      alert('B/L 출력은 한 건씩만 가능합니다.');
+      return;
+    }
+    const selected = allData.find(item => selectedIds.has(item.id));
+    if (selected) {
+      const blPrintData: PrintBLData = {
+        hblNo: selected.hblNo,
+        mblNo: selected.mblNo,
+        bookingNo: '',
+        blDate: selected.obDate,
+        shipper: selected.shipperName || '',
+        consignee: selected.consigneeName || '',
+        notifyParty: '',
+        carrier: '',
+        vessel: selected.vesselVoyage?.split('/')[0]?.trim() || '',
+        voyage: selected.vesselVoyage?.split('/')[1]?.trim() || '',
+        pol: selected.pol || '',
+        pod: selected.pod || '',
+        etd: selected.obDate,
+        eta: selected.arDate,
+        containerType: 'DRY',
+        containerQty: 1,
+        weight: 0,
+        measurement: 0,
+      };
+      setPrintData(blPrintData);
+      setShowPrintModal(true);
+    }
   };
 
-  // Excel
+  // Excel 다운로드
   const handleExcel = () => {
-    alert(`Excel 다운로드: ${selectedIds.size || filteredList.length}건`);
+    const dataToExport = selectedIds.size > 0
+      ? sortedList.filter(item => selectedIds.has(item.id))
+      : sortedList;
+
+    if (dataToExport.length === 0) {
+      alert('다운로드할 데이터가 없습니다.');
+      return;
+    }
+
+    // Excel용 데이터 변환
+    const excelData = dataToExport.map((item, index) => ({
+      'No': index + 1,
+      'O/B.Date': item.obDate || '-',
+      'A/R.Date': item.arDate || '-',
+      'JOB.NO.': item.jobNo || '-',
+      'S/R NO.': item.srNo || '-',
+      'M.B/L NO.': item.mblNo || '-',
+      'H.B/L NO.': item.hblNo || '-',
+      'L/C NO.': item.lcNo || '-',
+      'P/O NO.': item.poNo || '-',
+      'TYPE': item.type || '-',
+      'D/C': item.dc || '-',
+      'L/N': item.ln || '-',
+      'PC': item.pc || '-',
+      'INCO': item.inco || '-',
+      'Shipper': item.shipperName || '-',
+      'Consignee': item.consigneeName || '-',
+      'POL': item.pol || '-',
+      'POD': item.pod || '-',
+      'Vessel/Voyage': item.vesselVoyage || '-',
+      '상태': getStatusConfig(item.status || '').label,
+    }));
+
+    // 워크시트 생성
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // 컬럼 너비 설정
+    worksheet['!cols'] = [
+      { wch: 5 },   // No
+      { wch: 12 },  // O/B.Date
+      { wch: 12 },  // A/R.Date
+      { wch: 18 },  // JOB.NO.
+      { wch: 15 },  // S/R NO.
+      { wch: 18 },  // M.B/L NO.
+      { wch: 18 },  // H.B/L NO.
+      { wch: 15 },  // L/C NO.
+      { wch: 12 },  // P/O NO.
+      { wch: 8 },   // TYPE
+      { wch: 5 },   // D/C
+      { wch: 5 },   // L/N
+      { wch: 5 },   // PC
+      { wch: 8 },   // INCO
+      { wch: 20 },  // Shipper
+      { wch: 20 },  // Consignee
+      { wch: 10 },  // POL
+      { wch: 10 },  // POD
+      { wch: 25 },  // Vessel/Voyage
+      { wch: 12 },  // 상태
+    ];
+
+    // 워크북 생성
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '수출 B/L 목록');
+
+    // 파일명 생성 (현재 날짜 포함)
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+    const fileName = `수출BL목록_${dateStr}.xlsx`;
+
+    // 다운로드
+    XLSX.writeFile(workbook, fileName);
+
+    alert(`${dataToExport.length}건의 데이터가 Excel로 다운로드되었습니다.`);
   };
 
   // E-mail
@@ -550,7 +739,7 @@ export default function BLSeaPage() {
               <div className="flex items-center gap-3">
                 <h3 className="font-bold">B/L 목록</h3>
                 <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">
-                  {filteredList.length}건
+                  {sortedList.length}건{getSortStatusText()}
                 </span>
               </div>
               {selectedIds.size > 0 && (
@@ -566,29 +755,29 @@ export default function BLSeaPage() {
                     <th className="w-12 p-3">
                       <input
                         type="checkbox"
-                        checked={filteredList.length > 0 && selectedIds.size === filteredList.length}
+                        checked={sortedList.length > 0 && selectedIds.size === sortedList.length}
                         onChange={handleSelectAll}
                         className="rounded"
                       />
                     </th>
                     <th className="p-3 text-center text-sm font-semibold">No</th>
-                    <th className="p-3 text-center text-sm font-semibold">O/B.Date</th>
-                    <th className="p-3 text-center text-sm font-semibold">A/R.Date</th>
-                    <th className="p-3 text-left text-sm font-semibold">JOB.NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">S/R NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">M.B/L NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">H.B/L NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">L/C NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">P/O NO.</th>
-                    <th className="p-3 text-center text-sm font-semibold">TYPE</th>
-                    <th className="p-3 text-center text-sm font-semibold">D/C</th>
-                    <th className="p-3 text-center text-sm font-semibold">L/N</th>
-                    <th className="p-3 text-center text-sm font-semibold">PC</th>
-                    <th className="p-3 text-center text-sm font-semibold">INCO</th>
+                    <SortableHeader columnKey="obDate" label="O/B.Date" className="text-center" />
+                    <SortableHeader columnKey="arDate" label="A/R.Date" className="text-center" />
+                    <SortableHeader columnKey="jobNo" label="JOB.NO." className="text-left" />
+                    <SortableHeader columnKey="srNo" label="S/R NO." className="text-left" />
+                    <SortableHeader columnKey="mblNo" label="M.B/L NO." className="text-left" />
+                    <SortableHeader columnKey="hblNo" label="H.B/L NO." className="text-left" />
+                    <SortableHeader columnKey="lcNo" label="L/C NO." className="text-left" />
+                    <SortableHeader columnKey="poNo" label="P/O NO." className="text-left" />
+                    <SortableHeader columnKey="type" label="TYPE" className="text-center" />
+                    <SortableHeader columnKey="dc" label="D/C" className="text-center" />
+                    <SortableHeader columnKey="ln" label="L/N" className="text-center" />
+                    <SortableHeader columnKey="pc" label="PC" className="text-center" />
+                    <SortableHeader columnKey="inco" label="INCO" className="text-center" />
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredList.length === 0 ? (
+                  {sortedList.length === 0 ? (
                     <tr>
                       <td colSpan={15} className="p-12 text-center">
                         <div className="flex flex-col items-center gap-3">
@@ -599,7 +788,7 @@ export default function BLSeaPage() {
                         </div>
                       </td>
                     </tr>
-                  ) : filteredList.map((row, index) => (
+                  ) : sortedList.map((row, index) => (
                     <tr
                       key={row.id}
                       className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors ${selectedIds.has(row.id) ? 'bg-blue-500/10' : ''} ${selectedRow?.id === row.id ? 'bg-[#E8A838]/10' : ''}`}
@@ -701,12 +890,16 @@ export default function BLSeaPage() {
         onConfirm={handleConfirmClose}
       />
 
-      <ReportPrintModal
-        isOpen={showPrintModal}
-        onClose={() => setShowPrintModal(false)}
-        reportType="BL"
-        data={allData.filter(d => selectedIds.has(d.id)) as unknown as Record<string, unknown>[]}
-      />
+      {printData && (
+        <BLPrintModal
+          isOpen={showPrintModal}
+          onClose={() => {
+            setShowPrintModal(false);
+            setPrintData(null);
+          }}
+          blData={printData}
+        />
+      )}
 
       <SelectionAlertModal
         isOpen={showSelectionAlert}
