@@ -11,98 +11,61 @@ import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { LIST_PATHS } from '@/constants/paths';
 
 interface AWBDetailData {
-  awbNo: string;
-  awbType: string;
-  mawbNo: string;
-  airline: string;
-  flightNo: string;
-  origin: string;
-  destination: string;
-  etd: string;
-  etdTime: string;
-  eta: string;
-  etaTime: string;
-  atd: string;
-  ata: string;
-  shipperName: string;
-  shipperAddress: string;
-  consigneeName: string;
-  consigneeAddress: string;
-  notifyParty: string;
+  mawb_id: number;
+  mawb_no: string;
+  import_type: string;
+  airline_code: string;
+  flight_no: string;
+  origin_airport_cd: string;
+  dest_airport_cd: string;
+  etd_dt: string;
+  etd_time: string;
+  eta_dt: string;
+  eta_time: string;
+  atd_dt: string;
+  atd_time: string;
+  ata_dt: string;
+  ata_time: string;
+  issue_dt: string;
+  issue_place: string;
+  shipper_nm: string;
+  shipper_addr: string;
+  consignee_nm: string;
+  consignee_addr: string;
+  notify_party: string;
   pieces: number;
-  grossWeight: number;
-  chargeWeight: number;
-  volume: number;
-  commodity: string;
-  hsCode: string;
+  gross_weight_kg: number;
+  charge_weight_kg: number;
+  volume_cbm: number;
+  commodity_desc: string;
+  hs_code: string;
   dimensions: string;
-  specialHandling: string;
-  declaredValue: number;
-  declaredCurrency: string;
-  insuranceValue: number;
-  freightCharges: number;
-  otherCharges: number;
-  paymentTerms: string;
-  status: string;
+  special_handling: string;
+  declared_value: number;
+  declared_currency: string;
+  insurance_value: number;
+  freight_charges: number;
+  other_charges: number;
+  weight_charge: number;
+  valuation_charge: number;
+  tax_amt: number;
+  total_other_agent: number;
+  total_other_carrier: number;
+  rate_class: string;
+  rate: number;
+  payment_terms: string;
+  mrn_no: string;
+  msn: string;
+  agent_code: string;
+  agent_name: string;
+  customs_status: string;
+  customs_clearance_dt: string;
+  release_dt: string;
+  status_cd: string;
   remarks: string;
-  createdAt: string;
-  updatedAt: string;
+  created_dtm: string;
+  updated_dtm: string;
 }
-
-interface TrackingEvent {
-  id: number;
-  datetime: string;
-  location: string;
-  event: string;
-  status: string;
-}
-
-const mockAWBData: AWBDetailData = {
-  awbNo: '180-12345678',
-  awbType: 'MAWB',
-  mawbNo: '',
-  airline: 'KE',
-  flightNo: 'KE001',
-  origin: 'ICN',
-  destination: 'LAX',
-  etd: '2026-01-25',
-  etdTime: '10:00',
-  eta: '2026-01-25',
-  etaTime: '08:30',
-  atd: '2026-01-25',
-  ata: '',
-  shipperName: '삼성전자 주식회사',
-  shipperAddress: '경기도 수원시 영통구 삼성로 129',
-  consigneeName: 'Samsung America Inc.',
-  consigneeAddress: '85 Challenger Road, Ridgefield Park, NJ 07660',
-  notifyParty: 'SAME AS CONSIGNEE',
-  pieces: 100,
-  grossWeight: 5000,
-  chargeWeight: 5500,
-  volume: 35.5,
-  commodity: 'ELECTRONIC COMPONENTS',
-  hsCode: '8528.72',
-  dimensions: '120x80x100 CM',
-  specialHandling: '',
-  declaredValue: 150000,
-  declaredCurrency: 'USD',
-  insuranceValue: 155000,
-  freightCharges: 5500,
-  otherCharges: 850,
-  paymentTerms: 'PREPAID',
-  status: 'DEPARTED',
-  remarks: '파손주의 (FRAGILE)',
-  createdAt: '2026-01-20 10:00:00',
-  updatedAt: '2026-01-25 11:30:00',
-};
-
-const mockTracking: TrackingEvent[] = [
-  { id: 1, datetime: '2026-01-20 10:00', location: 'ICN', event: 'AWB 생성', status: 'CREATED' },
-  { id: 2, datetime: '2026-01-24 14:00', location: 'ICN', event: '화물 인수', status: 'ACCEPTED' },
-  { id: 3, datetime: '2026-01-24 18:00', location: 'ICN', event: '보세구역 반입', status: 'IN_BOND' },
-  { id: 4, datetime: '2026-01-25 08:30', location: 'ICN', event: '적재 완료', status: 'LOADED' },
-  { id: 5, datetime: '2026-01-25 10:15', location: 'ICN', event: '항공기 출발', status: 'DEPARTED' },
-];
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   DRAFT: { label: '작성중', color: 'bg-gray-500' },
@@ -114,69 +77,103 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   DELIVERED: { label: '인도완료', color: 'bg-gray-600' },
 };
 
+type TabType = 'MAIN' | 'CARGO' | 'OTHER';
+
 export default function AWBDetailPage() {
   const router = useRouter();
-  const [showCloseModal, setShowCloseModal] = useState(false);
   const params = useParams();
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
+  const [activeTab, setActiveTab] = useState<TabType>('MAIN');
   const [data, setData] = useState<AWBDetailData | null>(null);
-  const [tracking] = useState<TrackingEvent[]>(mockTracking);
-  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<AWBDetailData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showCloseModal, setShowCloseModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
 
-  // AWB 출력용 데이터 변환
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/awb/mawb/${params.id}`);
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+          setEditData(result);
+        } else {
+          alert('데이터를 불러올 수 없습니다.');
+          router.push('/logis/import-bl/air');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('데이터를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (params.id) fetchData();
+  }, [params.id, router]);
+
   const awbPrintData: AWBPrintData | null = useMemo(() => {
     if (!data) return null;
     return {
-      hawbNo: data.awbType === 'HAWB' ? data.awbNo : '',
-      mawbNo: data.awbType === 'MAWB' ? data.awbNo : data.mawbNo,
-      awbDate: data.etd || '',
-      shipper: data.shipperName || '',
-      shipperAddress: data.shipperAddress || '',
-      consignee: data.consigneeName || '',
-      consigneeAddress: data.consigneeAddress || '',
-      carrier: data.airline || '',
-      carrierCode: data.airline || '',
-      origin: data.origin || '',
-      destination: data.destination || '',
-      flightNo: data.flightNo || '',
-      flightDate: data.etd || '',
+      hawbNo: '',
+      mawbNo: data.mawb_no || '',
+      awbDate: data.etd_dt || '',
+      shipper: data.shipper_nm || '',
+      shipperAddress: data.shipper_addr || '',
+      consignee: data.consignee_nm || '',
+      consigneeAddress: data.consignee_addr || '',
+      carrier: data.airline_code || '',
+      carrierCode: data.airline_code || '',
+      origin: data.origin_airport_cd || '',
+      destination: data.dest_airport_cd || '',
+      flightNo: data.flight_no || '',
+      flightDate: data.etd_dt || '',
       pieces: data.pieces || 0,
       weightUnit: 'K' as const,
-      grossWeight: data.grossWeight || 0,
-      chargeableWeight: data.chargeWeight,
-      natureOfGoods: data.commodity || '',
+      grossWeight: data.gross_weight_kg || 0,
+      chargeableWeight: data.charge_weight_kg,
+      natureOfGoods: data.commodity_desc || '',
       dimensions: data.dimensions || '',
-      volumeWeight: data.volume ? data.volume * 166.67 : undefined,
-      currency: data.declaredCurrency || 'USD',
-      declaredValueCarriage: data.declaredValue ? String(data.declaredValue) : 'NVD',
-      declaredValueCustoms: data.declaredValue ? String(data.declaredValue) : 'NCV',
-      insuranceAmount: data.insuranceValue ? String(data.insuranceValue) : 'NIL',
-      totalCharge: data.freightCharges,
-      totalPrepaid: data.paymentTerms === 'PREPAID' ? data.freightCharges : undefined,
-      totalCollect: data.paymentTerms === 'COLLECT' ? data.freightCharges : undefined,
-      handlingInfo: data.specialHandling || '',
+      volumeWeight: data.volume_cbm ? data.volume_cbm * 166.67 : undefined,
+      currency: data.declared_currency || 'USD',
+      declaredValueCarriage: data.declared_value ? String(data.declared_value) : 'NVD',
+      declaredValueCustoms: data.declared_value ? String(data.declared_value) : 'NCV',
+      insuranceAmount: data.insurance_value ? String(data.insurance_value) : 'NIL',
+      totalCharge: data.freight_charges,
+      totalPrepaid: data.payment_terms === 'PREPAID' ? data.freight_charges : undefined,
+      totalCollect: data.payment_terms === 'COLLECT' ? data.freight_charges : undefined,
+      handlingInfo: data.special_handling || '',
       executedAt: 'SEOUL, KOREA',
-      executedOn: data.etd || '',
+      executedOn: data.etd_dt || '',
       issuerName: 'INTERGIS LOGISTICS CO., LTD.',
     };
   }, [data]);
-
-  useEffect(() => {
-    setData(mockAWBData);
-    setEditData(mockAWBData);
-  }, [params.id]);
-
   const handleEdit = () => setIsEditing(true);
   const handleCancel = () => { setIsEditing(false); setEditData(data); };
-  const handleSave = () => {
-    if (editData) {
-      setData(editData);
-      setIsEditing(false);
-      alert('AWB가 수정되었습니다.');
+
+  const handleSave = async () => {
+    if (!editData) return;
+    try {
+      const response = await fetch('/api/awb/mawb', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData),
+      });
+      if (response.ok) {
+        setData(editData);
+        setIsEditing(false);
+        alert('AWB가 수정되었습니다.');
+      } else {
+        const err = await response.json();
+        alert('수정 실패: ' + (err.error || '알 수 없는 오류'));
+      }
+    } catch (error) {
+      console.error('Error saving:', error);
+      alert('저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -184,46 +181,44 @@ export default function AWBDetailPage() {
     if (editData) setEditData({ ...editData, [field]: value });
   };
 
-  const handleDelete = () => {
-    if (confirm('이 AWB를 삭제하시겠습니까?')) {
-      alert('AWB가 삭제되었습니다.');
-      router.push('/logis/import-bl/air');
+  const handleDelete = async () => {
+    if (!confirm('이 AWB를 삭제하시겠습니까?')) return;
+    try {
+      const response = await fetch(`/api/awb/mawb?id=${params.id}`, { method: 'DELETE' });
+      if (response.ok) {
+        alert('AWB가 삭제되었습니다.');
+        router.push('/logis/import-bl/air');
+      } else {
+        alert('삭제 실패');
+      }
+    } catch (error) {
+      console.error('Error deleting:', error);
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
-  const handlePrint = () => {
-    setShowPrintModal(true);
-  };
+  const handlePrint = () => setShowPrintModal(true);
+  const handleConfirmClose = () => { setShowCloseModal(false); router.push(LIST_PATHS.IMPORT_BL_AIR); };
+  useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
+  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center"><div className="text-lg">로딩 중...</div></div>;
+  if (!data) return null;
 
   const displayData = isEditing ? editData! : data;
-
-  const handleCloseClick = () => {
-    setShowCloseModal(true);
-  };
-
-  const handleConfirmClose = () => {
-    setShowCloseModal(false);
-    router.push(LIST_PATHS.IMPORT_BL_AIR);
-  };
-
-  // 브라우저 뒤로가기 버튼 처리
-  useCloseConfirm({
-    showModal: showCloseModal,
-    setShowModal: setShowCloseModal,
-    onConfirmClose: handleConfirmClose,
-  });
+  const statusInfo = statusConfig[displayData.status_cd] || statusConfig.DRAFT;
+  const tabs: { key: TabType; label: string }[] = [{ key: 'MAIN', label: 'MAIN' }, { key: 'CARGO', label: 'CARGO' }, { key: 'OTHER', label: 'OTHER' }];
+  const inputClass = (editing: boolean) => `w-full px-3 py-2 border border-[var(--border)] rounded-lg ${editing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`;
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AWB 상세조회 (항공)" subtitle="Logis > AWB 관리 > AWB 상세조회 (항공)" showCloseButton={false} />
+        <Header title="AWB 상세조회 (항공수입)" subtitle="Logis > 수입B/L관리 > AWB 상세조회" showCloseButton={false} />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
-              <span className={`px-3 py-1 text-sm rounded-full text-white ${statusConfig[displayData.status].color}`}>{statusConfig[displayData.status].label}</span>
+              <span className="font-mono font-bold text-xl">{displayData.mawb_no}</span>
+              <span className={`px-3 py-1 text-sm rounded-full text-white ${statusInfo.color}`}>{statusInfo.label}</span>
             </div>
             <div className="flex gap-2">
               <button onClick={() => router.push('/logis/import-bl/air')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
@@ -242,124 +237,95 @@ export default function AWBDetailPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">AWB 정보</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between"><span className="text-[var(--muted)]">AWB No.</span><span className="font-mono font-bold text-lg">{displayData.awbNo}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">타입</span><span className={`px-2 py-1 text-xs rounded-full ${displayData.awbType === 'MAWB' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{displayData.awbType}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">항공사</span><span>{displayData.airline === 'KE' ? '대한항공 (KE)' : displayData.airline}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">편명</span><span>{displayData.flightNo}</span></div>
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">일정 정보</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between"><span className="text-[var(--muted)]">구간</span><span>{displayData.origin} → {displayData.destination}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">ETD</span><span>{displayData.etd} {displayData.etdTime}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">ETA</span><span>{displayData.eta} {displayData.etaTime}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">ATD</span><span className={displayData.atd ? '' : 'text-[var(--muted)]'}>{displayData.atd || '-'}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">ATA</span><span className={displayData.ata ? '' : 'text-[var(--muted)]'}>{displayData.ata || '-'}</span></div>
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물 요약</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between"><span className="text-[var(--muted)]">PCS</span><span className="font-bold">{displayData.pieces}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">G/W</span><span className="font-bold">{displayData.grossWeight.toLocaleString()} KG</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">C/W</span><span className="font-bold">{displayData.chargeWeight.toLocaleString()} KG</span></div>
-                <div className="flex justify-between"><span className="text-[var(--muted)]">Volume</span><span>{displayData.volume} CBM</span></div>
-              </div>
-            </div>
+          <div className="flex border-b border-[var(--border)] mb-6">
+            {tabs.map((tab) => (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`px-6 py-3 font-medium transition-colors ${activeTab === tab.key ? 'border-b-2 border-blue-500 text-blue-500' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}>{tab.label}</button>
+            ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">송하인 (Shipper)</h3>
-              <div className="space-y-3">
-                <div><label className="block text-sm text-[var(--muted)]">회사명</label><input type="text" value={displayData.shipperName} disabled={!isEditing} onChange={e => handleChange('shipperName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">주소</label><textarea value={displayData.shipperAddress} disabled={!isEditing} onChange={e => handleChange('shipperAddress', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+          {activeTab === 'MAIN' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">MAWB No.</label><input type="text" value={displayData.mawb_no || ''} disabled className={inputClass(false)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">수출/수입</label><input type="text" value={displayData.import_type === 'IMPORT' ? '수입' : '수출'} disabled className={inputClass(false)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">발행일</label><input type="date" value={displayData.issue_dt || ''} disabled={!isEditing} onChange={e => handleChange('issue_dt', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">발행장소</label><input type="text" value={displayData.issue_place || ''} disabled={!isEditing} onChange={e => handleChange('issue_place', e.target.value)} className={inputClass(isEditing)} /></div>
+                </div>
               </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">수하인 (Consignee)</h3>
-              <div className="space-y-3">
-                <div><label className="block text-sm text-[var(--muted)]">회사명</label><input type="text" value={displayData.consigneeName} disabled={!isEditing} onChange={e => handleChange('consigneeName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">주소</label><textarea value={displayData.consigneeAddress} disabled={!isEditing} onChange={e => handleChange('consigneeAddress', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">Notify Party</label><input type="text" value={displayData.notifyParty} disabled={!isEditing} onChange={e => handleChange('notifyParty', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">항공편 정보</h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">항공사</label><input type="text" value={displayData.airline_code || ''} disabled={!isEditing} onChange={e => handleChange('airline_code', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">편명</label><input type="text" value={displayData.flight_no || ''} disabled={!isEditing} onChange={e => handleChange('flight_no', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">출발공항</label><input type="text" value={displayData.origin_airport_cd || ''} disabled={!isEditing} onChange={e => handleChange('origin_airport_cd', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">도착공항</label><input type="text" value={displayData.dest_airport_cd || ''} disabled={!isEditing} onChange={e => handleChange('dest_airport_cd', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ETD 일자</label><input type="date" value={displayData.etd_dt || ''} disabled={!isEditing} onChange={e => handleChange('etd_dt', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ETD 시간</label><input type="time" value={displayData.etd_time || ''} disabled={!isEditing} onChange={e => handleChange('etd_time', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ETA 일자</label><input type="date" value={displayData.eta_dt || ''} disabled={!isEditing} onChange={e => handleChange('eta_dt', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ETA 시간</label><input type="time" value={displayData.eta_time || ''} disabled={!isEditing} onChange={e => handleChange('eta_time', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ATD 일자</label><input type="date" value={displayData.atd_dt || ''} disabled={!isEditing} onChange={e => handleChange('atd_dt', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ATD 시간</label><input type="time" value={displayData.atd_time || ''} disabled={!isEditing} onChange={e => handleChange('atd_time', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ATA 일자</label><input type="date" value={displayData.ata_dt || ''} disabled={!isEditing} onChange={e => handleChange('ata_dt', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">ATA 시간</label><input type="time" value={displayData.ata_time || ''} disabled={!isEditing} onChange={e => handleChange('ata_time', e.target.value)} className={inputClass(isEditing)} /></div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물 상세</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm text-[var(--muted)]">Commodity</label><input type="text" value={displayData.commodity} disabled={!isEditing} onChange={e => handleChange('commodity', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">HS Code</label><input type="text" value={displayData.hsCode} disabled={!isEditing} onChange={e => handleChange('hsCode', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">Dimensions</label><input type="text" value={displayData.dimensions} disabled={!isEditing} onChange={e => handleChange('dimensions', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm text-[var(--muted)]">Special Handling</label><input type="text" value={displayData.specialHandling || '-'} disabled={!isEditing} onChange={e => handleChange('specialHandling', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">운임/가액 정보</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm text-[var(--muted)]">Declared Value</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{displayData.declaredCurrency} {displayData.declaredValue.toLocaleString()}</div></div>
-                <div><label className="block text-sm text-[var(--muted)]">Insurance Value</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{displayData.declaredCurrency} {displayData.insuranceValue.toLocaleString()}</div></div>
-                <div><label className="block text-sm text-[var(--muted)]">Freight Charges</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{displayData.declaredCurrency} {displayData.freightCharges.toLocaleString()}</div></div>
-                <div><label className="block text-sm text-[var(--muted)]">Other Charges</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{displayData.declaredCurrency} {displayData.otherCharges.toLocaleString()}</div></div>
-                <div className="col-span-2"><label className="block text-sm text-[var(--muted)]">Payment Terms</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{displayData.paymentTerms}</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card p-6">
-            <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">운송 추적</h3>
-            <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-[var(--border)]"></div>
-              <div className="space-y-4">
-                {tracking.map((event, index) => (
-                  <div key={event.id} className="flex items-start gap-4 pl-8 relative">
-                    <div className={`absolute left-2 w-4 h-4 rounded-full border-2 ${index === tracking.length - 1 ? 'bg-blue-500 border-blue-500' : 'bg-[var(--surface-50)] border-[var(--border)]'}`}></div>
-                    <div className="flex-1 bg-[var(--surface-50)] p-3 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <span className="font-medium">{event.event}</span>
-                          <span className="ml-2 text-sm text-[var(--muted)]">({event.location})</span>
-                        </div>
-                        <span className="text-sm text-[var(--muted)]">{event.datetime}</span>
-                      </div>
-                    </div>
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">거래처 정보</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-blue-400">Shipper (송하인)</h4>
+                    <div><label className="block text-sm text-[var(--muted)] mb-1">회사명</label><input type="text" value={displayData.shipper_nm || ''} disabled={!isEditing} onChange={e => handleChange('shipper_nm', e.target.value)} className={inputClass(isEditing)} /></div>
+                    <div><label className="block text-sm text-[var(--muted)] mb-1">주소</label><textarea value={displayData.shipper_addr || ''} disabled={!isEditing} onChange={e => handleChange('shipper_addr', e.target.value)} rows={3} className={inputClass(isEditing)} /></div>
                   </div>
-                ))}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-green-400">Consignee (수하인)</h4>
+                    <div><label className="block text-sm text-[var(--muted)] mb-1">회사명</label><input type="text" value={displayData.consignee_nm || ''} disabled={!isEditing} onChange={e => handleChange('consignee_nm', e.target.value)} className={inputClass(isEditing)} /></div>
+                    <div><label className="block text-sm text-[var(--muted)] mb-1">주소</label><textarea value={displayData.consignee_addr || ''} disabled={!isEditing} onChange={e => handleChange('consignee_addr', e.target.value)} rows={3} className={inputClass(isEditing)} /></div>
+                  </div>
+                </div>
+                <div className="mt-4"><label className="block text-sm text-[var(--muted)] mb-1">Notify Party</label><input type="text" value={displayData.notify_party || ''} disabled={!isEditing} onChange={e => handleChange('notify_party', e.target.value)} className={inputClass(isEditing)} /></div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="mt-4 text-sm text-[var(--muted)]">
-            <span>등록일: {data.createdAt}</span>
-            <span className="ml-4">수정일: {data.updatedAt}</span>
-          </div>
+          {activeTab === 'CARGO' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">ȭ�� ����</h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">PCS</label><input type="number" value={displayData.pieces || ''} disabled={!isEditing} onChange={e => handleChange('pieces', parseInt(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Gross Weight</label><input type="number" step="0.01" value={displayData.gross_weight_kg || ''} disabled={!isEditing} onChange={e => handleChange('gross_weight_kg', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Charge Weight</label><input type="number" step="0.01" value={displayData.charge_weight_kg || ''} disabled={!isEditing} onChange={e => handleChange('charge_weight_kg', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Volume (CBM)</label><input type="number" step="0.01" value={displayData.volume_cbm || ''} disabled={!isEditing} onChange={e => handleChange('volume_cbm', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'OTHER' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">��� ����</h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">MRN NO</label><input type="text" value={displayData.mrn_no || ''} disabled={!isEditing} onChange={e => handleChange('mrn_no', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">MSN</label><input type="text" value={displayData.msn || ''} disabled={!isEditing} onChange={e => handleChange('msn', e.target.value)} className={inputClass(isEditing)} /></div>
+                </div>
+              </div>
+              <div className="card p-6">
+                <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Agent ����</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Agent Code</label><input type="text" value={displayData.agent_code || ''} disabled={!isEditing} onChange={e => handleChange('agent_code', e.target.value)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Agent Name</label><input type="text" value={displayData.agent_name || ''} disabled={!isEditing} onChange={e => handleChange('agent_name', e.target.value)} className={inputClass(isEditing)} /></div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
-
-      {/* 화면 닫기 확인 모달 */}
-      <CloseConfirmModal
-        isOpen={showCloseModal}
-        onClose={() => setShowCloseModal(false)}
-        onConfirm={handleConfirmClose}
-      />
-
-      {/* AWB 출력 모달 */}
-      <AWBPrintModal
-        isOpen={showPrintModal}
-        onClose={() => setShowPrintModal(false)}
-        awbData={awbPrintData}
-      />
+      <CloseConfirmModal isOpen={showCloseModal} onClose={() => setShowCloseModal(false)} onConfirm={handleConfirmClose} />
+      <AWBPrintModal isOpen={showPrintModal} onClose={() => setShowPrintModal(false)} awbData={awbPrintData} />
     </div>
   );
 }
