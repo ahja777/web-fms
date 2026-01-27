@@ -104,7 +104,8 @@
       "Bash(echo:*)",
       "Bash(\"C:\\\\Claude_AI\\\\fms-web\\\\src\\\\app\\\\logis\\\\booking\\\\sea\\\\[id]\\\\page.tsx\")",
       "Bash(find:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(pushd:*)"
     ]
   }
 }
