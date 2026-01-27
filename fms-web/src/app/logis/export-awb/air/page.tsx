@@ -11,7 +11,7 @@ import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
-import ReportPrintModal from '@/components/ReportPrintModal';
+import AWBPrintModal, { AWBData as AWBPrintData } from '@/components/AWBPrintModal';
 
 interface AWBData {
   mawb_id: number;
@@ -24,15 +24,20 @@ interface AWBData {
   origin_airport_name: string;
   dest_airport_name: string;
   shipper_nm: string;
+  shipper_addr?: string;
   consignee_nm: string;
+  consignee_addr?: string;
   pieces: number;
   gross_weight_kg: number;
   charge_weight_kg: number;
   commodity_desc: string;
+  goods_desc?: string;
   status_cd: string;
   hawb_count: number;
   carrier_name: string;
+  carrier_cd?: string;
   airline_code: string;
+  freight_amt?: number;
 }
 
 const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
@@ -186,8 +191,34 @@ export default function ExportAWBListPage() {
     }
   };
 
-  const getPrintData = () => {
-    return filteredData.filter(d => selectedIds.has(d.mawb_id));
+  const getPrintData = (): AWBPrintData | null => {
+    const selected = filteredData.filter(d => selectedIds.has(d.mawb_id));
+    if (selected.length === 0) return null;
+
+    const item = selected[0];
+    return {
+      hawbNo: '',
+      mawbNo: item.mawb_no || '',
+      awbDate: item.etd_dt || '',
+      shipper: item.shipper_nm || '',
+      shipperAddress: item.shipper_addr || '',
+      consignee: item.consignee_nm || '',
+      consigneeAddress: item.consignee_addr || '',
+      carrier: item.carrier_name || item.airline_code || '',
+      origin: item.origin_airport_cd || '',
+      destination: item.dest_airport_cd || '',
+      flightNo: item.flight_no || '',
+      flightDate: item.etd_dt || '',
+      pieces: item.pieces || 0,
+      weightUnit: 'K',
+      grossWeight: item.gross_weight_kg || 0,
+      chargeableWeight: item.charge_weight_kg || 0,
+      natureOfGoods: item.commodity_desc || item.goods_desc || 'CONSOLIDATION CARGO',
+      currency: 'USD',
+      totalCharge: item.freight_amt || 0,
+      issuerName: 'INTERGIS LOGISTICS CO., LTD.',
+      executedAt: 'SEOUL, KOREA',
+    };
   };
 
   return (
@@ -373,11 +404,10 @@ export default function ExportAWBListPage() {
         onClose={() => setShowSelectionAlert(false)}
       />
 
-      <ReportPrintModal
+      <AWBPrintModal
         isOpen={showPrintModal}
         onClose={() => setShowPrintModal(false)}
-        reportType="AWB"
-        data={getPrintData() as unknown as Record<string, unknown>[]}
+        awbData={getPrintData()}
       />
     </div>
   );
