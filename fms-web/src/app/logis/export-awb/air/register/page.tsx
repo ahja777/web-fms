@@ -8,6 +8,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import ExchangeRateModal from '@/components/ExchangeRateModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { DimensionsCalculatorModal } from '@/components/popup';
 
 export default function ExportAWBRegisterPage() {
   const router = useRouter();
@@ -16,9 +17,12 @@ export default function ExportAWBRegisterPage() {
 
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
+  const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
+    awb_type: 'MAWB',
+    mawb_no: '',
     airline_code: '',
     carrier_id: '',
     flight_no: '',
@@ -28,6 +32,10 @@ export default function ExportAWBRegisterPage() {
     etd_time: '',
     eta_dt: '',
     eta_time: '',
+    atd_dt: '',
+    atd_time: '',
+    ata_dt: '',
+    ata_time: '',
     issue_dt: new Date().toISOString().split('T')[0],
     issue_place: 'SEOUL',
     shipper_nm: '',
@@ -76,25 +84,56 @@ export default function ExportAWBRegisterPage() {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/awb/mawb', {
+      const apiUrl = formData.awb_type === 'MAWB' ? '/api/awb/mawb' : '/api/awb/hawb';
+      const payload = {
+        import_type: 'EXPORT',
+        airline_code: formData.airline_code,
+        flight_no: formData.flight_no,
+        origin_airport_cd: formData.origin_airport_cd,
+        dest_airport_cd: formData.dest_airport_cd,
+        etd_dt: formData.etd_dt || null,
+        etd_time: formData.etd_time || null,
+        eta_dt: formData.eta_dt || null,
+        eta_time: formData.eta_time || null,
+        atd_dt: formData.atd_dt || null,
+        atd_time: formData.atd_time || null,
+        ata_dt: formData.ata_dt || null,
+        ata_time: formData.ata_time || null,
+        issue_dt: formData.issue_dt || null,
+        issue_place: formData.issue_place || null,
+        shipper_nm: formData.shipper_nm,
+        shipper_addr: formData.shipper_addr,
+        consignee_nm: formData.consignee_nm,
+        consignee_addr: formData.consignee_addr,
+        notify_party: formData.notify_party,
+        pieces: formData.pieces ? parseInt(formData.pieces) : null,
+        gross_weight_kg: formData.gross_weight_kg ? parseFloat(formData.gross_weight_kg) : null,
+        charge_weight_kg: formData.charge_weight_kg ? parseFloat(formData.charge_weight_kg) : null,
+        volume_cbm: formData.volume_cbm ? parseFloat(formData.volume_cbm) : null,
+        commodity_desc: formData.commodity_desc,
+        hs_code: formData.hs_code,
+        dimensions: formData.dimensions,
+        special_handling: formData.special_handling,
+        declared_value: formData.declared_value ? parseFloat(formData.declared_value) : null,
+        declared_currency: formData.declared_currency,
+        insurance_value: formData.insurance_value ? parseFloat(formData.insurance_value) : null,
+        freight_charges: formData.freight_charges ? parseFloat(formData.freight_charges) : null,
+        other_charges: formData.other_charges ? parseFloat(formData.other_charges) : null,
+        payment_terms: formData.payment_terms,
+        remarks: formData.remarks,
+        ...(formData.awb_type === 'HAWB' && { mawb_no: formData.mawb_no }),
+      };
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          pieces: formData.pieces ? parseInt(formData.pieces) : null,
-          gross_weight_kg: formData.gross_weight_kg ? parseFloat(formData.gross_weight_kg) : null,
-          charge_weight_kg: formData.charge_weight_kg ? parseFloat(formData.charge_weight_kg) : null,
-          volume_cbm: formData.volume_cbm ? parseFloat(formData.volume_cbm) : null,
-          declared_value: formData.declared_value ? parseFloat(formData.declared_value) : null,
-          insurance_value: formData.insurance_value ? parseFloat(formData.insurance_value) : null,
-          freight_charges: formData.freight_charges ? parseFloat(formData.freight_charges) : null,
-          other_charges: formData.other_charges ? parseFloat(formData.other_charges) : null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
       if (result.success) {
-        alert(`AWB가 등록되었습니다.\nMAWB No: ${result.mawb_no}`);
+        const awbNo = formData.awb_type === 'MAWB' ? result.mawb_no : result.hawb_no;
+        alert(`AWB가 등록되었습니다.\nAWB No: ${awbNo}`);
         router.push('/logis/export-awb/air');
       } else {
         alert('오류: ' + (result.error || '저장 실패'));
@@ -111,11 +150,52 @@ export default function ExportAWBRegisterPage() {
     setShowCloseModal(true);
   };
 
-  // 환율 선택 핸들러
   const handleExchangeRateSelect = (rate: { currencyCode: string; dealBasR: number }) => {
     const currencyCode = rate.currencyCode.replace('(100)', '');
     setFormData(prev => ({ ...prev, declared_currency: currencyCode }));
     setExchangeRate(rate.dealBasR);
+  };
+
+  const handleFillTestData = () => {
+    setFormData({
+      awb_type: 'MAWB',
+      mawb_no: '',
+      airline_code: 'KE',
+      carrier_id: '',
+      flight_no: 'KE001',
+      origin_airport_cd: 'ICN',
+      dest_airport_cd: 'LAX',
+      etd_dt: '2026-01-25',
+      etd_time: '10:00',
+      eta_dt: '2026-01-25',
+      eta_time: '08:30',
+      atd_dt: '',
+      atd_time: '',
+      ata_dt: '',
+      ata_time: '',
+      issue_dt: new Date().toISOString().split('T')[0],
+      issue_place: 'SEOUL',
+      shipper_nm: '삼성전자 주식회사',
+      shipper_addr: '경기도 수원시 영통구 삼성로 129',
+      consignee_nm: 'Samsung America Inc.',
+      consignee_addr: '85 Challenger Road, Ridgefield Park, NJ 07660',
+      notify_party: 'SAME AS CONSIGNEE',
+      pieces: '100',
+      gross_weight_kg: '5000',
+      charge_weight_kg: '5500',
+      volume_cbm: '35.5',
+      commodity_desc: 'ELECTRONIC COMPONENTS',
+      hs_code: '8528.72',
+      dimensions: '120x80x100 CM',
+      special_handling: '',
+      declared_value: '150000',
+      declared_currency: 'USD',
+      insurance_value: '155000',
+      freight_charges: '5500',
+      other_charges: '850',
+      payment_terms: 'PREPAID',
+      remarks: '파손주의 (FRAGILE)',
+    });
   };
 
   return (
@@ -124,6 +204,74 @@ export default function ExportAWBRegisterPage() {
       <div className="ml-72">
         <Header title="AWB 등록 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 신규 등록" onClose={handleCancel} />
         <main ref={formRef} className="p-6">
+          {/* 상단 버튼 영역 */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex gap-2">
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+              >
+                테스트데이터
+              </button>
+            </div>
+            <div className="text-sm text-[var(--muted)]">
+              <span className="text-red-500">*</span> 필수 입력 항목
+            </div>
+          </div>
+
+          {/* AWB 타입 선택 */}
+          <div className="card p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">AWB 타입</h3>
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AWB 타입 *</label>
+                <select
+                  name="awb_type"
+                  value={formData.awb_type}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                >
+                  <option value="MAWB">MAWB (Master)</option>
+                  <option value="HAWB">HAWB (House)</option>
+                </select>
+              </div>
+              {formData.awb_type === 'HAWB' && (
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB 번호</label>
+                  <input
+                    type="text"
+                    name="mawb_no"
+                    value={formData.mawb_no}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    placeholder="180-12345678"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">발행일자</label>
+                <input
+                  type="date"
+                  name="issue_dt"
+                  value={formData.issue_dt}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">발행지</label>
+                <input
+                  type="text"
+                  name="issue_place"
+                  value={formData.issue_place}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  placeholder="SEOUL"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* 항공편 정보 */}
           <div className="card p-6 mb-6">
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">항공편 정보</h3>
@@ -208,6 +356,46 @@ export default function ExportAWBRegisterPage() {
                   type="time"
                   name="eta_time"
                   value={formData.eta_time}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD 일자 (실제출발)</label>
+                <input
+                  type="date"
+                  name="atd_dt"
+                  value={formData.atd_dt}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD 시간</label>
+                <input
+                  type="time"
+                  name="atd_time"
+                  value={formData.atd_time}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 일자 (실제도착)</label>
+                <input
+                  type="date"
+                  name="ata_dt"
+                  value={formData.ata_dt}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 시간</label>
+                <input
+                  type="time"
+                  name="ata_time"
+                  value={formData.ata_time}
                   onChange={handleChange}
                   className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
@@ -310,14 +498,23 @@ export default function ExportAWBRegisterPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label>
-                <input
-                  type="number"
-                  step="0.001"
-                  name="volume_cbm"
-                  value={formData.volume_cbm}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.001"
+                    name="volume_cbm"
+                    value={formData.volume_cbm}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDimensionsModal(true)}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap"
+                  >
+                    계산
+                  </button>
+                </div>
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-[var(--muted)]">품명</label>
@@ -502,6 +699,12 @@ export default function ExportAWBRegisterPage() {
         onClose={() => setShowExchangeRateModal(false)}
         onSelect={handleExchangeRateSelect}
         selectedCurrency={formData.declared_currency}
+      />
+
+      <DimensionsCalculatorModal
+        isOpen={showDimensionsModal}
+        onClose={() => setShowDimensionsModal(false)}
+        onApply={(totalCbm) => setFormData(prev => ({ ...prev, volume_cbm: totalCbm.toString() }))}
       />
     </div>
   );
