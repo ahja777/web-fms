@@ -157,7 +157,7 @@ export default function SNRegisterPage() {
       containerType: sr.containerType || '',
       containerQty: sr.containerQty || 0,
       grossWeight: sr.grossWeight,
-      measurement: sr.measurement,
+      measurement: sr.measurement || 0,
     }));
     setShowSRModal(false);
   };
