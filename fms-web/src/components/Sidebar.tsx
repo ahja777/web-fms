@@ -22,56 +22,57 @@ interface MenuItem {
   title: string;
   href: string;
   icon: React.ReactNode;
+  color?: string;  // 메뉴별 아이콘 색상
   subItems?: SubMenuItem[];
   categories?: CategoryItem[];
 }
 
-// 카테고리별 아이콘 및 색상
+// 카테고리별 아이콘 및 색상 - 물류 업무 특화 색상
 const categoryConfig = {
   seaExport: {
     title: '해상수출',
-    color: '#2563EB',
-    bgColor: 'rgba(37, 99, 235, 0.1)',
+    color: '#1E40AF',  // 진한 네이비 블루 - 깊은 바다/대양
+    bgColor: 'rgba(30, 64, 175, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 17h1l1-2h14l1 2h1M5 15l1-3h12l1 3M7 12V9l5-3 5 3v3M12 6V3m-4 9h8" />
       </svg>
     ),
   },
   seaImport: {
     title: '해상수입',
-    color: '#059669',
-    bgColor: 'rgba(5, 150, 105, 0.1)',
+    color: '#0891B2',  // 청록색 - 해안/도착
+    bgColor: 'rgba(8, 145, 178, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 17h1l1-2h14l1 2h1M5 15l1-3h12l1 3M7 12V9l5-3 5 3v3M12 21v-3m0 0l-2-2m2 2l2-2" />
       </svg>
     ),
   },
   airExport: {
     title: '항공수출',
-    color: '#7C3AED',
-    bgColor: 'rgba(124, 58, 237, 0.1)',
+    color: '#6366F1',  // 인디고 - 하늘 높이
+    bgColor: 'rgba(99, 102, 241, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5M12 3v3m0 0l2-2m-2 2l-2-2" />
       </svg>
     ),
   },
   airImport: {
     title: '항공수입',
-    color: '#F59E0B',
-    bgColor: 'rgba(245, 158, 11, 0.1)',
+    color: '#EA580C',  // 오렌지 - 일출/도착
+    bgColor: 'rgba(234, 88, 12, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5M12 21v-3m0 0l2 2m-2-2l-2 2" />
       </svg>
     ),
   },
   common: {
     title: '공통',
-    color: '#6B7280',
-    bgColor: 'rgba(107, 114, 128, 0.1)',
+    color: '#64748B',  // 슬레이트 - 중립적
+    bgColor: 'rgba(100, 116, 139, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -81,8 +82,8 @@ const categoryConfig = {
   },
   oms: {
     title: 'OMS',
-    color: '#EC4899',
-    bgColor: 'rgba(236, 72, 153, 0.1)',
+    color: '#DC2626',  // 레드 - 주문관리 중요성
+    bgColor: 'rgba(220, 38, 38, 0.1)',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
@@ -95,6 +96,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'Dashboard',
     href: '/',
+    color: '#14B8A6',  // Teal - 대시보드/모니터링
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -104,12 +106,22 @@ const menuItems: MenuItem[] = [
   {
     title: 'Logis',
     href: '/logis',
+    color: '#3B82F6',  // Blue - 물류 핵심 업무
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
       </svg>
     ),
     categories: [
+      {
+        ...categoryConfig.oms,
+        children: [
+          { title: '고객오더 (C/O)', href: '/logis/oms/customer-order' },
+          { title: '서비스오더 (S/O)', href: '/logis/oms/service-order' },
+          { title: '오더타입 관리', href: '/logis/oms/order-type' },
+          { title: 'S/O Control', href: '/logis/oms/so-control' },
+        ],
+      },
       {
         ...categoryConfig.seaExport,
         children: [
@@ -151,15 +163,6 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
-        ...categoryConfig.oms,
-        children: [
-          { title: '고객오더 (C/O)', href: '/logis/oms/customer-order' },
-          { title: '서비스오더 (S/O)', href: '/logis/oms/service-order' },
-          { title: '오더타입 관리', href: '/logis/oms/order-type' },
-          { title: 'S/O Control', href: '/logis/oms/so-control' },
-        ],
-      },
-      {
         ...categoryConfig.common,
         children: [
           { title: '견적요청', href: '/logis/quote/request' },
@@ -178,6 +181,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'Shipments',
     href: '/shipments',
+    color: '#8B5CF6',  // Violet - 운송/배송 추적
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
@@ -187,6 +191,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'B/L Management',
     href: '/bl',
+    color: '#F59E0B',  // Amber - 서류 관리
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -196,6 +201,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'Schedules',
     href: '/schedules',
+    color: '#10B981',  // Emerald - 스케줄/일정
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -203,17 +209,9 @@ const menuItems: MenuItem[] = [
     ),
   },
   {
-    title: 'Customs',
-    href: '/customs',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-      </svg>
-    ),
-  },
-  {
     title: 'Billing',
     href: '/billing',
+    color: '#EF4444',  // Red - 정산/비용 관리
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -369,21 +367,28 @@ export default function Sidebar() {
                         className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 w-full ${
                           isActive ? '' : 'hover:bg-white/[0.04]'
                         }`}
-                        style={isActive ? { background: 'rgba(232, 168, 56, 0.1)' } : {}}
+                        style={isActive ? { background: item.color ? `${item.color}15` : 'rgba(232, 168, 56, 0.1)' } : {}}
                       >
                         {isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
-                            style={{ background: 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
+                            style={{ background: item.color || 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
                           />
                         )}
-                        <span className={`transition-colors duration-200 ${isActive ? 'text-[#F5B756]' : 'text-white/40 group-hover:text-white/70'}`}>
+                        <span
+                          className="transition-colors duration-200"
+                          style={{ color: item.color || (isActive ? '#F5B756' : 'rgba(255,255,255,0.4)') }}
+                        >
                           {item.icon}
                         </span>
                         <span className={`font-medium transition-colors duration-200 flex-1 text-left ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}
                           style={{ fontFamily: 'var(--font-display)' }}>
                           {item.title}
                         </span>
-                        <svg className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''} ${isActive ? 'text-[#F5B756]' : 'text-white/40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          style={{ color: item.color || (isActive ? '#F5B756' : 'rgba(255,255,255,0.4)') }}
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
@@ -474,21 +479,28 @@ export default function Sidebar() {
                         className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 w-full ${
                           isActive ? '' : 'hover:bg-white/[0.04]'
                         }`}
-                        style={isActive ? { background: 'rgba(232, 168, 56, 0.1)' } : {}}
+                        style={isActive ? { background: item.color ? `${item.color}15` : 'rgba(232, 168, 56, 0.1)' } : {}}
                       >
                         {isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
-                            style={{ background: 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
+                            style={{ background: item.color || 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
                           />
                         )}
-                        <span className={`transition-colors duration-200 ${isActive ? 'text-[#F5B756]' : 'text-white/40 group-hover:text-white/70'}`}>
+                        <span
+                          className="transition-colors duration-200"
+                          style={{ color: item.color || (isActive ? '#F5B756' : 'rgba(255,255,255,0.4)') }}
+                        >
                           {item.icon}
                         </span>
                         <span className={`font-medium transition-colors duration-200 flex-1 text-left ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}
                           style={{ fontFamily: 'var(--font-display)' }}>
                           {item.title}
                         </span>
-                        <svg className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''} ${isActive ? 'text-[#F5B756]' : 'text-white/40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          style={{ color: item.color || (isActive ? '#F5B756' : 'rgba(255,255,255,0.4)') }}
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
@@ -520,17 +532,18 @@ export default function Sidebar() {
                         isActive ? '' : 'hover:bg-white/[0.04]'
                       }`}
                       style={isActive ? {
-                        background: 'rgba(232, 168, 56, 0.1)',
+                        background: item.color ? `${item.color}15` : 'rgba(232, 168, 56, 0.1)',
                       } : {}}
                     >
                       {isActive && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
-                          style={{ background: 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
+                          style={{ background: item.color || 'linear-gradient(180deg, #F5B756 0%, #E8A838 100%)' }}
                         />
                       )}
-                      <span className={`transition-colors duration-200 ${
-                        isActive ? 'text-[#F5B756]' : 'text-white/40 group-hover:text-white/70'
-                      }`}>
+                      <span
+                        className="transition-colors duration-200"
+                        style={{ color: item.color || (isActive ? '#F5B756' : 'rgba(255,255,255,0.4)') }}
+                      >
                         {item.icon}
                       </span>
                       <span className={`font-medium transition-colors duration-200 ${
@@ -545,7 +558,9 @@ export default function Sidebar() {
                       {!isActive && (
                         <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                           style={{
-                            background: 'radial-gradient(circle at 20% 50%, rgba(232,168,56,0.08) 0%, transparent 50%)',
+                            background: item.color
+                              ? `radial-gradient(circle at 20% 50%, ${item.color}15 0%, transparent 50%)`
+                              : 'radial-gradient(circle at 20% 50%, rgba(232,168,56,0.08) 0%, transparent 50%)',
                           }}
                         />
                       )}
