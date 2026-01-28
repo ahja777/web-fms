@@ -128,8 +128,7 @@ export default function SRSeaDetailPage() {
 
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
-  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">S/R을 찾을 수 없습니다.</div>;
+if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="S/R 상세조회 (해상)" subtitle="Logis > S/R > S/R 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="S/R 상세조회 (해상)" subtitle="Logis > S/R > S/R 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">S/R을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/sr/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
 
   const displayData = isEditing ? editData! : data;
   const statusInfo = statusConfig[displayData.status] || { label: displayData.status, color: 'bg-gray-500' };

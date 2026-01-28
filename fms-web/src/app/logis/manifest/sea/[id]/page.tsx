@@ -122,8 +122,7 @@ export default function ManifestSeaDetailPage() {
   const handleConfirmClose = () => { setShowCloseModal(false); router.back(); };
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
-  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">적하목록을 찾을 수 없습니다.</div>;
+if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">적하목록을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/manifest/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
 
   const displayData = isEditing ? editData! : data;
   const statusInfo = statusConfig[displayData.status] || { label: displayData.status, color: 'bg-gray-500' };
