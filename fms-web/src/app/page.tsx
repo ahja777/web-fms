@@ -285,7 +285,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center gap-1.5 text-[var(--muted)]">
                               <span>출발:</span>
-                              <span className="font-medium text-[var(--foreground)]">{shipment.route.split('→')[0]?.trim() || '-'}</span>
+                              <span className="font-medium text-[var(--foreground)]">{shipment.route?.split('→')[0]?.trim() || '-'}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[var(--muted)]">
                               <span>중량:</span>
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center gap-1.5 text-[var(--muted)]">
                               <span>도착:</span>
-                              <span className="font-medium text-[var(--foreground)]">{shipment.route.split('→')[1]?.trim() || '-'}</span>
+                              <span className="font-medium text-[var(--foreground)]">{shipment.route?.split('→')[1]?.trim() || '-'}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[var(--muted)]">
                               <span>용적:</span>

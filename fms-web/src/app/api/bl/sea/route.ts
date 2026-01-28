@@ -157,11 +157,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { main, cargo, other } = body;
+    // 두 가지 형태 지원: { main, cargo, other } 또는 flat 구조
+    const main = body.main || body;
+    const cargo = body.cargo || {};
+    const other = body.other || {};
 
     // 새 JOB NO 생성
     const year = new Date().getFullYear();
-    const prefix = main.ioType === 'OUT' ? 'SEX' : 'SIM';
+    const ioType = main.ioType || 'OUT';
+    const prefix = ioType === 'OUT' ? 'SEX' : 'SIM';
     const [countResult] = await pool.query<RowDataPacket[]>(
       `SELECT COUNT(*) as cnt FROM ORD_OCEAN_BL WHERE JOB_NO LIKE ?`,
       [`${prefix}-${year}-%`]
