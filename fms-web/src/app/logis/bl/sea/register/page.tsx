@@ -1272,6 +1272,7 @@ function BLSeaRegisterContent() {
               <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Gross Weight (KG)</label>
               <input
                 type="number"
+                step="0.01"
                 value={cargoData.grossWeight}
                 onChange={e => handleCargoChange('grossWeight', parseFloat(e.target.value) || 0)}
                 className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
@@ -1282,6 +1283,7 @@ function BLSeaRegisterContent() {
               <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Measurement (CBM)</label>
               <input
                 type="number"
+                step="0.001"
                 value={cargoData.measurement}
                 onChange={e => handleCargoChange('measurement', parseFloat(e.target.value) || 0)}
                 className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
@@ -1496,6 +1498,7 @@ function BLSeaRegisterContent() {
                     <td className="p-2">
                       <input
                         type="number"
+                        step="0.01"
                         value={container.grossWeight}
                         onChange={e => {
                           const updated = [...cargoData.containers];
@@ -1508,6 +1511,7 @@ function BLSeaRegisterContent() {
                     <td className="p-2">
                       <input
                         type="number"
+                        step="0.001"
                         value={container.measurement}
                         onChange={e => {
                           const updated = [...cargoData.containers];

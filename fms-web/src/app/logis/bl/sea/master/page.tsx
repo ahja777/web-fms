@@ -112,9 +112,19 @@ export default function MasterBLListPage() {
   const itemsPerPage = 10;
 
   // 화면닫기 훅
-  const { showCloseModal, handleCloseClick, handleCloseConfirm, handleCloseCancel } = useCloseConfirm({
-    redirectPath: '/',
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const handleConfirmClose = useCallback(() => {
+    setShowCloseModal(false);
+    router.push('/');
+  }, [router]);
+
+  const { handleConfirm } = useCloseConfirm({
+    showModal: showCloseModal,
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
+
+  const handleCloseClick = () => setShowCloseModal(true);
 
   // 필터링된 데이터
   const filteredData = useMemo(() => {
@@ -260,20 +270,26 @@ export default function MasterBLListPage() {
     const selected = data.find(item => item.id === selectedRows[0]);
     if (selected) {
       setPrintData({
-        blNo: selected.mblNo,
+        hblNo: '',
+        mblNo: selected.mblNo,
+        blDate: new Date().toISOString().split('T')[0],
         shipper: '',
         consignee: '',
         notifyParty: '',
+        carrier: selected.lineName || '',
         vessel: selected.vesselName,
         voyage: selected.voyage,
         pol: selected.pol,
         pod: selected.pod,
+        etd: selected.etd || '',
         containerNo: '',
         sealNo: '',
+        containerType: selected.serviceTerm || '',
+        containerQty: 0,
         description: '',
-        grossWeight: String(selected.totalWeight),
-        measurement: String(selected.totalCbm),
-        freightTerms: selected.freightTerm,
+        weight: selected.totalWeight || 0,
+        measurement: selected.totalCbm || 0,
+        freightTerms: selected.freightTerm === 'PREPAID' ? 'PREPAID' : 'COLLECT',
         placeOfIssue: 'SEOUL, KOREA',
         dateOfIssue: new Date().toISOString().split('T')[0],
       });
@@ -584,8 +600,8 @@ export default function MasterBLListPage() {
       {/* 모달들 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
-        onConfirm={handleCloseConfirm}
-        onCancel={handleCloseCancel}
+        onConfirm={handleConfirm}
+        onClose={() => setShowCloseModal(false)}
       />
 
       <SelectionAlertModal
@@ -601,7 +617,7 @@ export default function MasterBLListPage() {
           alert('이메일이 발송되었습니다.');
           setShowEmailModal(false);
         }}
-        documentType="master-bl"
+        documentType="bl"
         documentNo={selectedRows.length > 0 ? data.find(d => d.id === selectedRows[0])?.mblNo || '' : ''}
       />
 
@@ -617,7 +633,6 @@ export default function MasterBLListPage() {
           isOpen={showPrintModal}
           onClose={() => setShowPrintModal(false)}
           blData={printData}
-          blType="MBL"
         />
       )}
     </div>

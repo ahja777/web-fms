@@ -129,7 +129,8 @@ const menuItems: MenuItem[] = [
           { title: '부킹관리', href: '/logis/booking/sea' },
           { title: 'S/R 선적요청', href: '/logis/sr/sea' },
           { title: 'S/N 선적통지', href: '/logis/sn/sea' },
-          { title: 'B/L 관리', href: '/logis/bl/sea' },
+          { title: 'House B/L 관리', href: '/logis/bl/sea/house' },
+          { title: 'Master B/L 관리', href: '/logis/bl/sea/master' },
           { title: 'STUFFING', href: '/logis/export/stuffing' },
           { title: 'CLP', href: '/logis/export/clp' },
           { title: 'VGM', href: '/logis/export/vgm' },
@@ -140,7 +141,8 @@ const menuItems: MenuItem[] = [
       {
         ...categoryConfig.seaImport,
         children: [
-          { title: 'B/L 관리', href: '/logis/import-bl/sea' },
+          { title: 'House B/L 관리', href: '/logis/import-bl/sea/house' },
+          { title: 'Master B/L 관리', href: '/logis/import-bl/sea/master' },
           { title: '도착관리 (A/N)', href: '/logis/import-bl/sea/arrival' },
           { title: '통관관리', href: '/logis/customs/sea' },
           { title: '화물반출입', href: '/logis/cargo/release' },
@@ -151,14 +153,16 @@ const menuItems: MenuItem[] = [
         children: [
           { title: '견적관리', href: '/logis/quote/air' },
           { title: '부킹관리', href: '/logis/booking/air' },
-          { title: 'AWB 관리', href: '/logis/bl/air' },
+          { title: 'House AWB 관리', href: '/logis/bl/air/house' },
+          { title: 'Master AWB 관리', href: '/logis/bl/air/master' },
           { title: 'Pre-Alert', href: '/logis/pre-alert/air' },
         ],
       },
       {
         ...categoryConfig.airImport,
         children: [
-          { title: 'AWB 관리', href: '/logis/import-bl/air' },
+          { title: 'House AWB 관리', href: '/logis/import-bl/air/house' },
+          { title: 'Master AWB 관리', href: '/logis/import-bl/air/master' },
           { title: '도착관리 (A/N)', href: '/logis/import-bl/air/arrival' },
         ],
       },

@@ -989,6 +989,7 @@ function AWBRegisterContent() {
                   <td className="p-2">
                     <input
                       type="number"
+                      step="0.01"
                       value={item.grossWeight}
                       onChange={e => {
                         const updated = [...cargoData.cargoItems];
@@ -1027,6 +1028,7 @@ function AWBRegisterContent() {
                   <td className="p-2">
                     <input
                       type="number"
+                      step="0.01"
                       value={item.chargeableWeight}
                       onChange={e => {
                         const updated = [...cargoData.cargoItems];

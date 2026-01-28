@@ -122,9 +122,19 @@ export default function HouseBLListPage() {
   const itemsPerPage = 10;
 
   // 화면닫기 훅
-  const { showCloseModal, handleCloseClick, handleCloseConfirm, handleCloseCancel } = useCloseConfirm({
-    redirectPath: '/',
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const handleConfirmClose = useCallback(() => {
+    setShowCloseModal(false);
+    router.push('/');
+  }, [router]);
+
+  const { handleConfirm } = useCloseConfirm({
+    showModal: showCloseModal,
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
+
+  const handleCloseClick = () => setShowCloseModal(true);
 
   // 필터링된 데이터
   const filteredData = useMemo(() => {
@@ -270,19 +280,25 @@ export default function HouseBLListPage() {
     const selected = data.find(item => item.id === selectedRows[0]);
     if (selected) {
       setPrintData({
-        blNo: selected.hblNo,
+        hblNo: selected.hblNo,
+        mblNo: selected.mblNo || '',
+        blDate: new Date().toISOString().split('T')[0],
         shipper: selected.shipperName || '',
         consignee: selected.consigneeName || '',
         notifyParty: '',
+        carrier: '',
         vessel: selected.vesselVoyage?.split('/')[0]?.trim() || '',
         voyage: selected.vesselVoyage?.split('/')[1]?.trim() || '',
         pol: selected.pol || '',
         pod: selected.pod || '',
+        etd: selected.obDate || '',
         containerNo: '',
         sealNo: '',
+        containerType: '',
+        containerQty: 0,
         description: '',
-        grossWeight: '',
-        measurement: '',
+        weight: 0,
+        measurement: 0,
         freightTerms: selected.pc === 'P' ? 'PREPAID' : 'COLLECT',
         placeOfIssue: 'SEOUL, KOREA',
         dateOfIssue: new Date().toISOString().split('T')[0],
@@ -612,8 +628,8 @@ export default function HouseBLListPage() {
       {/* 모달들 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
-        onConfirm={handleCloseConfirm}
-        onCancel={handleCloseCancel}
+        onConfirm={handleConfirm}
+        onClose={() => setShowCloseModal(false)}
       />
 
       <SelectionAlertModal
@@ -629,7 +645,7 @@ export default function HouseBLListPage() {
           alert('이메일이 발송되었습니다.');
           setShowEmailModal(false);
         }}
-        documentType="house-bl"
+        documentType="bl"
         documentNo={selectedRows.length > 0 ? data.find(d => d.id === selectedRows[0])?.hblNo || '' : ''}
       />
 
@@ -645,7 +661,6 @@ export default function HouseBLListPage() {
           isOpen={showPrintModal}
           onClose={() => setShowPrintModal(false)}
           blData={printData}
-          blType="HBL"
         />
       )}
     </div>

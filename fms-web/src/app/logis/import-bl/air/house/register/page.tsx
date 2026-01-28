@@ -1,0 +1,96 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
+
+function RegisterContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('id');
+
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const handleConfirmClose = useCallback(() => {
+    setShowCloseModal(false);
+    router.push('/logis/import-bl/air/house');
+  }, [router]);
+
+  const { handleConfirm } = useCloseConfirm({
+    showModal: showCloseModal,
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
+  });
+
+  const handleCloseClick = () => setShowCloseModal(true);
+
+  const handleList = () => router.push('/logis/import-bl/air/house');
+  const handleSave = () => { alert('저장되었습니다.'); handleList(); };
+
+  return (
+    <div className="min-h-screen bg-[var(--background)]">
+      <Sidebar />
+      <div className="ml-72">
+        <Header
+          title={editId ? "House AWB 수정" : "House AWB 등록"}
+          subtitle="Logis > 항공수입 > House AWB 관리 > 등록"
+          onClose={handleCloseClick}
+        />
+        <main className="p-6">
+          <div className="card p-6 mb-6">
+            <h3 className="text-lg font-bold mb-4">기본정보</h3>
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">HAWB NO</label>
+                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="House AWB 번호" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB NO</label>
+                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="Master AWB 번호" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">O/B Date</label>
+                <input type="date" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Flight No.</label>
+                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="편명" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-6 mb-6">
+            <h3 className="text-lg font-bold mb-4">거래처 정보</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Shipper</label>
+                <textarea className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg h-24" placeholder="화주 정보" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Consignee</label>
+                <textarea className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg h-24" placeholder="수하인 정보" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-2">
+            <button onClick={handleSave} className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">저장</button>
+            <button onClick={handleList} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
+          </div>
+        </main>
+      </div>
+      <CloseConfirmModal isOpen={showCloseModal} onConfirm={handleConfirm} onClose={() => setShowCloseModal(false)} />
+    </div>
+  );
+}
+
+export default function ImportHouseAWBRegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[var(--background)] flex items-center justify-center">Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
+  );
+}

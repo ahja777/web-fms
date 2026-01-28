@@ -226,8 +226,8 @@ export default function ImportAWBRegisterPage() {
               <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">화물 정보</h3>
               <div className="grid grid-cols-4 gap-4">
                 <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">개수 (PCS)</label><input type="number" name="pieces" value={formData.pieces} onChange={handleChange} className={inputClass} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label><input type="number" step="0.001" name="gross_weight_kg" value={formData.gross_weight_kg} onChange={handleChange} className={inputClass} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">청구중량 (KG)</label><input type="number" step="0.001" name="charge_weight_kg" value={formData.charge_weight_kg} onChange={handleChange} className={inputClass} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label><input type="number" step="0.01" name="gross_weight_kg" value={formData.gross_weight_kg} onChange={handleChange} className={inputClass} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">청구중량 (KG)</label><input type="number" step="0.01" name="charge_weight_kg" value={formData.charge_weight_kg} onChange={handleChange} className={inputClass} /></div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label>
                   <div className="flex gap-2">

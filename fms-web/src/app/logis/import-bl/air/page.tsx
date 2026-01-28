@@ -13,6 +13,7 @@ import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { useSorting, SortableHeader, SortStatusBadge } from '@/components/table';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { formatWeightWithComma } from '@/utils/format';
 import { ActionButton } from '@/components/buttons';
 
 interface AWBData {
@@ -470,7 +471,7 @@ export default function ImportAWBListPage() {
               <div className="text-sm text-[var(--muted)]">도착</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-purple-500">{summaryStats.totalWeight.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-purple-500">{formatWeightWithComma(summaryStats.totalWeight)}</div>
               <div className="text-sm text-[var(--muted)]">총 중량 (KG)</div>
             </div>
           </div>
@@ -546,7 +547,7 @@ export default function ImportAWBListPage() {
                       <td className="px-4 py-3 text-sm">{item.consignee_nm}</td>
                       <td className="px-4 py-3 text-sm">{item.commodity_desc}</td>
                       <td className="px-4 py-3 text-sm text-right">{item.pieces?.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-right">{item.gross_weight_kg?.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-right">{formatWeightWithComma(item.gross_weight_kg)}</td>
                       <td className="px-4 py-3 text-sm text-right">
                         <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                           {item.hawb_count || 0}

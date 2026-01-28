@@ -14,6 +14,7 @@ import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { ListTopButtons, SearchButtons, ActionButton } from '@/components/buttons';
 import BLPrintModal, { BLData as PrintBLData } from '@/components/BLPrintModal';
+import { formatWeightWithComma, formatCBM } from '@/utils/format';
 
 // B/L 데이터 타입
 interface BLData {
@@ -1439,7 +1440,7 @@ export default function ImportBLSeaPage() {
                       <div>
                         <label className="block text-sm font-medium text-[var(--muted)] mb-1">중량 / 용적</label>
                         <p className="text-[var(--foreground)]">
-                          {(selectedBL.weight || 0).toLocaleString()} kg / {selectedBL.volume || 0} CBM
+                          {formatWeightWithComma(selectedBL.weight, true)} / {formatCBM(selectedBL.volume, true)}
                         </p>
                       </div>
                     </div>
