@@ -290,7 +290,7 @@ export default function BookingAirDetailPage() {
                 <div className="text-center p-3 bg-[var(--surface-50)] rounded-lg">
                   <div className="text-sm text-[var(--muted)]">용적 (CBM)</div>
                   {isEditing ? (
-                    <input type="number" step="0.01" value={displayData.volume || 0} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className="w-full text-center text-lg font-bold bg-[var(--surface-50)] border border-[var(--border)] rounded mt-1" />
+                    <input type="number" step="0.001" value={displayData.volume || 0} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className="w-full text-center text-lg font-bold bg-[var(--surface-50)] border border-[var(--border)] rounded mt-1" />
                   ) : (
                     <div className="text-lg font-bold">{(displayData.volume || 0).toFixed(2)}</div>
                   )}

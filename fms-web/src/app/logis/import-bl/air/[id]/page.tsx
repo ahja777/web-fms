@@ -298,7 +298,7 @@ export default function AWBDetailPage() {
                   <div><label className="block text-sm text-[var(--muted)] mb-1">PCS</label><input type="number" value={displayData.pieces || ''} disabled={!isEditing} onChange={e => handleChange('pieces', parseInt(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
                   <div><label className="block text-sm text-[var(--muted)] mb-1">Gross Weight</label><input type="number" step="0.01" value={displayData.gross_weight_kg || ''} disabled={!isEditing} onChange={e => handleChange('gross_weight_kg', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
                   <div><label className="block text-sm text-[var(--muted)] mb-1">Charge Weight</label><input type="number" step="0.01" value={displayData.charge_weight_kg || ''} disabled={!isEditing} onChange={e => handleChange('charge_weight_kg', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
-                  <div><label className="block text-sm text-[var(--muted)] mb-1">Volume (CBM)</label><input type="number" step="0.01" value={displayData.volume_cbm || ''} disabled={!isEditing} onChange={e => handleChange('volume_cbm', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
+                  <div><label className="block text-sm text-[var(--muted)] mb-1">Volume (CBM)</label><input type="number" step="0.001" value={displayData.volume_cbm || ''} disabled={!isEditing} onChange={e => handleChange('volume_cbm', parseFloat(e.target.value) || 0)} className={inputClass(isEditing)} /></div>
                 </div>
               </div>
             </div>
