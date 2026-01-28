@@ -4,10 +4,10 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import ExchangeRateModal from '@/components/ExchangeRateModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
-import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useScreenClose } from '@/hooks/useScreenClose';
 import { DimensionsCalculatorModal } from '@/components/popup';
 
 type TabType = 'MAIN' | 'CARGO' | 'OTHER';
@@ -18,8 +18,7 @@ export default function ImportAWBRegisterPage() {
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
   const [activeTab, setActiveTab] = useState<TabType>('MAIN');
-  const [showCloseModal, setShowCloseModal] = useState(false);
-  const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
+    const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,10 +37,21 @@ export default function ImportAWBRegisterPage() {
     mrn_no: '', msn: '', agent_code: '', agent_name: '', remarks: '',
   });
 
-  const handleConfirmClose = () => { setShowCloseModal(false); router.push('/logis/import-bl/air'); };
-  useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // 화면닫기 통합 훅
+  const {
+    showModal: showCloseModal,
+    handleCloseClick,
+    handleModalClose,
+    handleDiscard: handleDiscardChanges,
+  } = useScreenClose({
+    hasChanges: hasUnsavedChanges,
+    listPath: '/logis/import-bl/air',
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setHasUnsavedChanges(true);
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -99,7 +109,7 @@ export default function ImportAWBRegisterPage() {
     finally { setSaving(false); }
   };
 
-  const handleCancel = () => { setShowCloseModal(true); };
+  const handleCancel = () => { handleCloseClick(); };
   const handleExchangeRateSelect = (rate: { currencyCode: string; dealBasR: number }) => {
     const currencyCode = rate.currencyCode.replace('(100)', '');
     setFormData(prev => ({ ...prev, declared_currency: currencyCode }));
@@ -312,7 +322,12 @@ export default function ImportAWBRegisterPage() {
           </div>
         </main>
       </div>
-      <CloseConfirmModal isOpen={showCloseModal} onClose={() => setShowCloseModal(false)} onConfirm={handleConfirmClose} />
+      <UnsavedChangesModal
+        isOpen={showCloseModal}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+      />
       <ExchangeRateModal isOpen={showExchangeRateModal} onClose={() => setShowExchangeRateModal(false)} onSelect={handleExchangeRateSelect} selectedCurrency={formData.declared_currency} />
       <DimensionsCalculatorModal isOpen={showDimensionsModal} onClose={() => setShowDimensionsModal(false)} onApply={(totalCbm) => setFormData(prev => ({ ...prev, volume_cbm: totalCbm.toString() }))} />
     </div>

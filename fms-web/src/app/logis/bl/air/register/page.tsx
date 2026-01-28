@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import CloseConfirmModal from '@/components/CloseConfirmModal';
-import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
+import { useScreenClose } from '@/hooks/useScreenClose';
 import DimensionsCalcModal from '@/components/popup/DimensionsCalcModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
 
@@ -190,11 +190,11 @@ function AWBRegisterContent() {
   const [mainData, setMainData] = useState<MainData>(initialMainData);
   const [cargoData, setCargoData] = useState<CargoData>(initialCargoData);
   const [otherData, setOtherData] = useState<OtherData>(initialOtherData);
-  const [showCloseModal, setShowCloseModal] = useState(false);
   const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [mawbError, setMawbError] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 검색 팝업 상태
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
@@ -216,16 +216,15 @@ function AWBRegisterContent() {
     setShowCodeSearchModal(false);
   };
 
-  // 화면닫기 핸들러
-  const handleConfirmClose = () => {
-    setShowCloseModal(false);
-    router.push('/logis/bl/air');
-  };
-
-  useCloseConfirm({
+  // 화면닫기 통합 훅
+  const {
     showModal: showCloseModal,
-    setShowModal: setShowCloseModal,
-    onConfirmClose: handleConfirmClose,
+    handleCloseClick,
+    handleModalClose,
+    handleDiscard: handleDiscardChanges,
+  } = useScreenClose({
+    hasChanges: hasUnsavedChanges,
+    listPath: '/logis/bl/air',
   });
 
   // 수정 모드일 경우 데이터 로드
@@ -306,6 +305,7 @@ function AWBRegisterContent() {
 
   // 핸들러
   const handleMainChange = (field: keyof MainData, value: string | boolean) => {
+    setHasUnsavedChanges(true);
     setMainData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -1590,10 +1590,11 @@ function AWBRegisterContent() {
         </main>
       </div>
 
-      <CloseConfirmModal
+      <UnsavedChangesModal
         isOpen={showCloseModal}
-        onClose={() => setShowCloseModal(false)}
-        onConfirm={handleConfirmClose}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
       />
 
       <DimensionsCalcModal

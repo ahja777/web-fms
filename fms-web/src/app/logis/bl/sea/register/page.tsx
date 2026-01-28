@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import CloseConfirmModal from '@/components/CloseConfirmModal';
-import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
+import { useScreenClose } from '@/hooks/useScreenClose';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
 import SRSearchModal, { SRData } from '@/components/popup/SRSearchModal';
 
@@ -249,9 +249,9 @@ function BLSeaRegisterContent() {
   const [mainData, setMainData] = useState<MainData>(initialMainData);
   const [cargoData, setCargoData] = useState<CargoData>(initialCargoData);
   const [otherData, setOtherData] = useState<OtherData>(initialOtherData);
-  const [showCloseModal, setShowCloseModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 검색 팝업 상태
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
@@ -301,16 +301,15 @@ function BLSeaRegisterContent() {
     setShowSRSearchModal(false);
   };
 
-  // 화면닫기 핸들러
-  const handleConfirmClose = () => {
-    setShowCloseModal(false);
-    router.push('/logis/bl/sea');
-  };
-
-  useCloseConfirm({
+  // 화면닫기 통합 훅
+  const {
     showModal: showCloseModal,
-    setShowModal: setShowCloseModal,
-    onConfirmClose: handleConfirmClose,
+    handleCloseClick,
+    handleModalClose,
+    handleDiscard: handleDiscardChanges,
+  } = useScreenClose({
+    hasChanges: hasUnsavedChanges,
+    listPath: '/logis/bl/sea',
   });
 
   // 수정 모드일 경우 데이터 로드
@@ -412,6 +411,7 @@ function BLSeaRegisterContent() {
 
   // 핸들러
   const handleMainChange = (field: keyof MainData, value: string | boolean) => {
+    setHasUnsavedChanges(true);
     setMainData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -2047,10 +2047,11 @@ function BLSeaRegisterContent() {
         </main>
       </div>
 
-      <CloseConfirmModal
+      <UnsavedChangesModal
         isOpen={showCloseModal}
-        onClose={() => setShowCloseModal(false)}
-        onConfirm={handleConfirmClose}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
       />
 
       <CodeSearchModal

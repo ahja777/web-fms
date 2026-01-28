@@ -4,10 +4,10 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import ExchangeRateModal from '@/components/ExchangeRateModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
-import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useScreenClose } from '@/hooks/useScreenClose';
 import { DimensionsCalculatorModal } from '@/components/popup';
 
 export default function ExportAWBRegisterPage() {
@@ -15,8 +15,7 @@ export default function ExportAWBRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const [showCloseModal, setShowCloseModal] = useState(false);
-  const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
+    const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -60,18 +59,21 @@ export default function ExportAWBRegisterPage() {
     remarks: '',
   });
 
-  const handleConfirmClose = () => {
-    setShowCloseModal(false);
-    router.push('/logis/export-awb/air');
-  };
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  useCloseConfirm({
+  // 화면닫기 통합 훅
+  const {
     showModal: showCloseModal,
-    setShowModal: setShowCloseModal,
-    onConfirmClose: handleConfirmClose,
+    handleCloseClick,
+    handleModalClose,
+    handleDiscard: handleDiscardChanges,
+  } = useScreenClose({
+    hasChanges: hasUnsavedChanges,
+    listPath: '/logis/export-awb/air',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setHasUnsavedChanges(true);
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -147,7 +149,7 @@ export default function ExportAWBRegisterPage() {
   };
 
   const handleCancel = () => {
-    setShowCloseModal(true);
+    handleCloseClick();
   };
 
   const handleExchangeRateSelect = (rate: { currencyCode: string; dealBasR: number }) => {
@@ -688,10 +690,11 @@ export default function ExportAWBRegisterPage() {
         </main>
       </div>
 
-      <CloseConfirmModal
+      <UnsavedChangesModal
         isOpen={showCloseModal}
-        onClose={() => setShowCloseModal(false)}
-        onConfirm={handleConfirmClose}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
       />
 
       <ExchangeRateModal
