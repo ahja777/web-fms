@@ -8,12 +8,12 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import AWBPrintModal, { AWBData as AWBPrintData } from '@/components/AWBPrintModal';
-import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { useSorting, SortableHeader, SortStatusBadge } from '@/components/table';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { ActionButton } from '@/components/buttons';
 
 interface AWBData {
   mawb_id: number;
@@ -55,10 +55,12 @@ export default function ImportAWBListPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const today = getToday();
+  const today = new Date().toISOString().split('T')[0];
   const [filters, setFilters] = useState({
-    startDate: today,
-    endDate: today,
+    etaDateFrom: today,
+    etaDateTo: today,
+    ataDateFrom: '',
+    ataDateTo: '',
     awbNo: '',
     flightNo: '',
     consignee: '',
@@ -119,18 +121,40 @@ export default function ImportAWBListPage() {
     fetchData();
   }, [fetchData]);
 
-  const handleDateRangeSelect = (startDate: string, endDate: string) => {
-    setFilters(prev => ({ ...prev, startDate, endDate }));
-  };
-
   const handleSearch = () => setAppliedFilters(filters);
   const handleReset = () => {
-    const resetFilters = { startDate: today, endDate: today, awbNo: '', flightNo: '', consignee: '', status: '' };
+    const resetFilters = {
+      etaDateFrom: today,
+      etaDateTo: today,
+      ataDateFrom: '',
+      ataDateTo: '',
+      awbNo: '',
+      flightNo: '',
+      consignee: '',
+      status: ''
+    };
     setFilters(resetFilters);
     setAppliedFilters(resetFilters);
     setSelectedIds(new Set());
     setSelectedRow(null);
     resetSort();
+  };
+
+  // 버튼 핸들러
+  const handleNew = () => router.push('/logis/import-bl/air/register');
+  const handleEdit = () => {
+    if (selectedIds.size !== 1) {
+      alert('수정할 항목을 1개 선택해주세요.');
+      return;
+    }
+    const id = Array.from(selectedIds)[0];
+    router.push(`/logis/import-bl/air/${id}`);
+  };
+  const handleExcel = () => {
+    const dataToExport = selectedIds.size > 0
+      ? filteredData.filter(item => selectedIds.has(item.mawb_id))
+      : filteredData;
+    alert(`${dataToExport.length}건의 데이터를 Excel로 다운로드합니다.`);
   };
 
   // 필터링된 데이터
@@ -267,84 +291,167 @@ export default function ImportAWBListPage() {
       <div className="ml-72">
         <Header title="AWB 관리 (항공수입)" subtitle="Logis > 항공수입 > AWB 관리" showCloseButton={false} />
         <main ref={formRef} className="p-6">
-          {/* 버튼 영역 */}
+          {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
           <div className="flex justify-between items-center mb-6">
-            <div className="flex gap-2">
-              <Link href="/logis/import-bl/air/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
-                신규 등록
-              </Link>
+            <div className="flex items-center gap-3">
+              {selectedIds.size > 0 && (
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
+                  {selectedIds.size}건 선택
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={handlePrint}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                출력
-              </button>
-              <button
-                onClick={handleDeleteClick}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                삭제
-              </button>
-              {selectedIds.size > 0 && (
-                <button
-                  onClick={() => { setSelectedIds(new Set()); setSelectedRow(null); }}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                >
-                  선택해제 ({selectedIds.size}건)
-                </button>
-              )}
+              <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
+              <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
+              <ActionButton variant="danger" icon="delete" onClick={handleDeleteClick}>삭제</ActionButton>
+              <ActionButton variant="primary" icon="print" onClick={handlePrint}>출력</ActionButton>
+              <ActionButton variant="default" icon="download" onClick={handleExcel}>Excel</ActionButton>
+              <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
             </div>
           </div>
 
-          {/* 검색 필터 */}
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 기간</label>
-                <div className="flex gap-2 items-center">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+          {/* 검색조건 - 해상수출 B/L과 동일한 레이아웃 (grid-cols-6) */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              {/* 첫 번째 줄 */}
+              <div className="grid grid-cols-6 gap-4 mb-4">
+                {/* 업무구분 (고정값) */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">업무구분</label>
+                  <input
+                    type="text"
+                    value="항공"
+                    readOnly
+                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                  />
+                </div>
+                {/* 수출입구분 (고정값) */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수출입구분</label>
+                  <input
+                    type="text"
+                    value="수입(IN)"
+                    readOnly
+                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                  />
+                </div>
+                {/* ETA 기간 */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 기간</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={filters.etaDateFrom}
+                      onChange={e => setFilters(prev => ({ ...prev, etaDateFrom: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input
+                      type="date"
+                      value={filters.etaDateTo}
+                      onChange={e => setFilters(prev => ({ ...prev, etaDateTo: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    />
+                  </div>
+                </div>
+                {/* ATA 기간 */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 기간</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={filters.ataDateFrom}
+                      onChange={e => setFilters(prev => ({ ...prev, ataDateFrom: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input
+                      type="date"
+                      value={filters.ataDateTo}
+                      onChange={e => setFilters(prev => ({ ...prev, ataDateTo: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    />
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB No.</label>
-                <input type="text" value={filters.awbNo} onChange={e => setFilters(prev => ({ ...prev, awbNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="180-12345678" />
+              {/* 두 번째 줄 */}
+              <div className="grid grid-cols-6 gap-4">
+                {/* MAWB No. */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB No.</label>
+                  <input
+                    type="text"
+                    value={filters.awbNo}
+                    onChange={e => setFilters(prev => ({ ...prev, awbNo: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    placeholder="180-12345678"
+                  />
+                </div>
+                {/* 편명 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
+                  <input
+                    type="text"
+                    value={filters.flightNo}
+                    onChange={e => setFilters(prev => ({ ...prev, flightNo: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    placeholder="KE001"
+                  />
+                </div>
+                {/* 수하인 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인</label>
+                  <input
+                    type="text"
+                    value={filters.consignee}
+                    onChange={e => setFilters(prev => ({ ...prev, consignee: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    placeholder="수하인명"
+                  />
+                </div>
+                {/* 상태 */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <select
+                    value={filters.status}
+                    onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  >
+                    <option value="">전체</option>
+                    <option value="DRAFT">초안</option>
+                    <option value="DEPARTED">출발</option>
+                    <option value="IN_TRANSIT">운송중</option>
+                    <option value="ARRIVED">도착</option>
+                    <option value="CUSTOMS">통관중</option>
+                    <option value="RELEASED">반출</option>
+                    <option value="DELIVERED">인도완료</option>
+                  </select>
+                </div>
+                {/* 빈 칸 (정렬용) */}
+                <div></div>
+                <div></div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
-                <input type="text" value={filters.flightNo} onChange={e => setFilters(prev => ({ ...prev, flightNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KE001" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인</label>
-                <input type="text" value={filters.consignee} onChange={e => setFilters(prev => ({ ...prev, consignee: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="수하인명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="DRAFT">초안</option>
-                  <option value="DEPARTED">출발</option>
-                  <option value="IN_TRANSIT">운송중</option>
-                  <option value="ARRIVED">도착</option>
-                  <option value="CUSTOMS">통관중</option>
-                  <option value="RELEASED">반출</option>
-                  <option value="DELIVERED">인도완료</option>
-                </select>
-              </div>
-              <div className="flex items-end gap-2 col-span-3">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
+            </div>
+            {/* 검색 버튼 영역 - 하단 별도 영역 */}
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button
+                onClick={handleSearch}
+                className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium"
+              >
+                조회
+              </button>
+              <button
+                onClick={handleReset}
+                className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+              >
+                초기화
+              </button>
             </div>
           </div>
 

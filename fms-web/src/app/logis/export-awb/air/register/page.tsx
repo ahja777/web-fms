@@ -198,6 +198,7 @@ export default function ExportAWBRegisterPage() {
       payment_terms: 'PREPAID',
       remarks: '파손주의 (FRAGILE)',
     });
+    setHasUnsavedChanges(true);
   };
 
   return (

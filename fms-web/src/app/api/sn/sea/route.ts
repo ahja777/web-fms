@@ -91,10 +91,13 @@ export async function POST(request: NextRequest) {
     // shipmentId가 없으면 임시 생성
     let shipmentId = body.shipmentId;
     if (!shipmentId) {
+      // customerId가 없으면 첫 번째 고객 사용
+      const [customers] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM MST_CUSTOMER LIMIT 1`);
+      const customerId = customers.length > 0 ? customers[0].CUSTOMER_ID : 1;
       const [shipResult] = await pool.query<ResultSetHeader>(`
-        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
-        VALUES (?, 'SEA', 'SHIPPED', 'admin', NOW(), 'N')
-      `, [`SHP${Date.now()}`]);
+        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, TRADE_TYPE_CD, CUSTOMER_ID, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
+        VALUES (?, 'SEA', 'EXPORT', ?, 'SHIPPED', 'admin', NOW(), 'N')
+      `, [`SHP${Date.now()}`, customerId]);
       shipmentId = shipResult.insertId;
     }
 

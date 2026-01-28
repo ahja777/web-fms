@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import EmailModal from '@/components/EmailModal';
@@ -78,6 +79,9 @@ export default function SRRegisterPage() {
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
 
+  const [formData, setFormData] = useState<SRFormData>(initialFormData);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   // useScreenClose 훅
   const {
     showModal: showCloseModal,
@@ -85,12 +89,9 @@ export default function SRRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
+    hasChanges: hasUnsavedChanges,
     listPath: LIST_PATHS.SR_SEA,
   });
-
-  const [formData, setFormData] = useState<SRFormData>(initialFormData);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isNewMode, setIsNewMode] = useState(true); // 신규 입력 모드 (신규버튼 비활성화 제어)
 
   // 팝업 상태
@@ -379,6 +380,15 @@ export default function SRRegisterPage() {
         onClose={() => setShowBookingModal(false)}
         onSelect={handleBookingSelect}
         type="sea"
-      />    </div>
+      />
+
+      {/* 저장 확인 모달 */}
+      <UnsavedChangesModal
+        isOpen={showCloseModal}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+      />
+    </div>
   );
 }

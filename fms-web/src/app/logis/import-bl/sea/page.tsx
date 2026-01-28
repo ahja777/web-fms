@@ -922,7 +922,28 @@ export default function ImportBLSeaPage() {
                   </h3>
                 </div>
                 <div className="p-4">
-                  <div className="grid grid-cols-4 gap-4 mb-4">
+                  {/* 첫 번째 줄 */}
+                  <div className="grid grid-cols-6 gap-4 mb-4">
+                    {/* 업무구분 (고정값) */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">업무구분</label>
+                      <input
+                        type="text"
+                        value="해상"
+                        readOnly
+                        className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                      />
+                    </div>
+                    {/* 수출입구분 (고정값) */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수출입구분</label>
+                      <input
+                        type="text"
+                        value="수입(IN)"
+                        readOnly
+                        className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                      />
+                    </div>
                     {/* 일자유형 및 기간 */}
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-1">조회기간</label>
@@ -950,7 +971,6 @@ export default function ImportBLSeaPage() {
                           onChange={(e) => handleFilterChange('dateTo', e.target.value)}
                           className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                         />
-                        <DateRangeButtons onRangeSelect={(start, end) => { handleFilterChange('dateFrom', start); handleFilterChange('dateTo', end); }} />
                       </div>
                     </div>
                     {/* MBL No */}

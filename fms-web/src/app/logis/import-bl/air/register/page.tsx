@@ -134,6 +134,7 @@ export default function ImportAWBRegisterPage() {
       mrn_no: '', msn: '', agent_code: 'AGT001', agent_name: 'Korea Air Cargo Agency',
       remarks: '파손주의 (FRAGILE)',
     });
+    setHasUnsavedChanges(true);
   };
 
   const tabs: { id: TabType; label: string }[] = [

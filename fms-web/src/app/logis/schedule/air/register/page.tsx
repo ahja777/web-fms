@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import {
   CodeSearchModal,
@@ -76,6 +77,7 @@ export default function AirScheduleRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // useScreenClose 훅
   const {
@@ -84,7 +86,7 @@ export default function AirScheduleRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
+    hasChanges: hasUnsavedChanges,
     listPath: LIST_PATHS.SCHEDULE_AIR,
   });
 
@@ -163,6 +165,7 @@ export default function AirScheduleRegisterPage() {
       status: 'OPEN',
       remarks: '정기 화물편',
     });
+    setHasUnsavedChanges(true);
   };
 
   const handleReset = () => {
@@ -257,6 +260,13 @@ export default function AirScheduleRegisterPage() {
         type="airport"
       />
 
+      {/* 저장 확인 모달 */}
+      <UnsavedChangesModal
+        isOpen={showCloseModal}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+      />
     </div>
   );
 }

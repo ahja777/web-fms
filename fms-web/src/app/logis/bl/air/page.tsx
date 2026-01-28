@@ -11,6 +11,7 @@ import AWBPrintModal, { AWBData } from '@/components/AWBPrintModal';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import EmailModal from '@/components/EmailModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
+import { ActionButton } from '@/components/buttons';
 
 // 화면설계서 UI-G-01-07-05 기준 검색조건 인터페이스
 interface SearchFilters {
@@ -328,29 +329,23 @@ export default function BLAirPage() {
           showCloseButton={false}
         />
         <main className="p-6">
-          {/* 상단 버튼 영역 */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex gap-2">
-              <button onClick={handleNew} className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium">
-                신규
-              </button>
-              <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                수정
-              </button>
-              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] text-red-400">
-                삭제
-              </button>
+          {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              {selectedIds.size > 0 && (
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
+                  {selectedIds.size}건 선택
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
-              <button onClick={handlePrint} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                출력
-              </button>
-              <button onClick={handleEmail} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                E-mail
-              </button>
-              <button onClick={handleExcel} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                Excel
-              </button>
+              <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
+              <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
+              <ActionButton variant="danger" icon="delete" onClick={handleDelete}>삭제</ActionButton>
+              <ActionButton variant="primary" icon="print" onClick={handlePrint}>출력</ActionButton>
+              <ActionButton variant="primary" icon="email" onClick={handleEmail}>E-mail</ActionButton>
+              <ActionButton variant="default" icon="download" onClick={handleExcel}>Excel</ActionButton>
+              <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
             </div>
           </div>
 

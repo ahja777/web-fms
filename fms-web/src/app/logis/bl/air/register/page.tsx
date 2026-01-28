@@ -461,6 +461,32 @@ function AWBRegisterContent() {
     router.push('/logis/bl/air');
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    setMainData({
+      ...initialMainData,
+      ioType: 'OUT',
+      bookingNo: 'ABK-2026-0001',
+      mawbNo: '180-12345678',
+      hawbNo: 'HAWB-2026-0001',
+      shipperCode: 'SHP001',
+      shipperName: 'SAMSUNG ELECTRONICS CO., LTD.',
+      shipperAddress: '129 SAMSUNG-RO, YEONGTONG-GU, SUWON-SI, GYEONGGI-DO, KOREA',
+      consigneeCode: 'CSG001',
+      consigneeName: 'SAMSUNG AMERICA INC.',
+      consigneeAddress: '85 CHALLENGER ROAD, RIDGEFIELD PARK, NJ 07660, USA',
+      notifyCode: 'NTF001',
+      notifyName: 'SAME AS CONSIGNEE',
+      currencyCode: 'USD',
+      departure: 'ICN',
+      arrival: 'LAX',
+      flightNo: 'KE001',
+      flightDate: '2026-01-20',
+      handlingInfo: 'HANDLE WITH CARE',
+    });
+    setHasUnsavedChanges(true);
+  };
+
   // 탭 렌더링
   const renderTabContent = () => {
     switch (activeTab) {
@@ -1530,7 +1556,7 @@ function AWBRegisterContent() {
         <Header
           title={editId ? "AWB 수정 (항공)" : "AWB 등록 (항공)"}
           subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 등록"
-          showCloseButton={false}
+          onClose={handleCloseClick}
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}
@@ -1541,6 +1567,12 @@ function AWBRegisterContent() {
                 className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 목록
+              </button>
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                테스트데이터
               </button>
             </div>
             <div className="flex gap-2">

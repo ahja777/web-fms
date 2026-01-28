@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import {
   CodeSearchModal,
@@ -81,6 +82,7 @@ export default function SNRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // useScreenClose 훅
   const {
@@ -89,7 +91,7 @@ export default function SNRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
+    hasChanges: hasUnsavedChanges,
     listPath: LIST_PATHS.SN_SEA,
   });
 
@@ -213,6 +215,7 @@ export default function SNRegisterPage() {
       measurement: 68,
       remarks: '화주 요청: 도착 3일 전 사전 통지 필요',
     });
+    setHasUnsavedChanges(true);
   };
 
   const handleReset = () => {
@@ -333,6 +336,13 @@ export default function SNRegisterPage() {
         onClose={() => setShowBLModal(false)}
         onSelect={handleBLSelect}
         type="sea"
-      />    </div>
+      />      {/* 저장 확인 모달 */}
+      <UnsavedChangesModal
+        isOpen={showCloseModal}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+      />
+    </div>
   );
 }

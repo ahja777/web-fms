@@ -109,6 +109,23 @@ export async function POST(request: NextRequest) {
     const count = countResult[0].cnt + 1;
     const hawbNo = `HAWB${year}${String(count).padStart(5, '0')}`;
 
+    // customerId 결정
+    let customerId = body.customer_id;
+    if (!customerId) {
+      const [customers] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM MST_CUSTOMER LIMIT 1`);
+      customerId = customers.length > 0 ? customers[0].CUSTOMER_ID : 1;
+    }
+
+    // shipmentId가 없으면 자동 생성
+    let shipmentId = body.shipment_id;
+    if (!shipmentId) {
+      const [shipResult] = await pool.query<ResultSetHeader>(`
+        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, TRADE_TYPE_CD, CUSTOMER_ID, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
+        VALUES (?, 'AIR', 'EXPORT', ?, 'PENDING', 'admin', NOW(), 'N')
+      `, [`SHP${Date.now()}`, customerId]);
+      shipmentId = shipResult.insertId;
+    }
+
     const [result] = await pool.query<ResultSetHeader>(`
       INSERT INTO AWB_HOUSE_AWB (
         HAWB_NO, SHIPMENT_ID, MAWB_ID, CUSTOMER_ID, CARRIER_ID, AIRLINE_CODE,
@@ -135,9 +152,9 @@ export async function POST(request: NextRequest) {
       )
     `, [
       hawbNo,
-      body.shipment_id,
+      shipmentId,
       body.mawb_id || null,
-      body.customer_id,
+      customerId,
       body.carrier_id || null,
       body.airline_code || null,
       body.flight_no || null,

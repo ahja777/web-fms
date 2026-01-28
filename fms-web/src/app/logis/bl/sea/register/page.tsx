@@ -540,6 +540,40 @@ function BLSeaRegisterContent() {
     router.push('/logis/bl/sea');
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    setMainData({
+      ...initialMainData,
+      ioType: 'OUT',
+      salesType: 'DIRECT',
+      businessType: 'CONSOL',
+      blType: 'ORIGINAL',
+      mblNo: 'MAEU123456789',
+      hblNo: 'HBL-2026-0001',
+      srNo: 'SR-2026-0001',
+      bookingNo: 'BK-2026-0001',
+      shipperCode: 'SHP001',
+      shipperName: 'SAMSUNG ELECTRONICS CO., LTD.',
+      shipperAddress: '129 SAMSUNG-RO, YEONGTONG-GU, SUWON-SI, GYEONGGI-DO, KOREA',
+      consigneeCode: 'CSG001',
+      consigneeName: 'SAMSUNG AMERICA INC.',
+      consigneeAddress: '85 CHALLENGER ROAD, RIDGEFIELD PARK, NJ 07660, USA',
+      notifyCode: 'NTF001',
+      notifyName: 'SAME AS CONSIGNEE',
+      lineCode: 'MAEU',
+      lineName: 'MAERSK LINE',
+      portOfLoading: 'KRPUS',
+      portOfDischarge: 'USLAX',
+      placeOfReceipt: 'INCHEON',
+      placeOfDelivery: 'LOS ANGELES',
+      vesselName: 'MAERSK EINDHOVEN',
+      voyageNo: '001E',
+      etd: '2026-01-20',
+      eta: '2026-02-05',
+    });
+    setHasUnsavedChanges(true);
+  };
+
   // 탭 렌더링
   const renderTabContent = () => {
     switch (activeTab) {
@@ -1994,7 +2028,7 @@ function BLSeaRegisterContent() {
         <Header
           title={editId ? "B/L 수정 (해상)" : "B/L 등록 (해상)"}
           subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 등록"
-          showCloseButton={false}
+          onClose={handleCloseClick}
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}
@@ -2005,6 +2039,12 @@ function BLSeaRegisterContent() {
                 className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 목록
+              </button>
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                테스트데이터
               </button>
             </div>
             <div className="flex gap-2">

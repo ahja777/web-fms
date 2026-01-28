@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
+import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import {
   CodeSearchModal,
@@ -91,6 +92,7 @@ export default function ManifestRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // useScreenClose 훅
   const {
@@ -99,7 +101,7 @@ export default function ManifestRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
+    hasChanges: hasUnsavedChanges,
     listPath: LIST_PATHS.MANIFEST_SEA,
   });
 
@@ -213,6 +215,7 @@ export default function ManifestRegisterPage() {
       freightTerms: 'PREPAID',
       remarks: 'HANDLE WITH CARE - ELECTRONIC EQUIPMENT',
     });
+    setHasUnsavedChanges(true);
   };
 
   const handleReset = () => {
@@ -338,6 +341,13 @@ export default function ManifestRegisterPage() {
         isOpen={showHSCodeModal}
         onClose={() => setShowHSCodeModal(false)}
         onSelect={handleHSCodeSelect}
-      />    </div>
+      />      {/* 저장 확인 모달 */}
+      <UnsavedChangesModal
+        isOpen={showCloseModal}
+        onClose={handleModalClose}
+        onDiscard={handleDiscardChanges}
+        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+      />
+    </div>
   );
 }

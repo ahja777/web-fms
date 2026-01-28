@@ -90,17 +90,30 @@ export async function POST(request: NextRequest) {
     const count = countResult[0].cnt + 1;
     const declarationNo = `CUS-${year}-${String(count).padStart(4, '0')}`;
 
+    // shipmentId가 없으면 자동 생성
+    let shipmentId = body.shipmentId;
+    if (!shipmentId) {
+      const [customers] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM MST_CUSTOMER LIMIT 1`);
+      const customerId = customers.length > 0 ? customers[0].CUSTOMER_ID : 1;
+      const [shipResult] = await pool.query<ResultSetHeader>(`
+        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, TRADE_TYPE_CD, CUSTOMER_ID, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
+        VALUES (?, 'SEA', ?, ?, 'PENDING', 'admin', NOW(), 'N')
+      `, [`SHP${Date.now()}`, body.declarationType || 'EXPORT', customerId]);
+      shipmentId = shipResult.insertId;
+    }
+
     await pool.query<ResultSetHeader>(`
       INSERT INTO CUS_DECLARATION (
-        DECLARATION_ID, DECLARATION_NO, DECLARATION_TYPE, DECLARATION_DATE,
+        DECLARATION_ID, DECLARATION_NO, SHIPMENT_ID, DECLARATION_TYPE, DECLARATION_DATE,
         CUSTOMS_BROKER_ID, DECLARANT, IMPORTER_EXPORTER, IMPORTER_EXPORTER_BRN,
         HS_CODE, GOODS_DESC, COUNTRY_ORIGIN, PACKAGE_QTY, GROSS_WEIGHT,
         DECLARED_VALUE, CURRENCY, DUTY_AMOUNT, VAT_AMOUNT, TOTAL_TAX,
         STATUS, CLEARANCE_DATE, RELEASE_DATE, REMARKS, CREATED_BY, CREATED_AT
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin', NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin', NOW())
     `, [
       declarationId,
       declarationNo,
+      shipmentId,
       body.declarationType || 'EXPORT',
       body.declarationDate || new Date().toISOString().split('T')[0],
       body.brokerId || null,

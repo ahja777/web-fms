@@ -87,13 +87,20 @@ export async function POST(request: NextRequest) {
     const count = countResult[0].cnt + 1;
     const srNo = `SR-${year}-${String(count).padStart(4, '0')}`;
 
+    // customerId 결정
+    let customerId = body.customerId;
+    if (!customerId) {
+      const [customers] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM MST_CUSTOMER LIMIT 1`);
+      customerId = customers.length > 0 ? customers[0].CUSTOMER_ID : 1;
+    }
+
     // shipmentId가 없으면 임시 생성
     let shipmentId = body.shipmentId;
     if (!shipmentId) {
       const [shipResult] = await pool.query<ResultSetHeader>(`
-        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, TRADE_TYPE_CD, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
-        VALUES (?, ?, ?, 'PENDING', 'admin', NOW(), 'N')
-      `, [`SHP${Date.now()}`, body.transportMode || 'SEA', body.tradeType || 'EXPORT']);
+        INSERT INTO ORD_SHIPMENT (SHIPMENT_NO, TRANSPORT_MODE_CD, TRADE_TYPE_CD, CUSTOMER_ID, STATUS_CD, CREATED_BY, CREATED_DTM, DEL_YN)
+        VALUES (?, ?, ?, ?, 'PENDING', 'admin', NOW(), 'N')
+      `, [`SHP${Date.now()}`, body.transportMode || 'SEA', body.tradeType || 'EXPORT', customerId]);
       shipmentId = shipResult.insertId;
     }
 
@@ -109,7 +116,7 @@ export async function POST(request: NextRequest) {
       srNo,
       shipmentId,
       body.bookingId || null,
-      body.customerId || null,
+      customerId,
       body.transportMode || 'SEA',
       body.tradeType || 'EXPORT',
       body.shipperName || '',
@@ -149,6 +156,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'SR ID is required' }, { status: 400 });
     }
 
+    // customerId가 없으면 기존 값 유지 또는 기본값 사용
+    let customerId = body.customerId;
+    if (!customerId) {
+      const [existing] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM SHP_SHIPPING_REQUEST WHERE SR_ID = ?`, [body.id]);
+      if (existing.length > 0 && existing[0].CUSTOMER_ID) {
+        customerId = existing[0].CUSTOMER_ID;
+      } else {
+        const [customers] = await pool.query<RowDataPacket[]>(`SELECT CUSTOMER_ID FROM MST_CUSTOMER LIMIT 1`);
+        customerId = customers.length > 0 ? customers[0].CUSTOMER_ID : 1;
+      }
+    }
+
     await pool.query(`
       UPDATE SHP_SHIPPING_REQUEST SET
         BOOKING_ID = ?,
@@ -173,7 +192,7 @@ export async function PUT(request: NextRequest) {
       WHERE SR_ID = ?
     `, [
       body.bookingId || null,
-      body.customerId || null,
+      customerId,
       body.shipperName || '',
       body.shipperAddress || '',
       body.consigneeName || '',
