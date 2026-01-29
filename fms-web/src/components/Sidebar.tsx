@@ -153,7 +153,6 @@ const menuItems: MenuItem[] = [
         children: [
           { title: '견적관리', href: '/logis/quote/air' },
           { title: '부킹관리', href: '/logis/booking/air' },
-          { title: 'S/N 선적통지', href: '/logis/sn/air' },
           { title: 'House AWB 관리', href: '/logis/bl/air/house' },
           { title: 'Master AWB 관리', href: '/logis/bl/air/master' },
           { title: 'Pre-Alert', href: '/logis/pre-alert/air' },
