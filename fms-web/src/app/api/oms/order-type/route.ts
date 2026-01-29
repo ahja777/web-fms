@@ -83,25 +83,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    await pool.query(
-      `UPDATE oms_order_type SET
-        order_type_code = ?,
-        order_type_name = ?,
-        biz_type = ?,
-        description = ?,
-        related_system = ?,
-        is_active = ?
-      WHERE id = ?`,
-      [
-        body.order_type_code,
-        body.order_type_name,
-        body.biz_type,
-        body.description,
-        body.related_system,
-        body.is_active,
-        body.id
-      ]
-    );
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    const updatable = ['order_type_code','order_type_name','biz_type','description','related_system','is_active'];
+    for (const key of updatable) {
+      if (body[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(body[key] === '' ? null : body[key]);
+      }
+    }
+    if (fields.length === 0) {
+      return NextResponse.json({ success: false, error: '수정할 필드가 없습니다.' }, { status: 400 });
+    }
+    values.push(body.id);
+    await pool.query(`UPDATE oms_order_type SET ${fields.join(', ')} WHERE id = ?`, values);
 
     return NextResponse.json({
       success: true,

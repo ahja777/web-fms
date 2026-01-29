@@ -90,35 +90,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    await pool.query(
-      `UPDATE oms_so_control SET
-        control_code = ?,
-        control_name = ?,
-        customer_code = ?,
-        order_type_code = ?,
-        biz_type = ?,
-        check_validation = ?,
-        auto_release = ?,
-        auto_value_assignment = ?,
-        method_type = ?,
-        execution_module = ?,
-        is_active = ?
-      WHERE id = ?`,
-      [
-        body.control_code,
-        body.control_name,
-        body.customer_code,
-        body.order_type_code,
-        body.biz_type,
-        body.check_validation,
-        body.auto_release,
-        body.auto_value_assignment,
-        body.method_type,
-        body.execution_module,
-        body.is_active,
-        body.id
-      ]
-    );
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    const updatable = ['control_code','control_name','customer_code','order_type_code','biz_type','check_validation','auto_release','auto_value_assignment','method_type','execution_module','is_active'];
+    for (const key of updatable) {
+      if (body[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(body[key] === '' ? null : body[key]);
+      }
+    }
+    if (fields.length === 0) {
+      return NextResponse.json({ success: false, error: '수정할 필드가 없습니다.' }, { status: 400 });
+    }
+    values.push(body.id);
+    await pool.query(`UPDATE oms_so_control SET ${fields.join(', ')} WHERE id = ?`, values);
 
     return NextResponse.json({
       success: true,

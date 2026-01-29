@@ -133,49 +133,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    await pool.query(
-      `UPDATE oms_customer_order SET
-        order_type_code = ?,
-        biz_type = ?,
-        customer_code = ?,
-        customer_name = ?,
-        shipper_name = ?,
-        consignee_name = ?,
-        pol = ?,
-        pod = ?,
-        etd = ?,
-        eta = ?,
-        cargo_type = ?,
-        commodity = ?,
-        quantity = ?,
-        weight = ?,
-        volume = ?,
-        incoterms = ?,
-        status = ?,
-        remarks = ?
-      WHERE id = ?`,
-      [
-        body.order_type_code,
-        body.biz_type,
-        body.customer_code,
-        body.customer_name,
-        body.shipper_name,
-        body.consignee_name,
-        body.pol,
-        body.pod,
-        body.etd || null,
-        body.eta || null,
-        body.cargo_type,
-        body.commodity,
-        body.quantity || 0,
-        body.weight || 0,
-        body.volume || 0,
-        body.incoterms,
-        body.status,
-        body.remarks,
-        body.id
-      ]
-    );
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    const updatable = ['order_type_code','biz_type','customer_code','customer_name','shipper_name','consignee_name','pol','pod','etd','eta','cargo_type','commodity','quantity','weight','volume','incoterms','status','remarks'];
+    for (const key of updatable) {
+      if (body[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(body[key] === '' ? null : body[key]);
+      }
+    }
+    if (fields.length === 0) {
+      return NextResponse.json({ success: false, error: '수정할 필드가 없습니다.' }, { status: 400 });
+    }
+    values.push(body.id);
+    await pool.query(`UPDATE oms_customer_order SET ${fields.join(', ')} WHERE id = ?`, values);
 
     return NextResponse.json({
       success: true,

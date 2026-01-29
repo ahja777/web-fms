@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import { ActionButton } from '@/components/buttons';
+import { useSorting, SortableHeader } from '@/components/table/SortableTable';
 
 interface SOControl {
   id: number;
@@ -237,150 +240,101 @@ export default function SOControlPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">S/O Control 관리</h1>
-          <p className="text-sm text-[var(--foreground)]/60 mt-1">Service Order Control Management</p>
-        </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] transition-colors"
-        >
-          + 신규 등록
-        </button>
-      </div>
+    <div className="min-h-screen bg-[var(--background)]">
+      <Sidebar />
+      <div className="ml-72">
+        <Header
+          title="S/O Control 관리"
+          subtitle="HOME > OMS > S/O Control 관리"
+          showCloseButton={false}
+        />
+        <main className="p-6">
+          {/* 상단 버튼 영역 */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              {selectedIds.size > 0 && (
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
+                  {selectedIds.size}건 선택
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <ActionButton variant="success" icon="plus" onClick={() => { resetForm(); setIsModalOpen(true); }}>신규</ActionButton>
+              <ActionButton variant="danger" icon="delete" onClick={handleBulkDelete}>삭제</ActionButton>
+              <ActionButton variant="default" icon="refresh" onClick={fetchControls}>초기화</ActionButton>
+            </div>
+          </div>
 
-      {/* 버튼 영역 */}
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-[var(--foreground)]/60">
-          총 {controls.length}건 / 선택 {selectedIds.size}건
-        </span>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchControls}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            새로고침
-          </button>
-          <button
-            onClick={handleBulkDelete}
-            disabled={selectedIds.size === 0}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            선택 삭제
-          </button>
+      {/* 목록 테이블 */}
+      <div className="card mb-6">
+        <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <h3 className="font-bold">S/O Control 목록</h3>
+            <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">
+              {controls.length}건
+            </span>
+          </div>
+          {selectedIds.size > 0 && (
+            <button onClick={() => setSelectedIds(new Set())} className="text-sm text-[var(--muted)] hover:text-white">
+              선택 해제 ({selectedIds.size}건)
+            </button>
+          )}
         </div>
-      </div>
-
-      {/* 테이블 */}
-      <div className="bg-[var(--surface-100)] rounded-xl border border-[var(--border)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[var(--surface-200)]">
+            <thead className="bg-[var(--surface-100)]">
               <tr>
-                <th className="px-4 py-3 text-left">
-                  <input
-                    type="checkbox"
-                    checked={controls.length > 0 && selectedIds.size === controls.length}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="rounded"
-                  />
+                <th className="w-12 p-3">
+                  <input type="checkbox" checked={controls.length > 0 && selectedIds.size === controls.length} onChange={(e) => handleSelectAll(e.target.checked)} className="rounded" />
                 </th>
-                <SortableHeader<SOControl> columnKey="control_code" label={<>컨트롤<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="control_name" label={<>컨트롤<br/>명</>} sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="customer_code" label={<>고객<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                <th className="p-3 text-center text-sm font-semibold">No</th>
+                <SortableHeader<SOControl> columnKey="control_code" label="컨트롤코드" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="control_name" label="컨트롤명" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="customer_code" label="고객코드" sortConfig={sortConfig} onSort={handleSort} />
                 <SortableHeader<SOControl> columnKey="order_type_code" label="오더타입" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="check_validation" label={<>유효성<br/>검사</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="auto_release" label={<>자동<br/>릴리즈</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="auto_value_assignment" label={<>자동값<br/>할당</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="method_type" label={<>처리<br/>방법</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="check_validation" label="유효성검사" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="auto_release" label="자동릴리즈" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="auto_value_assignment" label="자동값할당" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="method_type" label="처리방법" sortConfig={sortConfig} onSort={handleSort} />
                 <SortableHeader<SOControl> columnKey="is_active" label="활성" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
+                <th className="p-3 text-center text-sm font-semibold">작업</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-[var(--foreground)]/60">
-                    로딩 중...
-                  </td>
-                </tr>
+                <tr><td colSpan={12} className="p-12 text-center"><p className="text-[var(--muted)]">로딩 중...</p></td></tr>
               ) : controls.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-[var(--foreground)]/60">
-                    데이터가 없습니다.
+                <tr><td colSpan={12} className="p-12 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <svg className="w-12 h-12 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-[var(--muted)]">조회된 데이터가 없습니다.</p>
+                  </div>
+                </td></tr>
+              ) : sortData(controls).map((control, index) => (
+                <tr key={control.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors">
+                  <td className="p-3 text-center">
+                    <input type="checkbox" checked={selectedIds.has(control.id)} onChange={(e) => handleSelect(control.id, e.target.checked)} className="rounded" />
+                  </td>
+                  <td className="p-3 text-center text-sm">{index + 1}</td>
+                  <td className="p-3 text-sm font-medium text-[#E8A838]">{control.control_code}</td>
+                  <td className="p-3 text-sm">{control.control_name}</td>
+                  <td className="p-3 text-sm">{control.customer_code || '-'}</td>
+                  <td className="p-3 text-sm">{control.order_type_code || '-'}</td>
+                  <td className="p-3 text-center">{control.check_validation ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
+                  <td className="p-3 text-center">{control.auto_release ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
+                  <td className="p-3 text-center">{control.auto_value_assignment ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
+                  <td className="p-3 text-sm">{METHOD_TYPE_OPTIONS.find(m => m.value === control.method_type)?.label || control.method_type}</td>
+                  <td className="p-3 text-center">{control.is_active ? <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">활성</span> : <span className="px-2 py-1 bg-gray-500 text-white text-xs rounded-full">비활성</span>}</td>
+                  <td className="p-3 text-center">
+                    <div className="flex justify-center gap-2">
+                      <button onClick={() => handleEdit(control)} className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">수정</button>
+                      <button onClick={() => handleDelete(control.id)} className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors">삭제</button>
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                sortData(controls).map((control) => (
-                  <tr key={control.id} className="hover:bg-[var(--surface-200)]/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(control.id)}
-                        onChange={(e) => handleSelect(control.id, e.target.checked)}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium text-[#E8A838]">{control.control_code}</td>
-                    <td className="px-4 py-3 text-sm">{control.control_name}</td>
-                    <td className="px-4 py-3 text-sm">{control.customer_code}</td>
-                    <td className="px-4 py-3 text-sm">{control.order_type_code}</td>
-                    <td className="px-4 py-3 text-center">
-                      {control.check_validation ? (
-                        <span className="text-green-500">&#10003;</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {control.auto_release ? (
-                        <span className="text-green-500">&#10003;</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {control.auto_value_assignment ? (
-                        <span className="text-green-500">&#10003;</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {METHOD_TYPE_OPTIONS.find(m => m.value === control.method_type)?.label || control.method_type}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {control.is_active ? (
-                        <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">활성</span>
-                      ) : (
-                        <span className="px-2 py-1 bg-gray-500 text-white text-xs rounded-full">비활성</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(control)}
-                          className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDelete(control.id)}
-                          className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
@@ -558,6 +512,8 @@ export default function SOControlPage() {
           </div>
         </div>
       )}
+        </main>
+      </div>
     </div>
   );
 }
