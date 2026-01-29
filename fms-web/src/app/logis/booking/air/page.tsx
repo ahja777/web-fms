@@ -172,8 +172,8 @@ export default function BookingAirPage() {
             eta: item.eta?.toString().substring(0, 10) || '',
             pieces: Number(item.pkgQty) || 0,
             weight: Number(item.grossWeight) || 0,
-            volume: 0,
-            commodity: '',
+            volume: Number(item.volume) || 0,
+            commodity: (item.commodityDesc as string) || '',
             status: String(item.status || 'draft').toLowerCase(),
           }));
           setAllData(formattedData);
@@ -303,9 +303,9 @@ export default function BookingAirPage() {
     }));
   };
 
-  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirBooking; label: string; className?: string }) => (
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirBooking; label: React.ReactNode; className?: string }) => (
     <th
-      className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
+      className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none whitespace-nowrap ${className}`}
       onClick={() => handleSort(columnKey)}
     >
       <span className="inline-flex items-center">

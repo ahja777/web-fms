@@ -44,6 +44,13 @@ interface BookingDetailData {
   namedCustomer: string;
   specialHandlingCode: string;
   grossWeight: number;
+  volume: number;
+  cntr20gpQty: number;
+  cntr40gpQty: number;
+  cntr40hcQty: number;
+  totalCntrQty: number;
+  closingDate: string;
+  closingTime: string;
   pickup: string;
   transportManager: string;
   transportCompany: string;
@@ -108,6 +115,13 @@ export default function BookingSeaDetailPage() {
           namedCustomer: result.namedCustomer || '',
           specialHandlingCode: result.specialHandlingCode || '',
           grossWeight: result.grossWeight || 0,
+          volume: result.volume || 0,
+          cntr20gpQty: result.cntr20gpQty || 0,
+          cntr40gpQty: result.cntr40gpQty || 0,
+          cntr40hcQty: result.cntr40hcQty || 0,
+          totalCntrQty: result.totalCntrQty || 0,
+          closingDate: result.closingDate || '',
+          closingTime: result.closingTime || '',
           pickup: result.pickup || '',
           transportManager: result.transportManager || '',
           transportCompany: result.transportCompany || '',
@@ -261,7 +275,29 @@ export default function BookingSeaDetailPage() {
               <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">Booking Office</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{data.bookingOffice || '-'}</div></div>
               <div className="col-span-2"><label className="block text-sm font-medium text-[var(--muted)] mb-1">Named Customer</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{data.namedCustomer || '-'}</div></div>
               <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">Special Handing Code</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{data.specialHandlingCode || '-'}</div></div>
-              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">Gross Weight(KGS)</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.grossWeight ? data.grossWeight.toLocaleString() : '0'}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">Gross Weight(KGS)</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.grossWeight ? Number(data.grossWeight).toLocaleString() : '0'}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">Volume(CBM)</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.volume ? Number(data.volume).toLocaleString() : '0'}</div></div>
+            </div>
+          </div>
+
+          {/* Container Information */}
+          <div className="card mb-6">
+            <div className="section-header"><h3 className="font-bold text-white">Container Information</h3></div>
+            <div className="p-4 grid grid-cols-4 gap-4">
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">20GP</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.cntr20gpQty || 0}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">40GP</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.cntr40gpQty || 0}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">40HC</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right">{data.cntr40hcQty || 0}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1 font-bold">합계</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right font-bold">{data.totalCntrQty || 0}</div></div>
+            </div>
+          </div>
+
+          {/* Cut-Off Information */}
+          <div className="card mb-6">
+            <div className="section-header"><h3 className="font-bold text-white">Cut-Off Information</h3></div>
+            <div className="p-4 grid grid-cols-4 gap-4">
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">서류마감일 (Doc Cut-Off)</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{data.closingDate || '-'}</div></div>
+              <div><label className="block text-sm font-medium text-[var(--muted)] mb-1">서류마감시간</label><div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">{data.closingTime || '-'}</div></div>
+              <div className="col-span-2"></div>
             </div>
           </div>
 

@@ -407,59 +407,6 @@ export default function BookingSeaRegisterPage() {
       alert('삭제 중 오류가 발생했습니다.');
     }
   };
-
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    setFormData({
-      // 기본정보
-      jobNo: '',
-      regDate: new Date().toISOString().split('T')[0],
-      inputUser: '홍길동',
-      bookingStatus: 'DRAFT',
-      bookingRequestDate: '',
-      bookingConfirmDate: '',
-      forwarderCode: 'FWD001',
-      carrierCode: 'MAEU',
-      bookingNo: '',
-      // Schedule
-      vesselVoyage: 'MAERSK EINDHOVEN / 001E',
-      partnerVoyage: 'KCS-001E',
-      por: 'KRPUS',
-      pol: 'KRPUS',
-      pod: 'USLAX',
-      pvy: 'USLAX',
-      etd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      eta: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      blType: 'ORIGINAL',
-      // 송수하인 정보
-      customerCode: 'C001',
-      actualCustomerName: '삼성전자',
-      bizNo: '123-45-67890',
-      bookingManager: '김담당',
-      containerManager: '박컨테이너',
-      notify: 'Samsung America',
-      consignee: 'Samsung America Inc.',
-      // Cargo Information
-      contractHolder: '삼성전자',
-      serviceTerm: 'CY-CY',
-      bookingShipper: '삼성전자 물류팀',
-      commodity: '전자제품',
-      serviceContractNo: 'SC-2026-001',
-      bookingOffice: '서울본사',
-      namedCustomer: 'Samsung Electronics',
-      specialHandlingCode: '',
-      grossWeight: 15000,
-      // Container Pick up Information
-      pickup: '부산항 신항',
-      transportManager: '이운송',
-      transportCompany: '한국물류(주)',
-      pickupDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      remark: '테스트 데이터입니다.',
-    });
-    setHasUnsavedChanges(true);
-    alert('테스트 데이터가 입력되었습니다.');
-  };
-
   // 상태별 배지 스타일
   const getStatusBadge = (status: string) => {
     const config: Record<string, { label: string; bgColor: string; textColor: string }> = {
@@ -493,12 +440,6 @@ export default function BookingSeaRegisterPage() {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <span className="text-sm text-[var(--muted)]">화면번호: FMS-BK-002</span>
-              <button
-                onClick={handleFillTestData}
-                className="px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700"
-              >
-                테스트 데이터
-              </button>
             </div>
             <div className="flex gap-2">
               {/* 화면설계서 기준 버튼: 신규, 수정, 삭제, 출력, E-mail, Excel, 부킹확정/취소, 부킹요청 */}
@@ -991,6 +932,88 @@ export default function BookingSeaRegisterPage() {
                   min="0"
                   step="0.01"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Volume(CBM)</label>
+                <input
+                  type="number"
+                  value={formData.volumeCbm || ''}
+                  onChange={(e) => handleInputChange('volumeCbm', Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-right"
+                  placeholder="0"
+                  min="0"
+                  step="0.001"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Container Information 섹션 */}
+          <div className="card mb-6">
+            <div className="section-header">
+              <h3 className="font-bold text-white">Container Information</h3>
+            </div>
+            <div className="p-4 grid grid-cols-8 gap-4">
+              {[
+                { label: '20GP', field: 'cntr20gpQty' },
+                { label: '40GP', field: 'cntr40gpQty' },
+                { label: '40HC', field: 'cntr40hcQty' },
+                { label: '45HC', field: 'cntr45hcQty' },
+                { label: 'Reefer', field: 'cntrReeferQty' },
+                { label: 'O/T', field: 'cntrOtQty' },
+                { label: 'F/R', field: 'cntrFrQty' },
+              ].map(({ label, field }) => (
+                <div key={field}>
+                  <label className="block text-sm font-medium mb-1">{label}</label>
+                  <input
+                    type="number"
+                    value={(formData as any)[field] || ''}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      handleInputChange(field as keyof BookingFormData, v);
+                      const fields = ['cntr20gpQty','cntr40gpQty','cntr40hcQty','cntr45hcQty','cntrReeferQty','cntrOtQty','cntrFrQty'];
+                      const total = fields.reduce((s, f) => s + (f === field ? v : ((formData as any)[f] || 0)), 0);
+                      handleInputChange('totalCntrQty', total);
+                    }}
+                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-right"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              ))}
+              <div>
+                <label className="block text-sm font-medium mb-1 font-bold">합계</label>
+                <input
+                  type="number"
+                  value={formData.totalCntrQty || 0}
+                  disabled
+                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right font-bold"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Cut-Off Information 섹션 */}
+          <div className="card mb-6">
+            <div className="section-header">
+              <h3 className="font-bold text-white">Cut-Off Information</h3>
+            </div>
+            <div className="p-4 grid grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">서류마감일 (Doc Cut-Off)</label>
+                <input type="date" value={formData.closingDate} onChange={(e) => handleInputChange('closingDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">서류마감시간</label>
+                <input type="time" value={formData.closingTime} onChange={(e) => handleInputChange('closingTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">화물반입마감일 (Cargo Cut-Off)</label>
+                <input type="date" value={formData.cargoCutOffDate} onChange={(e) => handleInputChange('cargoCutOffDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">화물반입마감시간</label>
+                <input type="time" value={formData.cargoCutOffTime} onChange={(e) => handleInputChange('cargoCutOffTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
             </div>
           </div>

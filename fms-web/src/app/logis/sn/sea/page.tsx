@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
@@ -73,7 +73,43 @@ export default function SNListPage() {
   const router = useRouter();
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
-  const [data] = useState<SNData[]>(mockData);
+  const [data, setData] = useState<SNData[]>(mockData);
+
+  // API에서 데이터 조회
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/sn/sea');
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const mapped: SNData[] = rows.map((r: Record<string, unknown>) => ({
+            id: Number(r.id),
+            snNo: (r.snNo as string) || '',
+            snDate: (r.createdAt as string)?.substring(0, 10) || '',
+            srNo: (r.srNo as string) || '',
+            blNo: (r.blNo as string) || '',
+            shipper: (r.senderName as string) || '',
+            consignee: (r.recipientName as string) || '',
+            carrier: (r.carrierName as string) || '',
+            vessel: (r.vesselFlight as string) || '',
+            voyage: (r.voyageNo as string) || '',
+            pol: (r.pol as string) || '',
+            pod: (r.pod as string) || '',
+            etd: (r.etd as string) || '',
+            atd: '',
+            eta: (r.eta as string) || '',
+            containerQty: Number(r.packageQty) || 0,
+            status: (r.status as string) || 'DRAFT',
+          }));
+          setData(mapped);
+        }
+      } catch (e) {
+        console.error('S/N 목록 조회 오류:', e);
+      }
+    };
+    fetchData();
+  }, []);
 
   // 정렬 훅
   const { sortConfig, handleSort, sortData, getSortStatusText, resetSort } = useSorting<SNData>();

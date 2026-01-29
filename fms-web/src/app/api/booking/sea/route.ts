@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
           b.COMMODITY_DESC as commodityDesc,
           b.GROSS_WEIGHT_KG as grossWeight,
           b.VOLUME_CBM as volume,
+          DATE_FORMAT(b.CLOSING_DT, '%Y-%m-%d') as closingDate,
+          b.CLOSING_TIME as closingTime,
           b.STATUS_CD as status,
           b.REMARKS as remark,
           DATE_FORMAT(b.CREATED_DTM, '%Y-%m-%d %H:%i:%s') as createdAt
@@ -58,8 +60,13 @@ export async function GET(request: NextRequest) {
         b.POD_PORT_CD as pod,
         DATE_FORMAT(b.ETD_DT, '%Y-%m-%d') as etd,
         DATE_FORMAT(b.ETA_DT, '%Y-%m-%d') as eta,
+        b.CNTR_20GP_QTY as cntr20gpQty,
+        b.CNTR_40GP_QTY as cntr40gpQty,
+        b.CNTR_40HC_QTY as cntr40hcQty,
         b.TOTAL_CNTR_QTY as totalCntrQty,
         b.COMMODITY_DESC as commodityDesc,
+        b.GROSS_WEIGHT_KG as grossWeight,
+        b.VOLUME_CBM as volume,
         b.STATUS_CD as status
       FROM ORD_OCEAN_BOOKING b
       LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci

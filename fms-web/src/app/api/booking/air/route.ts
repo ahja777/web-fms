@@ -54,8 +54,12 @@ export async function GET(request: NextRequest) {
         b.DEST_PORT_CD as destination,
         DATE_FORMAT(b.ETD_DTM, '%Y-%m-%d %H:%i') as etd,
         DATE_FORMAT(b.ETA_DTM, '%Y-%m-%d %H:%i') as eta,
+        b.COMMODITY_DESC as commodityDesc,
         b.PKG_QTY as pkgQty,
+        b.PKG_TYPE_CD as pkgType,
         b.GROSS_WEIGHT_KG as grossWeight,
+        b.CHARGEABLE_WEIGHT as chargeableWeight,
+        b.VOLUME_CBM as volume,
         b.STATUS_CD as status
       FROM ORD_AIR_BOOKING b
       LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci

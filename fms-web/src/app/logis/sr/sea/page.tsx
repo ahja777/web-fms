@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 import Sidebar from '@/components/Sidebar';
@@ -83,8 +83,44 @@ export default function SRSeaPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const [allData] = useState<SRData[]>(sampleData);
+  const [allData, setAllData] = useState<SRData[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+
+  // API에서 데이터 조회
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/sr/sea');
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const mapped: SRData[] = rows.map((r: Record<string, unknown>) => ({
+            id: String(r.id),
+            srNo: (r.srNo as string) || '',
+            srDate: (r.createdAt as string)?.substring(0, 10) || '',
+            bookingNo: (r.bookingNo as string) || '',
+            shipper: (r.shipperName as string) || '',
+            consignee: (r.consigneeName as string) || '',
+            carrier: (r.carrierName as string) || '',
+            vessel: (r.vesselName as string) || '',
+            voyage: (r.voyageNo as string) || '',
+            pol: (r.pol as string) || '',
+            pod: (r.pod as string) || '',
+            etd: (r.etd as string) || '',
+            eta: (r.eta as string) || '',
+            containerType: '',
+            containerQty: Number(r.packageQty) || 0,
+            commodity: (r.commodityDesc as string) || '',
+            status: ((r.status as string) || 'draft').toLowerCase() as SRData['status'],
+          }));
+          setAllData(mapped);
+        }
+      } catch (e) {
+        console.error('S/R 목록 조회 오류:', e);
+      }
+    };
+    fetchData();
+  }, []);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchMessage, setSearchMessage] = useState<string>('');
@@ -243,7 +279,7 @@ export default function SRSeaPage() {
                     <th className="w-12 p-3"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} className="rounded" /></th>
                     <SortableHeader columnKey="srNo" label="S/R 번호" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="srDate" label="S/R 일자" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="bookingNo" label="부킹번호" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="carrier" label="선사" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
