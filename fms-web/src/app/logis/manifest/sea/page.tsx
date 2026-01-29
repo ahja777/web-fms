@@ -349,7 +349,7 @@ export default function ManifestListPage() {
                     <th className="px-4 py-3 text-left text-sm font-medium">
                       <input type="checkbox" checked={selectedIds.length === sortedData.length && sortedData.length > 0} onChange={e => handleSelectAll(e.target.checked)} className="w-4 h-4" />
                     </th>
-                    <SortableHeader columnKey="mfNo">적하목록번호</SortableHeader>
+                    <SortableHeader columnKey="mfNo">적하목록<br/>번호</SortableHeader>
                     <SortableHeader columnKey="mfDate">일자</SortableHeader>
                     <SortableHeader columnKey="mfType">구분</SortableHeader>
                     <SortableHeader columnKey="blNo">B/L 번호</SortableHeader>

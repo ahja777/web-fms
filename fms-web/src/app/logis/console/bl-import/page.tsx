@@ -251,8 +251,8 @@ export default function ConsoleBLImportPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">콘솔번호</th>
-                    <th className="p-3 text-left text-sm">콘솔일자</th>
+                    <th className="p-3 text-left text-sm">콘솔<br/>번호</th>
+                    <th className="p-3 text-left text-sm">콘솔<br/>일자</th>
                     <th className="p-3 text-left text-sm">MBL No</th>
                     <th className="p-3 text-center text-sm">HBL 수</th>
                     <th className="p-3 text-left text-sm">선사</th>
@@ -261,7 +261,7 @@ export default function ConsoleBLImportPage() {
                     <th className="p-3 text-left text-sm">POD</th>
                     <th className="p-3 text-center text-sm">ETA</th>
                     <th className="p-3 text-center text-sm">컨테이너</th>
-                    <th className="p-3 text-right text-sm">중량(kg)</th>
+                    <th className="p-3 text-right text-sm">중량<br/>(kg)</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>
                 </thead>

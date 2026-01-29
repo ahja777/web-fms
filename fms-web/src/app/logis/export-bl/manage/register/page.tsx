@@ -340,36 +340,6 @@ export default function ExportBLRegisterPage() {
     }
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      hblNo: 'HBL-2026-0001',
-      mblNo: 'MAEU123456789',
-      businessType: 'CONSOL',
-      freightTerm: 'PREPAID',
-      shipperCode: 'SHP001',
-      shipperName: 'SAMSUNG ELECTRONICS',
-      shipperAddress: '129 SAMSUNG-RO, SUWON-SI, KOREA',
-      consigneeCode: 'CSG001',
-      consigneeName: 'SAMSUNG AMERICA INC.',
-      consigneeAddress: '85 CHALLENGER ROAD, NJ 07660, USA',
-      notifyCode: 'NTF001',
-      notifyName: 'SAME AS CONSIGNEE',
-      portOfLoading: 'KRPUS',
-      portOfLoadingName: 'PUSAN',
-      portOfDischarge: 'USLAX',
-      portOfDischargeName: 'LOS ANGELES',
-      carrierCode: 'MAEU',
-      carrierName: 'MAERSK LINE',
-      vesselName: 'MAERSK EINDHOVEN',
-      voyageNo: '001E',
-      etd: '2026-01-20',
-      eta: '2026-02-05',
-    });
-    setIsModified(true);
-  };
-
   // 컨테이너 추가
   const addContainer = () => {
     const newContainer: ContainerInfo = {
@@ -437,12 +407,6 @@ export default function ExportBLRegisterPage() {
                   수정됨
                 </span>
               )}
-              <button
-                onClick={handleFillTestData}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
-                테스트데이터
-              </button>
             </div>
             <div className="flex gap-2">
               <button
@@ -963,8 +927,8 @@ export default function ExportBLRegisterPage() {
                         <th className="p-3 text-center text-sm">Type</th>
                         <th className="p-3 text-center text-sm">Size</th>
                         <th className="p-3 text-center text-sm">수량</th>
-                        <th className="p-3 text-center text-sm">중량(KG)</th>
-                        <th className="p-3 text-center text-sm">용적(CBM)</th>
+                        <th className="p-3 text-center text-sm">중량<br/>(KG)</th>
+                        <th className="p-3 text-center text-sm">용적<br/>(CBM)</th>
                         <th className="p-3 text-center text-sm">삭제</th>
                       </tr>
                     </thead>

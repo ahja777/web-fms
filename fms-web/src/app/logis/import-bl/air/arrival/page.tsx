@@ -412,8 +412,8 @@ export default function AirArrivalPage() {
                     <th className="px-4 py-3 text-left text-sm font-medium">수하인</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">PCS</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">G/W</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">화물상태</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">통관상태</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">화물<br/>상태</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">통관<br/>상태</th>
                     <th className="px-4 py-3 text-center text-sm font-medium">A/N</th>
                     <th className="px-4 py-3 text-center text-sm font-medium">R/O</th>
                   </tr>

@@ -236,8 +236,8 @@ export default function TransportRequestPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">요청번호</th>
-                    <th className="p-3 text-left text-sm">요청일자</th>
+                    <th className="p-3 text-left text-sm">요청<br/>번호</th>
+                    <th className="p-3 text-left text-sm">요청<br/>일자</th>
                     <th className="p-3 text-left text-sm">고객사</th>
                     <th className="p-3 text-left text-sm">B/L No</th>
                     <th className="p-3 text-left text-sm">출발지</th>
@@ -245,7 +245,7 @@ export default function TransportRequestPage() {
                     <th className="p-3 text-center text-sm">픽업일</th>
                     <th className="p-3 text-center text-sm">배송일</th>
                     <th className="p-3 text-left text-sm">차량</th>
-                    <th className="p-3 text-right text-sm">중량(kg)</th>
+                    <th className="p-3 text-right text-sm">중량<br/>(kg)</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>
                 </thead>

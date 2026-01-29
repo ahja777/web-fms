@@ -190,14 +190,14 @@ export default function DocumentPage() {
               <thead className="bg-[var(--surface-100)]">
                 <tr>
                   <th className="px-2 py-3 text-center text-sm font-medium w-10"><input type="checkbox" /></th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">서류번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">서류<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">유형</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">서류명</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">B/L 번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">파일명</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">크기</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">업로드일</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">업로드<br/>일</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
                   <th className="px-4 py-3 text-center text-sm font-medium">액션</th>
                 </tr>

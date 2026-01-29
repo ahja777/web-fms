@@ -216,14 +216,14 @@ export default function AgentOperationPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">대리점코드</th>
+                    <th className="p-3 text-left text-sm">대리점<br/>코드</th>
                     <th className="p-3 text-left text-sm">대리점명</th>
                     <th className="p-3 text-left text-sm">유형</th>
                     <th className="p-3 text-center text-sm">국가</th>
                     <th className="p-3 text-left text-sm">도시</th>
                     <th className="p-3 text-left text-sm">담당자</th>
                     <th className="p-3 text-left text-sm">이메일</th>
-                    <th className="p-3 text-center text-sm">계약기간</th>
+                    <th className="p-3 text-center text-sm">계약<br/>기간</th>
                     <th className="p-3 text-right text-sm">수수료(%)</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>

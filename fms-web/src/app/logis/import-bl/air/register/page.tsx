@@ -116,27 +116,6 @@ export default function ImportAWBRegisterPage() {
     setExchangeRate(rate.dealBasR);
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      awb_type: 'MAWB', mawb_no: '', airline_code: 'KE', carrier_id: '', flight_no: 'KE002',
-      origin_airport_cd: 'LAX', dest_airport_cd: 'ICN', etd_dt: '2026-01-25', etd_time: '10:00',
-      eta_dt: '2026-01-26', eta_time: '14:30', atd_dt: '', atd_time: '', ata_dt: '', ata_time: '',
-      issue_dt: '2026-01-24', issue_place: 'LAX',
-      shipper_nm: 'Samsung America Inc.', shipper_addr: '85 Challenger Road, Ridgefield Park, NJ 07660',
-      consignee_nm: '삼성전자 주식회사', consignee_addr: '경기도 수원시 영통구 삼성로 129',
-      notify_party: 'SAME AS CONSIGNEE', pieces: '50', gross_weight_kg: '2500', charge_weight_kg: '2800',
-      volume_cbm: '18.5', commodity_desc: 'ELECTRONIC COMPONENTS', hs_code: '8528.72',
-      dimensions: '120x80x100 CM', special_handling: '', declared_value: '75000', declared_currency: 'USD',
-      insurance_value: '77500', freight_charges: '2800', other_charges: '450',
-      weight_charge: '2500', valuation_charge: '300', tax_amt: '150',
-      total_other_agent: '200', total_other_carrier: '250', rate_class: 'Q', rate: '3.50',
-      payment_terms: 'COLLECT', customs_status: '', customs_clearance_dt: '', release_dt: '',
-      mrn_no: '', msn: '', agent_code: 'AGT001', agent_name: 'Korea Air Cargo Agency',
-      remarks: '파손주의 (FRAGILE)',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const tabs: { id: TabType; label: string }[] = [
     { id: 'MAIN', label: 'MAIN' }, { id: 'CARGO', label: 'CARGO' }, { id: 'OTHER', label: 'OTHER' },
   ];
@@ -151,7 +130,6 @@ export default function ImportAWBRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">테스트데이터</button>
             </div>
             <div className="text-sm text-[var(--muted)]"><span className="text-red-500">*</span> 필수 입력 항목</div>
           </div>

@@ -172,10 +172,10 @@ export default function StuffingPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">작업번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">작업<br/>번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">부킹<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">작업일시</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">작업<br/>일시</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">창고</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">PKG</th>

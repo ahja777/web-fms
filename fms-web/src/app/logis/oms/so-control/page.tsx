@@ -289,14 +289,14 @@ export default function SOControlPage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤 코드</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤 명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">고객코드</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤<br/>코드</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤<br/>명</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">고객<br/>코드</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">오더타입</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">유효성검사</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동릴리즈</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동값할당</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">처리방법</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">유효성<br/>검사</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동<br/>릴리즈</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동값<br/>할당</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">처리<br/>방법</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">활성</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
               </tr>

@@ -540,40 +540,6 @@ function BLSeaRegisterContent() {
     router.push('/logis/bl/sea/house');
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    setMainData({
-      ...initialMainData,
-      ioType: 'OUT',
-      salesType: 'DIRECT',
-      businessType: 'CONSOL',
-      blType: 'ORIGINAL',
-      mblNo: 'MAEU123456789',
-      hblNo: 'HBL-2026-0001',
-      srNo: 'SR-2026-0001',
-      bookingNo: 'BK-2026-0001',
-      shipperCode: 'SHP001',
-      shipperName: 'SAMSUNG ELECTRONICS CO., LTD.',
-      shipperAddress: '129 SAMSUNG-RO, YEONGTONG-GU, SUWON-SI, GYEONGGI-DO, KOREA',
-      consigneeCode: 'CSG001',
-      consigneeName: 'SAMSUNG AMERICA INC.',
-      consigneeAddress: '85 CHALLENGER ROAD, RIDGEFIELD PARK, NJ 07660, USA',
-      notifyCode: 'NTF001',
-      notifyName: 'SAME AS CONSIGNEE',
-      lineCode: 'MAEU',
-      lineName: 'MAERSK LINE',
-      portOfLoading: 'KRPUS',
-      portOfDischarge: 'USLAX',
-      placeOfReceipt: 'INCHEON',
-      placeOfDelivery: 'LOS ANGELES',
-      vesselName: 'MAERSK EINDHOVEN',
-      voyageNo: '001E',
-      etd: '2026-01-20',
-      eta: '2026-02-05',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   // 탭 렌더링
   const renderTabContent = () => {
     switch (activeTab) {
@@ -2032,22 +1998,27 @@ function BLSeaRegisterContent() {
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-sm text-[var(--muted)]">화면 ID: HBL-SEA-REG</span>
             <div className="flex gap-2">
               <button
+                onClick={() => { setFormData({}); }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                신규
+              </button>
+              <button
+                onClick={() => { setFormData({}); }}
+                className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
+              >
+                초기화
+              </button>
+              <button
                 onClick={handleList}
-                className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
               >
                 목록
               </button>
-              <button
-                onClick={handleFillTestData}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
-                테스트데이터
-              </button>
-            </div>
-            <div className="flex gap-2">
               <button
                 onClick={handleCopyBL}
                 disabled={!isSaved}
@@ -2058,7 +2029,7 @@ function BLSeaRegisterContent() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium disabled:opacity-50"
+                className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] disabled:opacity-50"
               >
                 {isLoading ? '저장중...' : '저장'}
               </button>

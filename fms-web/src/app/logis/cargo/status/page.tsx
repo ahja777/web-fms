@@ -350,12 +350,12 @@ export default function CargoStatusPage() {
                     <th className="p-3 text-left text-sm">컨테이너 No</th>
                     <th className="p-3 text-left text-sm">고객사</th>
                     <th className="p-3 text-left text-sm">품명</th>
-                    <th className="p-3 text-right text-sm">중량(kg)</th>
-                    <th className="p-3 text-right text-sm">용적(CBM)</th>
-                    <th className="p-3 text-left text-sm">보관장소</th>
+                    <th className="p-3 text-right text-sm">중량<br/>(kg)</th>
+                    <th className="p-3 text-right text-sm">용적<br/>(CBM)</th>
+                    <th className="p-3 text-left text-sm">보관<br/>장소</th>
                     <th className="p-3 text-left text-sm">위치</th>
                     <th className="p-3 text-center text-sm">입고일</th>
-                    <th className="p-3 text-center text-sm">통관상태</th>
+                    <th className="p-3 text-center text-sm">통관<br/>상태</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>
                 </thead>

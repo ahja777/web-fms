@@ -177,14 +177,14 @@ export default function CargoReleasePage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">반출입번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">반출입<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">구분</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">B/L 번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">일시</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">장소</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">G/W (KG)</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">차량번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">차량<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">통관</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
                 </tr>

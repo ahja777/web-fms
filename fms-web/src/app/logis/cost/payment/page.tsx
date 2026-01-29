@@ -223,15 +223,15 @@ export default function CostPaymentPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">결제번호</th>
-                    <th className="p-3 text-left text-sm">등록일자</th>
+                    <th className="p-3 text-left text-sm">결제<br/>번호</th>
+                    <th className="p-3 text-left text-sm">등록<br/>일자</th>
                     <th className="p-3 text-left text-sm">B/L No</th>
                     <th className="p-3 text-left text-sm">고객사</th>
-                    <th className="p-3 text-left text-sm">비용유형</th>
+                    <th className="p-3 text-left text-sm">비용<br/>유형</th>
                     <th className="p-3 text-left text-sm">내역</th>
                     <th className="p-3 text-right text-sm">금액</th>
-                    <th className="p-3 text-left text-sm">결제방법</th>
-                    <th className="p-3 text-center text-sm">결제기한</th>
+                    <th className="p-3 text-left text-sm">결제<br/>방법</th>
+                    <th className="p-3 text-center text-sm">결제<br/>기한</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>
                 </thead>

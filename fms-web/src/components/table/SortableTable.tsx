@@ -138,7 +138,7 @@ export function SortIcon<T>({
 // 정렬 가능한 헤더 Props
 interface SortableHeaderProps<T> {
   columnKey: keyof T;
-  label: string;
+  label: ReactNode;
   sortConfig: SortConfig<T>;
   onSort: (key: keyof T) => void;
   className?: string;

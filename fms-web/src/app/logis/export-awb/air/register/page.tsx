@@ -158,49 +158,6 @@ export default function ExportAWBRegisterPage() {
     setExchangeRate(rate.dealBasR);
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      awb_type: 'MAWB',
-      mawb_no: '',
-      airline_code: 'KE',
-      carrier_id: '',
-      flight_no: 'KE001',
-      origin_airport_cd: 'ICN',
-      dest_airport_cd: 'LAX',
-      etd_dt: '2026-01-25',
-      etd_time: '10:00',
-      eta_dt: '2026-01-25',
-      eta_time: '08:30',
-      atd_dt: '',
-      atd_time: '',
-      ata_dt: '',
-      ata_time: '',
-      issue_dt: new Date().toISOString().split('T')[0],
-      issue_place: 'SEOUL',
-      shipper_nm: '삼성전자 주식회사',
-      shipper_addr: '경기도 수원시 영통구 삼성로 129',
-      consignee_nm: 'Samsung America Inc.',
-      consignee_addr: '85 Challenger Road, Ridgefield Park, NJ 07660',
-      notify_party: 'SAME AS CONSIGNEE',
-      pieces: '100',
-      gross_weight_kg: '5000',
-      charge_weight_kg: '5500',
-      volume_cbm: '35.5',
-      commodity_desc: 'ELECTRONIC COMPONENTS',
-      hs_code: '8528.72',
-      dimensions: '120x80x100 CM',
-      special_handling: '',
-      declared_value: '150000',
-      declared_currency: 'USD',
-      insurance_value: '155000',
-      freight_charges: '5500',
-      other_charges: '850',
-      payment_terms: 'PREPAID',
-      remarks: '파손주의 (FRAGILE)',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
@@ -210,12 +167,6 @@ export default function ExportAWBRegisterPage() {
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button
-                onClick={handleFillTestData}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
-              >
-                테스트데이터
-              </button>
             </div>
             <div className="text-sm text-[var(--muted)]">
               <span className="text-red-500">*</span> 필수 입력 항목

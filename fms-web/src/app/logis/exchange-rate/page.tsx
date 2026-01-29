@@ -484,14 +484,14 @@ export default function ExchangeRatePage() {
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-semibold w-28">통화</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold w-32">통화명</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">매매기준율</th>
+                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">매매<br/>기준율</th>
                     <th className="px-4 py-3 text-right text-sm font-semibold w-36">
-                      <span className="text-red-400">송금보내실때</span>
+                      <span className="text-red-400">송금<br/>보내실때</span>
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-semibold w-36">
-                      <span className="text-blue-400">송금받으실때</span>
+                      <span className="text-blue-400">송금<br/>받으실때</span>
                     </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">서울외국환중개</th>
+                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">서울외국환<br/>중개</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">

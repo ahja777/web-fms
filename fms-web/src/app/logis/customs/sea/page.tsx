@@ -253,15 +253,15 @@ export default function CustomsListPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <SortableHeader columnKey="declarationNo">신고번호</SortableHeader>
-                  <SortableHeader columnKey="declarationDate">신고일자</SortableHeader>
+                  <SortableHeader columnKey="declarationNo">신고<br/>번호</SortableHeader>
+                  <SortableHeader columnKey="declarationDate">신고<br/>일자</SortableHeader>
                   <SortableHeader columnKey="declarationType">구분</SortableHeader>
-                  <SortableHeader columnKey="importerExporter">수출입자</SortableHeader>
+                  <SortableHeader columnKey="importerExporter">수출<br/>입자</SortableHeader>
                   <SortableHeader columnKey="brokerName">관세사</SortableHeader>
                   <SortableHeader columnKey="hsCode">HS Code</SortableHeader>
                   <SortableHeader columnKey="goodsDesc">품명</SortableHeader>
                   <SortableHeader columnKey="packageQty">수량</SortableHeader>
-                  <SortableHeader columnKey="declaredValue">신고금액</SortableHeader>
+                  <SortableHeader columnKey="declaredValue">신고<br/>금액</SortableHeader>
                   <SortableHeader columnKey="totalTax">총세액</SortableHeader>
                   <SortableHeader columnKey="status">상태</SortableHeader>
                 </tr>

@@ -137,37 +137,6 @@ export default function AirScheduleRegisterPage() {
     router.push('/logis/schedule/air');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      airline: 'KE',
-      flightNo: 'KE001',
-      aircraftType: 'B747-8F',
-      origin: 'ICN',
-      destination: 'LAX',
-      via: '',
-      etd: '2026-01-25',
-      etdTime: '10:00',
-      eta: '2026-01-25',
-      etaTime: '08:30',
-      transitTime: '10h 30m',
-      frequency: '매일',
-      cutOffDate: '2026-01-24',
-      cutOffTime: '18:00',
-      spaceKg: 50000,
-      spaceCbm: 300,
-      rateMin: 50,
-      rateNormal: 5.50,
-      rate45: 5.20,
-      rate100: 4.80,
-      rate300: 4.50,
-      rate500: 4.20,
-      status: 'OPEN',
-      remarks: '정기 화물편',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -181,7 +150,6 @@ export default function AirScheduleRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}

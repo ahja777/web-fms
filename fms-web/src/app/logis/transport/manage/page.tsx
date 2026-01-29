@@ -223,16 +223,16 @@ export default function TransportManagePage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">운송번호</th>
-                    <th className="p-3 text-left text-sm">요청번호</th>
+                    <th className="p-3 text-left text-sm">운송<br/>번호</th>
+                    <th className="p-3 text-left text-sm">요청<br/>번호</th>
                     <th className="p-3 text-left text-sm">기사명</th>
                     <th className="p-3 text-left text-sm">연락처</th>
-                    <th className="p-3 text-left text-sm">차량번호</th>
-                    <th className="p-3 text-left text-sm">차량종류</th>
+                    <th className="p-3 text-left text-sm">차량<br/>번호</th>
+                    <th className="p-3 text-left text-sm">차량<br/>종류</th>
                     <th className="p-3 text-left text-sm">출발지</th>
                     <th className="p-3 text-left text-sm">도착지</th>
-                    <th className="p-3 text-center text-sm">출발시간</th>
-                    <th className="p-3 text-center text-sm">도착시간</th>
+                    <th className="p-3 text-center text-sm">출발<br/>시간</th>
+                    <th className="p-3 text-center text-sm">도착<br/>시간</th>
                     <th className="p-3 text-center text-sm">상태</th>
                   </tr>
                 </thead>

@@ -554,78 +554,6 @@ function QuoteSeaRegisterPageContent() {
     setHasUnsavedChanges(false);
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    setBasicInfo({
-      quoteNo: '',
-      registrationDate: new Date().toISOString().split('T')[0],
-      exportImport: 'export',
-      businessType: 'LOCAL',
-      tradeTerms: 'FOB',
-      customerCode: '1', // CUSTOMER_ID (숫자)
-      customerName: '삼성전자',
-      customerManager: '김담당',
-      customerPhone: '02-1234-5678',
-      senderName: 'Samsung Electronics',
-      senderManager: 'John Kim',
-      senderPhone: '+82-2-1234-5678',
-      origin: 'KRPUS',
-      originName: '부산항',
-      inputEmployee: '홍길동',
-      toBy1: '',
-      toBy1Name: '',
-      toBy2: '',
-      toBy2Name: '',
-      destination: 'USLAX',
-      destinationName: '로스앤젤레스',
-      carrier: 'MAERSK',
-      carrierName: '머스크라인',
-      carrierManager: '이선사',
-      carrierTel: '02-9876-5432',
-      carrierFax: '02-9876-5433',
-      cyCfs: '',
-      cyCfsName: '',
-      cyCfsManager: '',
-      cyCfsTel: '',
-      cyCfsFax: '',
-      vesselName: 'MAERSK EINDHOVEN',
-      voyageNo: '001E',
-      etd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      eta: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      validFrom: new Date().toISOString().split('T')[0],
-      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    });
-    setFreightItems([
-      {
-        id: '1',
-        freightType: 'O/F',
-        freightCode: 'O/F',
-        currency: 'USD',
-        exchangeRate: 1350,
-        rateMin: 10,
-        rateBL: 20,
-        rateRTon: 30,
-        containerDry20: 1500,
-        containerDry40: 2800,
-        containerTypeACode: '20FH',
-        containerTypeARate: 10,
-        containerTypeBCode: '20RF',
-        containerTypeBRate: 20,
-        containerTypeCCode: '40DR',
-        containerTypeCRate: 30,
-        bulkRate: 5,
-        vatYn: 'N',
-        unitPrice: 3000,
-        amountForeign: 3000,
-        amountKrw: 4050000,
-        vat: 0,
-        totalAmount: 4050000,
-      },
-    ]);
-    setHasUnsavedChanges(true);
-    alert('테스트 데이터가 입력되었습니다.');
-  };
-
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
@@ -646,17 +574,6 @@ function QuoteSeaRegisterPageContent() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                {/* 테스트 데이터 버튼 */}
-                <button
-                  onClick={handleFillTestData}
-                  className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  테스트데이터
-                </button>
-
                 {/* 스케줄조회 버튼 */}
                 <button
                   onClick={() => setShowScheduleModal(true)}
@@ -1259,9 +1176,9 @@ function QuoteSeaRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th rowSpan={2} className="w-10 p-2 text-center border-r border-[var(--border)]"><input type="checkbox" /></th>
-                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임유형</th>
-                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임코드</th>
-                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">통화단위</th>
+                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임<br/>유형</th>
+                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임<br/>코드</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">통화<br/>단위</th>
                     <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">환율</th>
                     <th colSpan={3} className="p-2 text-center border-r border-[var(--border)] border-b">Rate Per</th>
                     <th colSpan={2} className="p-2 text-center border-r border-[var(--border)] border-b">Container DRY</th>
@@ -1271,10 +1188,10 @@ function QuoteSeaRegisterPageContent() {
                     <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">Bulk</th>
                     <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">VAT</th>
                     <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">단가</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT(외화)</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT(원화)</th>
+                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT<br/>(외화)</th>
+                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT<br/>(원화)</th>
                     <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">VAT</th>
-                    <th rowSpan={2} className="p-2 text-right">합계금액</th>
+                    <th rowSpan={2} className="p-2 text-right">합계<br/>금액</th>
                   </tr>
                   <tr className="bg-[var(--surface-100)]">
                     <th className="p-1 text-center text-xs border-r border-[var(--border)]">Min</th>

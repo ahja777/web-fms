@@ -257,7 +257,7 @@ export default function QuoteSeaPage() {
     }));
   };
 
-  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof QuoteData; label: string; className?: string }) => (
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof QuoteData; label: React.ReactNode; className?: string }) => (
     <th
       className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
       onClick={() => handleSort(columnKey)}
@@ -570,15 +570,15 @@ export default function QuoteSeaPage() {
                         className="rounded"
                       />
                     </th>
-                    <SortableHeader columnKey="quoteNo" label="견적번호" className="text-left font-medium" />
-                    <SortableHeader columnKey="quoteDate" label="견적일자" className="text-left font-medium" />
+                    <SortableHeader columnKey="quoteNo" label={<>견적<br/>번호</>} className="text-left font-medium" />
+                    <SortableHeader columnKey="quoteDate" label={<>견적<br/>일자</>} className="text-left font-medium" />
                     <SortableHeader columnKey="shipper" label="화주" className="text-left font-medium" />
                     <SortableHeader columnKey="pol" label="POL" className="text-left font-medium" />
                     <SortableHeader columnKey="pod" label="POD" className="text-left font-medium" />
                     <SortableHeader columnKey="containerQty" label="컨테이너" className="text-center font-medium" />
                     <SortableHeader columnKey="carrier" label="선사" className="text-left font-medium" />
-                    <SortableHeader columnKey="validFrom" label="유효기간" className="text-center font-medium" />
-                    <SortableHeader columnKey="totalAmount" label="견적금액" className="text-right font-medium" />
+                    <SortableHeader columnKey="validFrom" label={<>유효<br/>기간</>} className="text-center font-medium" />
+                    <SortableHeader columnKey="totalAmount" label={<>견적<br/>금액</>} className="text-right font-medium" />
                     <SortableHeader columnKey="status" label="상태" className="text-center font-medium" />
                   </tr>
                 </thead>

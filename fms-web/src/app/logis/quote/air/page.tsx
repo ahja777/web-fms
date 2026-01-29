@@ -264,7 +264,7 @@ export default function QuoteAirPage() {
     }));
   };
 
-  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirQuoteData; label: string; className?: string }) => (
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirQuoteData; label: React.ReactNode; className?: string }) => (
     <th
       className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
       onClick={() => handleSort(columnKey)}
@@ -541,16 +541,16 @@ export default function QuoteAirPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3 text-center"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader columnKey="quoteNo" label="견적번호" className="text-left font-medium" />
-                    <SortableHeader columnKey="quoteDate" label="견적일자" className="text-left font-medium" />
+                    <SortableHeader columnKey="quoteNo" label={<>견적<br/>번호</>} className="text-left font-medium" />
+                    <SortableHeader columnKey="quoteDate" label={<>견적<br/>일자</>} className="text-left font-medium" />
                     <SortableHeader columnKey="shipper" label="화주" className="text-left font-medium" />
                     <SortableHeader columnKey="origin" label="출발" className="text-left font-medium" />
                     <SortableHeader columnKey="destination" label="도착" className="text-left font-medium" />
-                    <SortableHeader columnKey="weight" label="중량(kg)" className="text-center font-medium" />
-                    <SortableHeader columnKey="volume" label="용적(CBM)" className="text-center font-medium" />
+                    <SortableHeader columnKey="weight" label={<>중량<br/>(kg)</>} className="text-center font-medium" />
+                    <SortableHeader columnKey="volume" label={<>용적<br/>(CBM)</>} className="text-center font-medium" />
                     <SortableHeader columnKey="airline" label="항공사" className="text-left font-medium" />
-                    <SortableHeader columnKey="validFrom" label="유효기간" className="text-center font-medium" />
-                    <SortableHeader columnKey="totalAmount" label="견적금액" className="text-right font-medium" />
+                    <SortableHeader columnKey="validFrom" label={<>유효<br/>기간</>} className="text-center font-medium" />
+                    <SortableHeader columnKey="totalAmount" label={<>견적<br/>금액</>} className="text-right font-medium" />
                     <SortableHeader columnKey="status" label="상태" className="text-center font-medium" />
                   </tr>
                 </thead>

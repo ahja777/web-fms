@@ -92,12 +92,15 @@ export default function AirSNRegisterPage() {
       <div className="ml-72">
         <Header title="선적통지 등록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 등록 (항공)" onClose={handleCloseClick} />
         <main ref={formRef} className="p-6">
-          <div className="flex gap-2 mb-6">
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium">테스트데이터</button>
-            <button onClick={() => router.push('/logis/sn/air')} className="px-4 py-2 bg-blue-600 text-white rounded-lg">신규</button>
-            <button onClick={handleReset} className="px-4 py-2 bg-gray-500 text-white rounded-lg">초기화</button>
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg">통지발송</button>
-            <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-sm text-[var(--muted)]">화면 ID: SN-AIR-REG</span>
+            <div className="flex gap-2">
+              <button onClick={() => router.push('/logis/sn/air')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">신규</button>
+              <button onClick={handleReset} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">초기화</button>
+              <button onClick={() => router.push('/logis/sn/air')} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">목록</button>
+              <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">통지발송</button>
+              <button onClick={handleSave} className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">저장</button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6">

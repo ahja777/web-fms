@@ -159,16 +159,16 @@ export default function CorporateRatePage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">계약번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">계약<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">고객사</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">모드</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">선사/항공사</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">선사<br/>/항공사</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">타입</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">유효기간</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">계약단가</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">유효<br/>기간</th>
+                  <th className="px-4 py-3 text-right text-sm font-medium">계약<br/>단가</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">마진</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">판매단가</th>
+                  <th className="px-4 py-3 text-right text-sm font-medium">판매<br/>단가</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
                 </tr>
               </thead>

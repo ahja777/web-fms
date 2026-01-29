@@ -185,12 +185,12 @@ export default function ContainerSharePage() {
               <table className="w-full">
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">공유번호</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">공유<br/>번호</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">ETD</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">선명/항차</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">적입현황</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">적입<br/>현황</th>
                     <th className="px-4 py-3 text-center text-sm font-medium">HBL</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
                   </tr>

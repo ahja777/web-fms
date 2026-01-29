@@ -750,90 +750,6 @@ function ImportBLRegisterPageContent() {
     window.location.href = '/logis/import-bl/sea/register';
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const etdDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const etaDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    setFormData({
-      ...initialFormData,
-      importExport: 'IN',
-      businessType: 'CONSOL',
-      paymentMethod: 'PREPAID',
-      mblNo: 'MSKU1234567890',
-      hblNo: 'HBLKR2024001234',
-      shipperCode: 'SH001',
-      shipperName: 'SAMSUNG ELECTRONICS CO., LTD.',
-      shipperAddress: '129, Samsung-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Korea',
-      consigneeCode: 'CN001',
-      consigneeName: 'SAMSUNG ELECTRONICS AMERICA, INC.',
-      consigneeAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
-      notifyCode: 'NP001',
-      notifyName: 'Same as Consignee',
-      notifyAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
-      carrierCode: 'MAEU',
-      carrierName: 'MAERSK LINE',
-      vesselName: 'MAERSK EINDHOVEN',
-      voyageNo: '2408E',
-      portOfLoading: 'KRPUS',
-      portOfLoadingName: 'BUSAN, KOREA',
-      portOfDischarge: 'USLAX',
-      portOfDischargeName: 'LOS ANGELES, USA',
-      placeOfReceipt: 'BUSAN',
-      placeOfDelivery: 'LOS ANGELES',
-      finalDestination: 'LOS ANGELES',
-      etd: etdDate,
-      eta: etaDate,
-      serviceTerm: 'CY/CY',
-      freightTerm: 'PREPAID',
-      freightPayableAt: 'Destination',
-      blIssueDate: today,
-      blIssuePlace: 'BUSAN, KOREA',
-      containerType: 'FCL',
-      packageQty: 200,
-      packageUnit: 'CT',
-      grossWeight: 15000,
-      weightUnit: 'KG',
-      measurement: 45,
-      measurementUnit: 'CBM',
-      asArranged: true,
-      cargoDescription: 'SEMICONDUCTOR PRODUCTS\nHS CODE: 8542.31.0000\nMADE IN KOREA',
-      marksAndNumbers: 'N/M\nCONTAINER NO. AS PER ATTACHED LIST',
-      containers: [
-        {
-          id: '1',
-          containerNo: 'MSKU1234567',
-          sealNo: 'SEAL001',
-          containerType: '40HC',
-          size: '40',
-          packageQty: 100,
-          packageUnit: 'CT',
-          grossWeight: 7500,
-          measurement: 22.5,
-        },
-        {
-          id: '2',
-          containerNo: 'MSKU7654321',
-          sealNo: 'SEAL002',
-          containerType: '40HC',
-          size: '40',
-          packageQty: 100,
-          packageUnit: 'CT',
-          grossWeight: 7500,
-          measurement: 22.5,
-        },
-      ],
-      otherCharges: [],
-      remarks: '테스트 데이터 - 수입 B/L 등록',
-    });
-
-    setErrors({});
-    setHasUnsavedChanges(true);
-    setMessage({ type: 'success', text: '테스트 데이터가 입력되었습니다.' });
-    setTimeout(() => setMessage(null), 3000);
-  };
-
   // 삭제 처리
   const handleDelete = async () => {
     if (!hblId || !confirm('정말 삭제하시겠습니까?')) return;
@@ -2040,17 +1956,6 @@ function ImportBLRegisterPageContent() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {/* 테스트데이터 버튼 */}
-              <button
-                onClick={handleFillTestData}
-                className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                테스트데이터
-              </button>
-
               {/* 신규 버튼 */}
               <button
                 onClick={handleNew}

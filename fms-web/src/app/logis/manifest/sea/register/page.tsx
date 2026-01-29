@@ -183,41 +183,6 @@ export default function ManifestRegisterPage() {
     router.push('/logis/manifest/sea');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      mfType: '수출',
-      blNo: 'HDMU1234567',
-      shipper: '삼성전자 주식회사',
-      shipperAddr: '경기도 수원시 영통구 삼성로 129',
-      consignee: 'Samsung America Inc.',
-      consigneeAddr: '85 Challenger Rd, Ridgefield Park, NJ 07660, USA',
-      notifyParty: 'Same as Consignee',
-      carrier: 'HMM',
-      vessel: 'HMM GDANSK',
-      voyage: '001E',
-      callSign: 'H9HM',
-      pol: 'KRPUS',
-      pod: 'USLAX',
-      finalDest: 'Los Angeles, CA, USA',
-      etd: '2026-01-22',
-      eta: '2026-02-08',
-      containerType: '40HC',
-      containerQty: 2,
-      containerNo: 'HDMU1234567, HDMU1234568',
-      sealNo: 'SL001, SL002',
-      packageType: 'CARTON',
-      packageQty: 500,
-      commodity: 'ELECTRONIC PRODUCTS (TV, MONITOR)',
-      hsCode: '8528.72',
-      grossWeight: 18500,
-      measurement: 68,
-      freightTerms: 'PREPAID',
-      remarks: 'HANDLE WITH CARE - ELECTRONIC EQUIPMENT',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -236,7 +201,6 @@ export default function ManifestRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}

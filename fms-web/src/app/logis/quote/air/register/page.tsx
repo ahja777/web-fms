@@ -502,80 +502,6 @@ function QuoteAirRegisterPageContent() {
     setHasUnsavedChanges(false);
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    setBasicInfo({
-      quoteNo: '',
-      registrationDate: new Date().toISOString().split('T')[0],
-      exportImport: 'export',
-      businessType: 'LOCAL',
-      tradeTerms: 'FOB',
-      customerCode: '1', // CUSTOMER_ID (숫자)
-      customerName: '삼성전자',
-      customerManager: '김담당',
-      customerPhone: '02-1234-5678',
-      senderName: 'Samsung Electronics',
-      senderManager: 'John Kim',
-      senderPhone: '+82-2-1234-5678',
-      origin: 'ICN',
-      originName: '인천국제공항',
-      inputEmployee: '홍길동',
-      toBy1: '',
-      toBy1Name: '',
-      toBy2: '',
-      toBy2Name: '',
-      destination: 'JFK',
-      destinationName: 'JFK 국제공항',
-      airline: 'KE',
-      airlineName: '대한항공',
-      airlineManager: '이항공',
-      airlineTel: '02-9876-5432',
-      airlineFax: '02-9876-5433',
-      flightNo: 'KE081',
-      etd: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-      eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-      validFrom: new Date().toISOString().split('T')[0],
-      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    });
-    setCargoInfo({
-      cargoType: 'general',
-      pieces: 50,
-      grossWeight: 500,
-      chargeableWeight: 520,
-      volume: 3.5,
-      commodity: '전자부품',
-      hsCode: '8542.31.0000',
-      dimensions: '60 x 40 x 40 cm',
-      specialCargo: false,
-      dangerousGoods: false,
-      dgClass: '',
-      unNumber: '',
-    });
-    setFreightItems([
-      {
-        id: '1',
-        freightType: 'AFC',
-        freightCode: 'AFC',
-        currency: 'USD',
-        exchangeRate: 1350,
-        minCharge: 150,
-        under45: 4.5,
-        under100: 4.2,
-        under300: 3.8,
-        under500: 3.5,
-        over500: 3.2,
-        vatYn: 'N',
-        unitPrice: 3.5,
-        amountForeign: 1820,
-        amountKrw: 2457000,
-        vat: 0,
-        totalAmount: 2457000,
-      },
-    ]);
-    setHasUnsavedChanges(true);
-    alert('테스트 데이터가 입력되었습니다.');
-  };
-
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
@@ -596,17 +522,6 @@ function QuoteAirRegisterPageContent() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                {/* 테스트 데이터 버튼 */}
-                <button
-                  onClick={handleFillTestData}
-                  className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  테스트데이터
-                </button>
-
                 {/* 스케줄조회 버튼 */}
                 <button
                   onClick={() => setShowScheduleModal(true)}
@@ -1181,8 +1096,8 @@ function QuoteAirRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-2 text-center"><input type="checkbox" /></th>
-                    <th className="p-2 text-left">운임유형</th>
-                    <th className="p-2 text-left">운임코드</th>
+                    <th className="p-2 text-left">운임<br/>유형</th>
+                    <th className="p-2 text-left">운임<br/>코드</th>
                     <th className="p-2 text-center">통화</th>
                     <th className="p-2 text-right">환율</th>
                     <th className="p-2 text-right">M/C</th>
@@ -1192,8 +1107,8 @@ function QuoteAirRegisterPageContent() {
                     <th className="p-2 text-right">-500K</th>
                     <th className="p-2 text-right">+500K</th>
                     <th className="p-2 text-center">VAT</th>
-                    <th className="p-2 text-right">AMOUNT(외화)</th>
-                    <th className="p-2 text-right">AMOUNT(원화)</th>
+                    <th className="p-2 text-right">AMOUNT<br/>(외화)</th>
+                    <th className="p-2 text-right">AMOUNT<br/>(원화)</th>
                     <th className="p-2 text-right">VAT</th>
                     <th className="p-2 text-right">합계</th>
                   </tr>

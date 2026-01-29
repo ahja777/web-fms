@@ -410,8 +410,8 @@ export default function SeaArrivalPage() {
                     <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">수하인</th>
                     <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">화물상태</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">통관상태</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">화물<br/>상태</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">통관<br/>상태</th>
                     <th className="px-4 py-3 text-center text-sm font-medium">A/N</th>
                     <th className="px-4 py-3 text-center text-sm font-medium">D/O</th>
                   </tr>

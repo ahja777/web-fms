@@ -252,10 +252,10 @@ export default function QuoteRequestDetailPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">견적번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">견적<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">선사</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Transit Time</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">유효기간</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">유효<br/>기간</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">Ocean Freight</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">Local Charges</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">총액</th>

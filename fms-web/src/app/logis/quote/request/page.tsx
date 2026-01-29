@@ -557,10 +557,10 @@ export default function QuoteRequestPage() {
                             className="rounded"
                           />
                         </th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임유형</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임코드</th>
+                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임<br/>유형</th>
+                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임<br/>코드</th>
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">통화</th>
-                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">기본운임</th>
+                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">기본<br/>운임</th>
                         <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">할증료</th>
                         <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">합계</th>
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">비고</th>
@@ -754,8 +754,8 @@ export default function QuoteRequestPage() {
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임코드</th>
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">출발지</th>
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">도착지</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운송구분</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">차량구분</th>
+                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운송<br/>구분</th>
+                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">차량<br/>구분</th>
                         <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">금액</th>
                         <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">연락처</th>
                       </tr>

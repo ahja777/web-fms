@@ -189,34 +189,6 @@ export default function SRRegisterPage() {
     router.push('/logis/sr/sea');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      bookingNo: 'SB-2026-0001',
-      shipper: '삼성전자',
-      shipperContact: '02-1234-5678',
-      consignee: 'Samsung America Inc.',
-      consigneeContact: '+1-123-456-7890',
-      notifyParty: 'Same as Consignee',
-      carrier: 'MAERSK',
-      vessel: 'MAERSK EINDHOVEN',
-      voyage: '001E',
-      pol: 'KRPUS',
-      pod: 'USLAX',
-      finalDest: 'Los Angeles, CA',
-      etd: '2026-01-20',
-      eta: '2026-02-05',
-      containerType: '40HC',
-      containerQty: 2,
-      commodity: '전자제품 (ELECTRONIC PRODUCTS)',
-      grossWeight: 15000,
-      measurement: 65,
-      freightTerms: 'CY-CY',
-      remarks: '특별 취급 요청사항 없음',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -231,7 +203,6 @@ export default function SRRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setHasUnsavedChanges(false); setIsNewMode(true); }}
                 disabled={isNewMode}

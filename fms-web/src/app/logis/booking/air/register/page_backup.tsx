@@ -411,87 +411,6 @@ export default function BookingAirRegisterPage() {
     router.push(LIST_PATH);
   };
 
-  // 테스트 데이터 입력
-  const handleFillTestData = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const etdDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const etaDate = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    setFormData({
-      ...initialFormData,
-      bookingDate: today,
-      bookingType: 'EXPORT',
-      serviceType: 'AIRPORT_TO_AIRPORT',
-      incoterms: 'FOB',
-      shipperCode: 'SH001',
-      shipperName: '삼성전자 주식회사',
-      shipperAddress: '경기도 수원시 영통구 삼성로 129',
-      shipperContact: '김철수',
-      shipperTel: '031-200-1234',
-      shipperEmail: 'shipper@samsung.com',
-      consigneeCode: 'CN001',
-      consigneeName: 'Samsung Electronics America',
-      consigneeAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
-      consigneeContact: 'John Smith',
-      consigneeTel: '+1-201-229-4000',
-      consigneeEmail: 'consignee@samsung.com',
-      notifyPartyCode: 'NP001',
-      notifyPartyName: 'Same as Consignee',
-      notifyPartyAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
-      airline: 'KOREAN AIR',
-      flightNo: 'KE081',
-      origin: 'ICN',
-      destination: 'JFK',
-      etd: etdDate,
-      eta: etaDate,
-      transitPort: '',
-      transitTime: '14시간',
-      mawbNo: '180-12345678',
-      hawbNo: 'HAWB-2024-001',
-      totalPieces: 50,
-      totalGrossWeight: 500,
-      totalChargeableWeight: 600,
-      totalVolume: 3.6,
-      specialHandling: 'FRAGILE',
-      dangerousGoods: false,
-      dgClass: '',
-      unNumber: '',
-      remarks: '테스트 데이터 - 항공 부킹 등록',
-    });
-
-    setCargoItems([
-      {
-        id: '1',
-        pieces: 30,
-        packageType: 'CARTON',
-        grossWeight: 300,
-        chargeableWeight: 350,
-        length: 60,
-        width: 40,
-        height: 50,
-        volume: 1.2,
-        commodity: '반도체 부품',
-        hsCode: '8542.31.0000',
-      },
-      {
-        id: '2',
-        pieces: 20,
-        packageType: 'PALLET',
-        grossWeight: 200,
-        chargeableWeight: 250,
-        length: 120,
-        width: 100,
-        height: 100,
-        volume: 2.4,
-        commodity: '전자 디스플레이',
-        hsCode: '8528.52.0000',
-      },
-    ]);
-
-    setHasUnsavedChanges(true);
-    alert('테스트 데이터가 입력되었습니다.');
-  };
-
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
@@ -502,15 +421,6 @@ export default function BookingAirRegisterPage() {
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm text-[var(--muted)]">화면 ID: UI-G-01-03-05</span>
             <div className="flex gap-2">
-              <button
-                onClick={handleFillTestData}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                테스트데이터
-              </button>
               <button
                 onClick={handleNew}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"

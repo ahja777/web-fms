@@ -190,16 +190,16 @@ export default function TransportStatusPage() {
               <table className="w-full">
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
-                    <th className="p-3 text-left text-sm">운송번호</th>
-                    <th className="p-3 text-left text-sm">차량번호</th>
+                    <th className="p-3 text-left text-sm">운송<br/>번호</th>
+                    <th className="p-3 text-left text-sm">차량<br/>번호</th>
                     <th className="p-3 text-left text-sm">기사명</th>
                     <th className="p-3 text-left text-sm">출발지</th>
                     <th className="p-3 text-left text-sm">도착지</th>
-                    <th className="p-3 text-left text-sm">현재위치</th>
+                    <th className="p-3 text-left text-sm">현재<br/>위치</th>
                     <th className="p-3 text-center text-sm">진행률</th>
                     <th className="p-3 text-center text-sm">ETA</th>
                     <th className="p-3 text-center text-sm">상태</th>
-                    <th className="p-3 text-center text-sm">최종갱신</th>
+                    <th className="p-3 text-center text-sm">최종<br/>갱신</th>
                   </tr>
                 </thead>
                 <tbody>

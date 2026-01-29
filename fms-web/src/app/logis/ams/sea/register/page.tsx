@@ -197,45 +197,6 @@ export default function AMSRegisterPage() {
     router.push('/logis/ams/sea');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      amsType: 'ISF',
-      targetCountry: 'USA',
-      blNo: 'HDMU1234567',
-      shipper: 'Samsung Electronics Co., Ltd.',
-      shipperAddr: '129 Samsung-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Korea',
-      shipperTaxId: '124-81-00998',
-      consignee: 'Samsung America Inc.',
-      consigneeAddr: '85 Challenger Rd, Ridgefield Park, NJ 07660, USA',
-      consigneeTaxId: '13-2789078',
-      notifyParty: 'Same as Consignee',
-      seller: 'Samsung Electronics Co., Ltd.',
-      sellerAddr: '129 Samsung-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Korea',
-      buyer: 'Samsung America Inc.',
-      buyerAddr: '85 Challenger Rd, Ridgefield Park, NJ 07660, USA',
-      manufacturer: 'Samsung Electronics Vietnam',
-      manufacturerAddr: 'Yen Phong IP, Bac Ninh, Vietnam',
-      consolidator: 'KCS Logistics Co., Ltd.',
-      carrier: 'HMM',
-      vessel: 'HMM GDANSK',
-      voyage: '001E',
-      pol: 'KRPUS',
-      pod: 'USLAX',
-      finalDest: 'Los Angeles, CA 90731',
-      etd: '2026-01-22',
-      containerType: '40HC',
-      containerQty: 2,
-      containerNo: 'HDMU1234567, HDMU1234568',
-      sealNo: 'SL001, SL002',
-      hsCode: '8528.72.6400',
-      commodity: 'TELEVISION RECEIVERS, COLOR, WITH FLAT PANEL SCREEN',
-      grossWeight: 18500,
-      remarks: 'ISF 10+2 Filing for US Customs',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -255,7 +216,6 @@ export default function AMSRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}

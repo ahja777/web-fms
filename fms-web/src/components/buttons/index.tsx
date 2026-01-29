@@ -180,11 +180,10 @@ export function ActionButton({
 
 /**
  * 등록 페이지 상단 버튼 그룹
- * 표준 순서: 테스트데이터(옵션) → 스케줄조회(옵션) → E-mail → 신규 → 초기화 → 목록 → 삭제(조건부) → 저장
+ * 표준 순서: 스케줄조회(옵션) → E-mail → 신규 → 초기화 → 목록 → 삭제(조건부) → 저장
  */
 interface RegisterTopButtonsProps {
   screenId: string;
-  onTestData?: () => void;
   onScheduleSearch?: () => void;
   onEmail?: () => void;
   onNew: () => void;
@@ -195,13 +194,11 @@ interface RegisterTopButtonsProps {
   isNewMode?: boolean;
   isSaving?: boolean;
   showDelete?: boolean;
-  showTestData?: boolean;
   showScheduleSearch?: boolean;
 }
 
 export function RegisterTopButtons({
   screenId,
-  onTestData,
   onScheduleSearch,
   onEmail,
   onNew,
@@ -212,18 +209,12 @@ export function RegisterTopButtons({
   isNewMode = true,
   isSaving = false,
   showDelete = false,
-  showTestData = false,
   showScheduleSearch = false,
 }: RegisterTopButtonsProps) {
   return (
     <div className="flex justify-between items-center mb-6">
       <span className="text-sm text-[var(--muted)]">화면 ID: {screenId}</span>
       <div className="flex gap-2">
-        {showTestData && onTestData && (
-          <ActionButton variant="purple" icon="test" onClick={onTestData}>
-            테스트데이터
-          </ActionButton>
-        )}
         {showScheduleSearch && onScheduleSearch && (
           <ActionButton variant="info" icon="schedule" onClick={onScheduleSearch}>
             스케줄조회

@@ -209,7 +209,7 @@ export default function WarehouseManagePage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">창고코드</th>
+                    <th className="p-3 text-left text-sm">창고<br/>코드</th>
                     <th className="p-3 text-left text-sm">창고명</th>
                     <th className="p-3 text-left text-sm">유형</th>
                     <th className="p-3 text-left text-sm">주소</th>

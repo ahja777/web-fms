@@ -319,11 +319,11 @@ export default function OrderTypePage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">타입 코드</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">타입<br/>코드</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">타입 명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">비즈니스 타입</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">비즈니스<br/>타입</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">설명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">연계 시스템</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">연계<br/>시스템</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">활성</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
               </tr>

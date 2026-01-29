@@ -451,15 +451,15 @@ export default function QuoteRequestListPage() {
                       />
                     </th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">No</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">견적번호</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">등록일자</th>
+                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">견적<br/>번호</th>
+                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">등록<br/>일자</th>
                     <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">구분</th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">출발지</th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">도착지</th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">거래처</th>
-                    <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">무역조건</th>
+                    <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">무역<br/>조건</th>
                     <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">상태</th>
-                    <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">견적금액</th>
+                    <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">견적<br/>금액</th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">담당자</th>
                   </tr>
                 </thead>

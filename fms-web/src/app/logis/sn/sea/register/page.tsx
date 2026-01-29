@@ -188,36 +188,6 @@ export default function SNRegisterPage() {
     router.push('/logis/sn/sea');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      srNo: 'SR-2026-0001',
-      blNo: 'HDMU1234567',
-      shipper: '삼성전자',
-      consignee: 'Samsung America Inc.',
-      notifyParty: 'Same as Consignee',
-      carrier: 'HMM',
-      vessel: 'HMM GDANSK',
-      voyage: '001E',
-      pol: 'KRPUS',
-      pod: 'USLAX',
-      finalDest: 'Los Angeles, CA',
-      etd: '2026-01-22',
-      atd: '',
-      eta: '2026-02-08',
-      ata: '',
-      containerType: '40HC',
-      containerQty: 2,
-      containerNo: 'HDMU1234567, HDMU1234568',
-      sealNo: 'SL001, SL002',
-      commodity: '전자제품 (ELECTRONIC PRODUCTS)',
-      grossWeight: 18500,
-      measurement: 68,
-      remarks: '화주 요청: 도착 3일 전 사전 통지 필요',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -235,16 +205,17 @@ export default function SNRegisterPage() {
         <Header title="선적통지 등록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 등록 (해상)" onClose={handleCloseClick} />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
+            <span className="text-sm text-[var(--muted)]">화면 ID: SN-SEA-REG</span>
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}
-                className={`px-4 py-2 rounded-lg ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                className={`px-4 py-2 rounded-lg font-medium ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
               >신규</button>
-              <button onClick={handleReset} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              <button onClick={handleSendNotice} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">통지발송</button>
-              <button onClick={handleSubmit} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+              <button onClick={handleReset} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">초기화</button>
+              <button onClick={() => router.push('/logis/sn/sea')} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">목록</button>
+              <button onClick={handleSendNotice} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">통지발송</button>
+              <button onClick={handleSubmit} className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">저장</button>
             </div>
           </div>
 

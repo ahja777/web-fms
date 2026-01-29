@@ -40,6 +40,17 @@ function RegisterContent() {
           onClose={handleCloseClick}
         />
         <main className="p-6">
+          {/* 상단 버튼 영역 */}
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-sm text-[var(--muted)]">화면 ID: HAWB-AIR-REG</span>
+            <div className="flex gap-2">
+              <button onClick={() => router.push('/logis/bl/air/house/register')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">신규</button>
+              <button onClick={() => router.push('/logis/bl/air/house/register')} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">초기화</button>
+              <button onClick={handleList} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium">목록</button>
+              <button onClick={handleSave} className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">저장</button>
+            </div>
+          </div>
+
           <div className="card p-6 mb-6">
             <h3 className="text-lg font-bold mb-4">기본정보</h3>
             <div className="grid grid-cols-4 gap-4">
@@ -76,10 +87,6 @@ function RegisterContent() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-2">
-            <button onClick={handleSave} className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">저장</button>
-            <button onClick={handleList} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
-          </div>
         </main>
       </div>
       <CloseConfirmModal isOpen={showCloseModal} onConfirm={handleConfirm} onClose={() => setShowCloseModal(false)} />

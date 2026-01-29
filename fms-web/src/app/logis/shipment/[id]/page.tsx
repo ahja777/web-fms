@@ -475,8 +475,8 @@ export default function ShipmentDetailPage({ params }: { params: Promise<{ id: s
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-[var(--border)]">
-                          <th className="text-left py-2 text-sm text-[var(--muted)]">컨테이너 번호</th>
-                          <th className="text-left py-2 text-sm text-[var(--muted)]">사이즈/타입</th>
+                          <th className="text-left py-2 text-sm text-[var(--muted)]">컨테이너<br/>번호</th>
+                          <th className="text-left py-2 text-sm text-[var(--muted)]">사이즈<br/>/타입</th>
                           <th className="text-left py-2 text-sm text-[var(--muted)]">씰번호</th>
                           <th className="text-left py-2 text-sm text-[var(--muted)]">중량 (KG)</th>
                           <th className="text-left py-2 text-sm text-[var(--muted)]">상태</th>

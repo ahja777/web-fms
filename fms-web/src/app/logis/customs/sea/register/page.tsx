@@ -177,37 +177,6 @@ export default function CustomsRegisterPage() {
     router.push('/logis/customs/sea');
   };
 
-  const handleFillTestData = () => {
-    setFormData({
-      ...initialFormData,
-      customsType: '수입',
-      blNo: 'MAEU5678901',
-      declarationNo: 'I-2026-0002345',
-      shipper: 'Apple Inc.',
-      shipperAddr: 'One Apple Park Way, Cupertino, CA 95014, USA',
-      consignee: 'LG전자 주식회사',
-      consigneeAddr: '서울특별시 영등포구 여의대로 128',
-      broker: '한국관세사무소',
-      brokerContact: '02-1234-5678',
-      hsCode: '8471.30',
-      commodity: 'COMPUTER PARTS AND ACCESSORIES',
-      origin: 'USA',
-      packageType: 'CARTON',
-      packageQty: 200,
-      grossWeight: 5000,
-      totalAmount: 120000,
-      currency: 'USD',
-      exchangeRate: 1350,
-      dutyRate: 8,
-      dutyAmount: 12960000,
-      vatAmount: 17496000,
-      etaDate: '2026-01-18',
-      clearanceDate: '',
-      remarks: '정밀검사 대상 가능성 있음',
-    });
-    setHasUnsavedChanges(true);
-  };
-
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -227,7 +196,6 @@ export default function CustomsRegisterPage() {
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleFillTestData} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}

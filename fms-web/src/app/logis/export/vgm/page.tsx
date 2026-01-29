@@ -169,7 +169,7 @@ export default function VGMPage() {
               <thead className="bg-[var(--surface-100)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium">VGM 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹번호</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">부킹<br/>번호</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
                   <th className="px-4 py-3 text-right text-sm font-medium">Tare (KG)</th>
