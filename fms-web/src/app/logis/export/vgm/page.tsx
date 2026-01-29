@@ -116,9 +116,12 @@ export default function VGMPage() {
         <Header title="VGM 관리" subtitle="Logis > 수출B/L관리 > VGM 관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <Link href="/logis/export/vgm/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
-              신규 등록
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/logis/export/vgm/register" className="px-4 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+                신규 등록
+              </Link>
+              <button className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
+            </div>
           </div>
 
           <div className="card p-6 mb-6">
@@ -158,12 +161,25 @@ export default function VGMPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-4 mb-6">
-            <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-gray-500">{summaryStats.pending}</div><div className="text-sm text-[var(--muted)]">대기</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.submitted}</div><div className="text-sm text-[var(--muted)]">제출</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-green-500">{summaryStats.accepted}</div><div className="text-sm text-[var(--muted)]">수신확인</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-yellow-500">{summaryStats.overdue}</div><div className="text-sm text-[var(--muted)]">기한초과</div></div>
+          <div className="flex items-end gap-4 mb-6">
+            <div className="grid grid-cols-5 gap-4 flex-1">
+              <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
+              <div className="card p-4 text-center"><div className="text-2xl font-bold text-gray-500">{summaryStats.pending}</div><div className="text-sm text-[var(--muted)]">대기</div></div>
+              <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.submitted}</div><div className="text-sm text-[var(--muted)]">제출</div></div>
+              <div className="card p-4 text-center"><div className="text-2xl font-bold text-green-500">{summaryStats.accepted}</div><div className="text-sm text-[var(--muted)]">수신확인</div></div>
+              <div className="card p-4 text-center"><div className="text-2xl font-bold text-yellow-500">{summaryStats.overdue}</div><div className="text-sm text-[var(--muted)]">기한초과</div></div>
+            </div>
+            <div className="card p-4 flex-shrink-0 min-w-[320px]">
+              <div className="text-xs font-semibold text-[var(--muted)] mb-2">VGM 산출 공식</div>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded font-medium">Cargo Weight</span>
+                <span className="text-[var(--muted)] font-bold">+</span>
+                <span className="px-2 py-1 bg-green-50 text-green-700 rounded font-medium">Tare Weight</span>
+                <span className="text-[var(--muted)] font-bold">=</span>
+                <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded font-bold">VGM</span>
+              </div>
+              <div className="text-[11px] text-[var(--muted)] mt-1">(물건무게 + 포장무게) + 컨테이너 자체중량 = VGM</div>
+            </div>
           </div>
 
           <div className="card overflow-hidden">
@@ -171,7 +187,7 @@ export default function VGMPage() {
               <thead className="bg-[var(--surface-100)]">
                 <tr>
                   <SortableHeader<VGMData> columnKey="vgmNo" label="VGM 번호" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<VGMData> columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="bookingNo" label="부킹번호" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader<VGMData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader<VGMData> columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader<VGMData> columnKey="tareWeight" label="Tare (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
@@ -181,7 +197,7 @@ export default function VGMPage() {
                   <SortableHeader<VGMData> columnKey="cutOffDate" label="Cut-Off" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader<VGMData> columnKey="submittedDate" label="제출일" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader<VGMData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
-                  <th className="px-4 py-3 text-center text-sm font-medium">액션</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium whitespace-nowrap">액션</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

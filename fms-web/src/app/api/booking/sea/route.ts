@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
           b.REMARKS as remark,
           DATE_FORMAT(b.CREATED_DTM, '%Y-%m-%d %H:%i:%s') as createdAt
         FROM ORD_OCEAN_BOOKING b
-        LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci
+        LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID
         WHERE b.BOOKING_ID = ? AND b.DEL_YN = 'N'
       `, [bookingId]);
 
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         b.VOLUME_CBM as volume,
         b.STATUS_CD as status
       FROM ORD_OCEAN_BOOKING b
-      LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci
+      LEFT JOIN MST_CARRIER cr ON b.CARRIER_ID = cr.CARRIER_ID
       WHERE b.DEL_YN = 'N'
       ORDER BY b.CREATED_DTM DESC
     `);

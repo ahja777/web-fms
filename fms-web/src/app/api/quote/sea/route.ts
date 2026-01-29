@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
           q.REMARK as remark,
           DATE_FORMAT(q.CREATED_AT, '%Y-%m-%d %H:%i:%s') as createdAt
         FROM QUO_QUOTE_SEA q
-        LEFT JOIN MST_CUSTOMER c ON q.CUSTOMER_ID = c.CUSTOMER_ID COLLATE utf8mb4_general_ci
-        LEFT JOIN MST_CARRIER cr ON q.CARRIER_CD = cr.CARRIER_CD COLLATE utf8mb4_general_ci
+        LEFT JOIN MST_CUSTOMER c ON q.CUSTOMER_ID = c.CUSTOMER_ID
+        LEFT JOIN MST_CARRIER cr ON q.CARRIER_CD = cr.CARRIER_CD
         WHERE q.QUOTE_ID = ?
       `, [quoteId]);
 
@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
         q.CURRENCY_CD as currency,
         q.STATUS as status
       FROM QUO_QUOTE_SEA q
-      LEFT JOIN MST_CUSTOMER c ON q.CUSTOMER_ID = c.CUSTOMER_ID COLLATE utf8mb4_general_ci
-      LEFT JOIN MST_CARRIER cr ON q.CARRIER_CD = cr.CARRIER_CD COLLATE utf8mb4_general_ci
+      LEFT JOIN MST_CUSTOMER c ON q.CUSTOMER_ID = c.CUSTOMER_ID
+      LEFT JOIN MST_CARRIER cr ON q.CARRIER_CD = cr.CARRIER_CD
       ORDER BY q.CREATED_AT DESC
     `);
 

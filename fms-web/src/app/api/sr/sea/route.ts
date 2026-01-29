@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
           s.REMARKS as remark,
           DATE_FORMAT(s.CREATED_DTM, '%Y-%m-%d %H:%i:%s') as createdAt
         FROM SHP_SHIPPING_REQUEST s
-        LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID COLLATE utf8mb4_general_ci
+        LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID
         WHERE s.SR_ID = ? AND s.DEL_YN = 'N'
       `, [srId]);
 
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         s.GROSS_WEIGHT_KG as grossWeight,
         s.STATUS_CD as status
       FROM SHP_SHIPPING_REQUEST s
-      LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID COLLATE utf8mb4_general_ci
+      LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID
       WHERE s.DEL_YN = 'N'
       ORDER BY s.CREATED_DTM DESC
     `);

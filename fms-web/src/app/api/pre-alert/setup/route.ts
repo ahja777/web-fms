@@ -18,7 +18,7 @@ export async function POST() {
         updated_by VARCHAR(50),
         updated_dt DATETIME,
         UNIQUE KEY uk_group_code (group_code)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     // Pre-Alert Mail Address 테이블 (그룹별 이메일 주소)
@@ -32,7 +32,7 @@ export async function POST() {
         created_by VARCHAR(50),
         created_dt DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (group_id) REFERENCES pre_alert_mail_group(group_id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     // Pre-Alert Settings 테이블
@@ -59,7 +59,7 @@ export async function POST() {
         created_dt DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_by VARCHAR(50),
         updated_dt DATETIME
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     // Pre-Alert Settings Address 테이블 (설정별 수신자)
@@ -73,7 +73,7 @@ export async function POST() {
         mail_group_id INT,
         sort_order INT DEFAULT 0,
         FOREIGN KEY (setting_id) REFERENCES pre_alert_settings(setting_id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     // Pre-Alert Mail Log 테이블
@@ -100,7 +100,7 @@ export async function POST() {
         INDEX idx_doc_no (doc_no),
         INDEX idx_status (status),
         INDEX idx_send_dt (send_dt)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     return NextResponse.json({

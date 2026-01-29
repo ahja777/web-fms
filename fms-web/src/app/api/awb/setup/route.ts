@@ -60,7 +60,7 @@ export async function POST() {
         INDEX idx_status (STATUS_CD),
         INDEX idx_etd (ETD_DT),
         INDEX idx_import_type (IMPORT_TYPE)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     // AWB_HOUSE_AWB 테이블 생성
@@ -100,7 +100,7 @@ export async function POST() {
         INDEX idx_hawb_no (HAWB_NO),
         INDEX idx_mawb_id (MAWB_ID),
         INDEX idx_status (STATUS_CD)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
     `);
 
     return NextResponse.json({

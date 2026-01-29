@@ -27,7 +27,7 @@ export async function POST() {
         UNIQUE KEY uk_rate_date_currency (rate_date, currency_code),
         INDEX idx_currency_code (currency_code),
         INDEX idx_rate_date (rate_date)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
       COMMENT='환율 정보 테이블'
     `);
 
@@ -42,7 +42,7 @@ export async function POST() {
         status VARCHAR(20) DEFAULT 'SUCCESS' COMMENT '조회 상태',
         error_msg TEXT COMMENT '에러 메시지',
         created_by VARCHAR(50) DEFAULT 'system'
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
       COMMENT='환율 조회 이력 테이블'
     `);
 

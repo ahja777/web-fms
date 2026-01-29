@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
           s.REMARKS as remark,
           DATE_FORMAT(s.CREATED_DTM, '%Y-%m-%d %H:%i:%s') as createdAt
         FROM SCH_OCEAN_SCHEDULE s
-        LEFT JOIN MST_CARRIER cr ON s.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci
+        LEFT JOIN MST_CARRIER cr ON s.CARRIER_ID = cr.CARRIER_ID
         WHERE s.OCEAN_SCHEDULE_ID = ? AND s.DEL_YN = 'N'
       `, [scheduleId]);
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         s.TRANSIT_DAYS as transitDays,
         s.STATUS_CD as status
       FROM SCH_OCEAN_SCHEDULE s
-      LEFT JOIN MST_CARRIER cr ON s.CARRIER_ID = cr.CARRIER_ID COLLATE utf8mb4_general_ci
+      LEFT JOIN MST_CARRIER cr ON s.CARRIER_ID = cr.CARRIER_ID
       WHERE s.DEL_YN = 'N'
       ORDER BY s.ETD_DTM DESC
     `);

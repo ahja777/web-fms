@@ -31,7 +31,7 @@ export async function GET() {
         COALESCE(s.GROSS_WEIGHT_KG, 0) as gross_weight,
         COALESCE(s.VOLUME_CBM, 0) as volume_cbm
       FROM ORD_SHIPMENT s
-      LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID COLLATE utf8mb4_general_ci
+      LEFT JOIN MST_CUSTOMER c ON s.CUSTOMER_ID = c.CUSTOMER_ID
       WHERE s.DEL_YN = 'N'
       ORDER BY s.CREATED_DTM DESC
       LIMIT 10
