@@ -58,6 +58,23 @@ interface BookingFormData {
   namedCustomer: string;            // Named Customer*
   specialHandlingCode: string;      // Special Handing Code
   grossWeight: number;              // Gross Weight(KGS)*
+  volumeCbm: number;                // Volume(CBM)
+
+  // Container 수량 정보
+  totalCntrQty: number;             // 총 컨테이너 수량
+  cntr20gpQty: number;
+  cntr40gpQty: number;
+  cntr40hcQty: number;
+  cntr45hcQty: number;
+  cntrReeferQty: number;
+  cntrOtQty: number;
+  cntrFrQty: number;
+
+  // Cut-off 정보
+  cargoCutOffDate: string;
+  cargoCutOffTime: string;
+  closingDate: string;
+  closingTime: string;
 
   // Container Pick up Information (화면설계서 기준)
   pickup: string;                   // Pick up*
@@ -117,6 +134,23 @@ const initialFormData: BookingFormData = {
   namedCustomer: '',
   specialHandlingCode: '',
   grossWeight: 0,
+  volumeCbm: 0,
+
+  // Container 수량
+  totalCntrQty: 0,
+  cntr20gpQty: 0,
+  cntr40gpQty: 0,
+  cntr40hcQty: 0,
+  cntr45hcQty: 0,
+  cntrReeferQty: 0,
+  cntrOtQty: 0,
+  cntrFrQty: 0,
+
+  // Cut-off
+  cargoCutOffDate: '',
+  cargoCutOffTime: '',
+  closingDate: '',
+  closingTime: '',
 
   // Container Pick up Information
   pickup: '',

@@ -202,6 +202,7 @@ export default function ExportBLRegisterPage() {
   // 지역 검색 모달
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationModalTarget, setLocationModalTarget] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 화면 닫기 처리
   const { showModal, setShowModal, handleCloseClick, handleModalClose, handleDiscard } = useScreenClose({

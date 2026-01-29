@@ -118,10 +118,9 @@ export default function CustomsRegisterPage() {
       }
       return newData;
     });
-  };
     setHasUnsavedChanges(true);
+  };
 
-  
   // 코드 검색 버튼 클릭
   const handleCodeSearch = (field: string, codeType: CodeType) => {
     setCurrentField(field);

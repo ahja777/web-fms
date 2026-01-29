@@ -14,6 +14,7 @@ export default function AirSNRegisterPage() {
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
   const [showCloseModal, setShowCloseModal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formData, setFormData] = useState({
     snNo: '',
     snDate: new Date().toISOString().split('T')[0],
