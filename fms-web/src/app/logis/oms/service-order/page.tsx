@@ -268,7 +268,7 @@ export default function ServiceOrderPage() {
         <Header
           title="서비스 오더 관리 (S/O)"
           subtitle="HOME > OMS > 서비스 오더 관리"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

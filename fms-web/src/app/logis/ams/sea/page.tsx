@@ -279,7 +279,7 @@ export default function AMSListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AMS 관리" subtitle="Logis > AMS > AMS 관리 (해상)" showCloseButton={false} />
+        <Header title="AMS 관리" subtitle="Logis > AMS > AMS 관리 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

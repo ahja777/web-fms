@@ -128,7 +128,7 @@ export default function ContainerSharePage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="컨테이너공유관리 (콘솔)" subtitle="Logis > 견적/부킹관리 > 컨테이너공유관리" showCloseButton={false} />
+        <Header title="컨테이너공유관리 (콘솔)" subtitle="Logis > 견적/부킹관리 > 컨테이너공유관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <Link href="/logis/container/share/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>

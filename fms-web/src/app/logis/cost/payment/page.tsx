@@ -137,7 +137,7 @@ export default function CostPaymentPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="부대비용결제관리" subtitle="부대비용관리  부대비용결제관리" showCloseButton={false} />
+        <Header title="부대비용결제관리" subtitle="부대비용관리  부대비용결제관리" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

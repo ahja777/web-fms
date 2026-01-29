@@ -290,7 +290,7 @@ export default function ImportAWBListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AWB 관리 (항공수입)" subtitle="Logis > 항공수입 > AWB 관리" showCloseButton={false} />
+        <Header title="AWB 관리 (항공수입)" subtitle="Logis > 항공수입 > AWB 관리" />
         <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
           <div className="flex justify-between items-center mb-6">

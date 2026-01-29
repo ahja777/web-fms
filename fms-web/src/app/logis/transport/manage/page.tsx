@@ -141,7 +141,7 @@ export default function TransportManagePage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="운송관리 조회" subtitle="운송의뢰관리  운송관리 조회" showCloseButton={false} />
+        <Header title="운송관리 조회" subtitle="운송의뢰관리  운송관리 조회" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>

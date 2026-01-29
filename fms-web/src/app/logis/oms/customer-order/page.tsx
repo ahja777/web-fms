@@ -255,7 +255,7 @@ export default function CustomerOrderPage() {
         <Header
           title="고객 오더 관리 (C/O)"
           subtitle="HOME > OMS > 고객 오더 관리"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

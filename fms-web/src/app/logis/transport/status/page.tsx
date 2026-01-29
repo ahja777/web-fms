@@ -118,7 +118,7 @@ export default function TransportStatusPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="운송상태 정보조회" subtitle="운송의뢰관리  운송상태 정보조회" showCloseButton={false} />
+        <Header title="운송상태 정보조회" subtitle="운송의뢰관리  운송상태 정보조회" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">새로고침</button>

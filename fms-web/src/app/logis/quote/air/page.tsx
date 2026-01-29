@@ -377,7 +377,7 @@ export default function QuoteAirPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="견적관리 (항공)" subtitle="물류견적관리  견적관리 (항공)" showCloseButton={false} />
+        <Header title="견적관리 (항공)" subtitle="물류견적관리  견적관리 (항공)" />
 
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">

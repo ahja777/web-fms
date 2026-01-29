@@ -154,7 +154,7 @@ export default function ImportBLSeaDetailPage() {
 
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" showCloseButton={false} />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">수입 B/L을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/import-bl/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
+if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">수입 B/L을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/import-bl/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
 
   const statusInfo = statusConfig[data.status_cd] || { label: data.status_cd, color: 'bg-gray-500' };
 
@@ -162,7 +162,7 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" showCloseButton={false} />
+        <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

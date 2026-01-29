@@ -154,7 +154,7 @@ export default function ConsoleBLImportPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="B/L취합관리 (수입/해상)" subtitle="콘솔취합관리  B/L취합관리 (수입/해상)" showCloseButton={false} />
+        <Header title="B/L취합관리 (수입/해상)" subtitle="콘솔취합관리  B/L취합관리 (수입/해상)" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

@@ -181,7 +181,7 @@ export default function AirArrivalPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AWB 도착관리 (항공)" subtitle="Logis > AWB 관리 > AWB 도착관리 (항공)" showCloseButton={false} />
+        <Header title="AWB 도착관리 (항공)" subtitle="Logis > AWB 관리 > AWB 도착관리 (항공)" />
         <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
           <div className="flex justify-between items-center mb-6">

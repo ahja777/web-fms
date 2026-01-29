@@ -105,7 +105,7 @@ export default function BaseRatePage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="운임기초정보 관리" subtitle="Logis > 운임관리 > 운임기초정보 관리" showCloseButton={false} />
+        <Header title="운임기초정보 관리" subtitle="Logis > 운임관리 > 운임기초정보 관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <Link href="/logis/rate/base/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>

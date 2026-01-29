@@ -163,7 +163,7 @@ export default function SeaSchedulePage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="해상 스케줄 조회" subtitle="Logis > 스케줄관리 > 해상 스케줄 조회" showCloseButton={false} />
+        <Header title="해상 스케줄 조회" subtitle="Logis > 스케줄관리 > 해상 스케줄 조회" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

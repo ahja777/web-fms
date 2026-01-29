@@ -181,7 +181,7 @@ export default function SNListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="선적통지 목록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 목록 (해상)" showCloseButton={false} />
+        <Header title="선적통지 목록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 목록 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <Link href="/logis/sn/sea/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>

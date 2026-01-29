@@ -116,7 +116,7 @@ export default function StuffingPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="STUFFING ORDER 관리" subtitle="Logis > 수출B/L관리 > STUFFING ORDER 관리" showCloseButton={false} />
+        <Header title="STUFFING ORDER 관리" subtitle="Logis > 수출B/L관리 > STUFFING ORDER 관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

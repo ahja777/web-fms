@@ -136,7 +136,7 @@ export default function AgentOperationPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="운영관리 조회" subtitle="입력대행관리  운영관리 조회" showCloseButton={false} />
+        <Header title="운영관리 조회" subtitle="입력대행관리  운영관리 조회" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

@@ -179,7 +179,7 @@ export default function SeaArrivalPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="B/L 도착관리 (해상)" subtitle="Logis > B/L관리 > B/L 도착관리 (해상)" showCloseButton={false} />
+        <Header title="B/L 도착관리 (해상)" subtitle="Logis > B/L관리 > B/L 도착관리 (해상)" />
         <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
           <div className="flex justify-between items-center mb-6">

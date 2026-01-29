@@ -836,7 +836,7 @@ export default function ImportBLSeaPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="수입 B/L 관리 (해상)" subtitle="수입 B/L관리  B/L관리 (해상)" showCloseButton={false} />
+        <Header title="수입 B/L 관리 (해상)" subtitle="수입 B/L관리  B/L관리 (해상)" />
 
         <main ref={formRef} className="p-6">
           {viewMode === 'list' ? (

@@ -142,7 +142,7 @@ export default function TransportQuotePage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="운송견적관리" subtitle="운송의뢰관리  운송견적관리" showCloseButton={false} />
+        <Header title="운송견적관리" subtitle="운송의뢰관리  운송견적관리" />
         <main className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

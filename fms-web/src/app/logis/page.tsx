@@ -220,7 +220,7 @@ export default function LogisPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="Logis" subtitle="디지털물류네트워크 Shipping 관리" showCloseButton={false} />
+        <Header title="Logis" subtitle="디지털물류네트워크 Shipping 관리" />
 
         <main className="p-8">
           {/* Page Title */}

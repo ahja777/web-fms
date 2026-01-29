@@ -162,7 +162,7 @@ export default function QuoteRequestDetailPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="견적요청 상세조회" subtitle="Logis > 물류견적관리 > 견적요청 상세조회" showCloseButton={false} />
+        <Header title="견적요청 상세조회" subtitle="Logis > 물류견적관리 > 견적요청 상세조회" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

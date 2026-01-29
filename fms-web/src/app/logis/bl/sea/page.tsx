@@ -482,7 +482,7 @@ export default function BLSeaPage() {
         <Header
           title="B/L 조회 (해상)"
           subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 조회"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 - 해상수입 B/L과 동일한 스타일 */}

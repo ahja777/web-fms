@@ -380,7 +380,7 @@ export default function QuoteSeaPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="견적관리 (해상)" subtitle="물류견적관리  견적관리 (해상)" showCloseButton={false} />
+        <Header title="견적관리 (해상)" subtitle="물류견적관리  견적관리 (해상)" />
 
         <main ref={formRef} className="p-6">
           {/* 상단 버튼 */}

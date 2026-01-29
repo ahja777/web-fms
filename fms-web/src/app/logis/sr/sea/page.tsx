@@ -201,7 +201,7 @@ export default function SRSeaPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="선적요청관리 (S/R)" subtitle="Logis > 선적관리 > 선적요청관리 (해상)" showCloseButton={false} />
+        <Header title="선적요청관리 (S/R)" subtitle="Logis > 선적관리 > 선적요청관리 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">

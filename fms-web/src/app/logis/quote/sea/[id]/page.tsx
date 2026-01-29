@@ -117,7 +117,7 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
       <div className="min-h-screen bg-[var(--background)]">
         <Sidebar />
         <div className="ml-72">
-          <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" showCloseButton={false} />
+          <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" />
           <main className="p-6">
             <div className="card p-12 text-center">
               <svg className="w-16 h-16 text-[var(--muted)] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +141,7 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" showCloseButton={false} />
+        <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" />
 
         <main className="p-6">
           {/* 상단 버튼 */}

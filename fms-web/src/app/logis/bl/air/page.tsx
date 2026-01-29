@@ -329,7 +329,7 @@ export default function BLAirPage() {
         <Header
           title="AWB 조회 (항공)"
           subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 조회"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}

@@ -229,7 +229,7 @@ export default function QuoteRequestListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="견적요청 조회" subtitle="물류견적관리  견적요청 등록/조회 > 견적요청 조회" showCloseButton={false} />
+        <Header title="견적요청 조회" subtitle="물류견적관리  견적요청 등록/조회 > 견적요청 조회" />
 
         <main className="p-6">
           {/* 상단 버튼 영역 */}

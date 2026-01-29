@@ -228,7 +228,7 @@ export default function ExportAWBListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AWB 관리 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리" showCloseButton={false} />
+        <Header title="AWB 관리 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

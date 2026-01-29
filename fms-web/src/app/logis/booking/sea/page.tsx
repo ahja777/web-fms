@@ -357,7 +357,7 @@ export default function BookingSeaPage() {
         <Header
           title="선적부킹관리 조회 (해상)"
           subtitle="HOME > 견적/부킹의뢰 > 견적/부킹관리(수출) > 선적부킹관리(해상)"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}

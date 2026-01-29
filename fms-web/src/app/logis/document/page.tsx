@@ -123,7 +123,7 @@ export default function DocumentPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="수출입서류관리" subtitle="Logis > 견적/부킹관리 > 수출입서류관리" showCloseButton={false} />
+        <Header title="수출입서류관리" subtitle="Logis > 견적/부킹관리 > 수출입서류관리" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

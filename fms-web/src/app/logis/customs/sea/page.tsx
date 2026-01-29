@@ -185,7 +185,7 @@ export default function CustomsListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="통관 관리" subtitle="Logis > 통관 > 통관 관리 (해상)" showCloseButton={false} />
+        <Header title="통관 관리" subtitle="Logis > 통관 > 통관 관리 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <Link href="/logis/customs/sea/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>

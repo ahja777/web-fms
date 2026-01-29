@@ -640,7 +640,7 @@ export default function BLSeaDetailPage() {
         <Header
           title="B/L 상세조회 (해상)"
           subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 상세조회"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

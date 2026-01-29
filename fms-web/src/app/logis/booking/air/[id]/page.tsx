@@ -163,7 +163,7 @@ export default function BookingAirDetailPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="부킹 상세조회 (항공)" subtitle="Logis > Booking > 부킹 상세조회 (항공)" showCloseButton={false} />
+        <Header title="부킹 상세조회 (항공)" subtitle="Logis > Booking > 부킹 상세조회 (항공)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">

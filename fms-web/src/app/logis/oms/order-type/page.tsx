@@ -163,7 +163,7 @@ export default function OrderTypePage() {
         <Header
           title="오더 타입 관리"
           subtitle="HOME > OMS > 오더 타입 관리"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

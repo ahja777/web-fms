@@ -213,7 +213,7 @@ export default function AWBDetailPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="AWB 상세조회 (항공수입)" subtitle="Logis > 수입B/L관리 > AWB 상세조회" showCloseButton={false} />
+        <Header title="AWB 상세조회 (항공수입)" subtitle="Logis > 수입B/L관리 > AWB 상세조회" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">

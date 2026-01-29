@@ -246,7 +246,7 @@ export default function SOControlPage() {
         <Header
           title="S/O Control 관리"
           subtitle="HOME > OMS > S/O Control 관리"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

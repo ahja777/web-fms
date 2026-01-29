@@ -725,7 +725,7 @@ export default function AWBDetailPage({ params }: PageProps) {
         <Header
           title="AWB 상세조회 (항공)"
           subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 상세조회"
-          showCloseButton={false}
+         
         />
         <main className="p-6">
           {/* 상단 버튼 영역 */}

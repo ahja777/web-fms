@@ -271,7 +271,7 @@ export default function ManifestListPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div className="ml-72">
-        <Header title="적하목록 관리" subtitle="Logis > 적하목록 > 적하목록 관리 (해상)" showCloseButton={false} />
+        <Header title="적하목록 관리" subtitle="Logis > 적하목록 > 적하목록 관리 (해상)" />
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
