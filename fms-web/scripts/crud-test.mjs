@@ -216,7 +216,12 @@ async function main() {
   check('READ (list)', Array.isArray(readBlList.data) && readBlList.data.length > 0);
 
   const updateBl = await request('PUT', '/api/bl/sea', {
-    id: createBl.data.blId, vesselName:'UPDATED BL VESSEL', status:'CONFIRMED'
+    id: createBl.data.blId,
+    main: { mblNo:'CRUDMBL001', hblNo:'CRUDHBL001', ioType:'OUT', businessType:'SIMPLE', blType:'ORIGINAL',
+      shipperName:'CRUD Shipper', consigneeName:'CRUD Consignee', portOfLoading:'KRPUS', portOfDischarge:'CNSHA',
+      vesselName:'UPDATED BL VESSEL', voyageNo:'C001', freightTerm:'PREPAID', serviceTerm:'CY-CY',
+      containerType:'FCL', packageUnit:'CTN', blIssueType:'ORIGINAL' },
+    cargo: { packageQty:100, grossWeight:5000, measurement:20.0 }, other: {}
   });
   check('UPDATE', updateBl.data.success);
 
