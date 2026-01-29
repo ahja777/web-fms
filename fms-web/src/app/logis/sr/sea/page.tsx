@@ -240,7 +240,7 @@ export default function SRSeaPage() {
             <div className="p-4 grid grid-cols-4 gap-4">
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/R 일자</label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-nowrap">
                   <input type="date" value={filters.startDate} onChange={e => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" />
                   <span className="text-[var(--muted)]">~</span>
                   <input type="date" value={filters.endDate} onChange={e => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" />

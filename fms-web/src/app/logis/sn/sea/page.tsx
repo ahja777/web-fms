@@ -191,9 +191,9 @@ export default function SNListPage() {
 
           <div className="card p-6 mb-6">
             <div className="grid grid-cols-4 gap-4 mb-4">
-              <div>
+              <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/N 일자</label>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center flex-nowrap">
                   <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
                   <span className="text-[var(--muted)]">~</span>
                   <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />

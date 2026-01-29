@@ -51,7 +51,7 @@ export default function DateRangeButtons({ onRangeSelect }: DateRangeButtonsProp
   const buttonStyle = "px-2 py-1 text-xs font-medium rounded border border-[var(--border)] bg-[var(--surface-50)] hover:bg-[var(--surface-100)] hover:border-[#E8A838] transition-colors";
 
   return (
-    <div className="flex items-center gap-1 ml-2">
+    <div className="flex items-center gap-1 ml-2 flex-shrink-0">
       <button
         type="button"
         onClick={() => handleClick('today')}

@@ -477,7 +477,7 @@ export default function QuoteAirPage() {
               <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-[var(--foreground)] mb-1">견적일자</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-nowrap">
                     <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
                     <span>~</span>
                     <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
