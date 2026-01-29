@@ -101,6 +101,7 @@ export default function AirScheduleRegisterPage() {
 
   const handleChange = (field: keyof AirScheduleFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   

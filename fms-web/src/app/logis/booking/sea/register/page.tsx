@@ -208,6 +208,7 @@ export default function BookingSeaRegisterPage() {
 
   const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   const handleScheduleSelect = (schedule: any) => {

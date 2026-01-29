@@ -118,6 +118,7 @@ export default function ManifestRegisterPage() {
 
   const handleChange = (field: keyof ManifestFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   

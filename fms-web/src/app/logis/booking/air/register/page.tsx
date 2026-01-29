@@ -191,6 +191,7 @@ export default function BookingAirRegisterPage() {
 
   const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   const handleCargoChange = (index: number, field: keyof CargoItem, value: string | number) => {

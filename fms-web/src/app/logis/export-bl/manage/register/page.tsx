@@ -212,6 +212,7 @@ export default function ExportBLRegisterPage() {
   // 폼 데이터 변경 핸들러
   const handleChange = (field: keyof BLFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
     setIsModified(true);
   };
 

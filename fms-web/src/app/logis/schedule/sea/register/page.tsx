@@ -137,6 +137,7 @@ export default function ScheduleRegisterPage() {
       return newData;
     });
   };
+    setHasUnsavedChanges(true);
 
   
   // 코드 검색 버튼 클릭

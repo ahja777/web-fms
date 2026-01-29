@@ -37,6 +37,7 @@ export default function AirSNRegisterPage() {
 
   const handleChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   const handleSave = async () => {

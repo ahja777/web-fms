@@ -127,6 +127,7 @@ export default function AMSRegisterPage() {
 
   const handleChange = (field: keyof AMSFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   

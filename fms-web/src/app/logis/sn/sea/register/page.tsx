@@ -108,6 +108,7 @@ export default function SNRegisterPage() {
 
   const handleChange = (field: keyof SNFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
   };
 
   
