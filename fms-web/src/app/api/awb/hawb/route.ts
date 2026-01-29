@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
       LEFT JOIN AWB_MASTER_AWB m ON h.MAWB_ID = m.MAWB_ID
       LEFT JOIN MST_CUSTOMER c ON h.CUSTOMER_ID = c.CUSTOMER_ID
       LEFT JOIN MST_CARRIER cr ON h.CARRIER_ID = cr.CARRIER_ID
-      LEFT JOIN MST_PORT orig ON h.ORIGIN_AIRPORT_CD = orig.PORT_CD
-      LEFT JOIN MST_PORT dest ON h.DEST_AIRPORT_CD = dest.PORT_CD
+      LEFT JOIN MST_PORT orig ON h.ORIGIN_AIRPORT_CD COLLATE utf8mb4_general_ci = orig.PORT_CD
+      LEFT JOIN MST_PORT dest ON h.DEST_AIRPORT_CD COLLATE utf8mb4_general_ci = dest.PORT_CD
       ${whereClause}
       ORDER BY h.CREATED_DTM DESC
     `, params);
