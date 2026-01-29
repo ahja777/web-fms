@@ -9,6 +9,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { ANSearchModal, type ANItem } from '@/components/popup';
 import { ActionButton } from '@/components/buttons';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface ArrivalData {
   id: number;
@@ -74,6 +75,7 @@ export default function SeaArrivalPage() {
   const [data] = useState<ArrivalData[]>(mockData);
   const [showANModal, setShowANModal] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { sortConfig, handleSort, sortData } = useSorting<ArrivalData>();
 
   const handleANSelect = (item: ANItem) => {
     setFilters(prev => ({ ...prev, blNo: item.blNo }));
@@ -98,7 +100,7 @@ export default function SeaArrivalPage() {
     setSelectedIds(new Set());
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.blNo && !item.blNo.toLowerCase().includes(appliedFilters.blNo.toLowerCase())) return false;
     if (appliedFilters.vessel && !item.vessel.toLowerCase().includes(appliedFilters.vessel.toLowerCase())) return false;
     if (appliedFilters.consignee && !item.consignee.includes(appliedFilters.consignee)) return false;
@@ -109,7 +111,7 @@ export default function SeaArrivalPage() {
     if (appliedFilters.ataDateFrom && item.ata && item.ata < appliedFilters.ataDateFrom) return false;
     if (appliedFilters.ataDateTo && item.ata && item.ata > appliedFilters.ataDateTo) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -403,17 +405,17 @@ export default function SeaArrivalPage() {
                       />
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium">No</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">B/L No.</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">선명/항차</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">ETA</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">ATA</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">수하인</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">화물<br/>상태</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">통관<br/>상태</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">A/N</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">D/O</th>
+                    <SortableHeader<ArrivalData> columnKey="blNo" label="B/L No." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="ata" label="ATA" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="pol" label="구간" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="consignee" label="수하인" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="containers" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="cargoStatus" label={<>화물<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="customsStatus" label={<>통관<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ArrivalData> columnKey="arrivalNotice" label="A/N" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<ArrivalData> columnKey="doIssued" label="D/O" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">

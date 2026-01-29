@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface TransportStatus {
   id: string;
@@ -72,6 +73,7 @@ export default function TransportStatusPage() {
     onConfirmClose: handleConfirmClose,
   });
 
+  const { sortConfig, handleSort, sortData } = useSorting<TransportStatus>();
   const [allData] = useState<TransportStatus[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -190,23 +192,23 @@ export default function TransportStatusPage() {
               <table className="w-full">
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
-                    <th className="p-3 text-left text-sm">운송<br/>번호</th>
-                    <th className="p-3 text-left text-sm">차량<br/>번호</th>
-                    <th className="p-3 text-left text-sm">기사명</th>
-                    <th className="p-3 text-left text-sm">출발지</th>
-                    <th className="p-3 text-left text-sm">도착지</th>
-                    <th className="p-3 text-left text-sm">현재<br/>위치</th>
-                    <th className="p-3 text-center text-sm">진행률</th>
-                    <th className="p-3 text-center text-sm">ETA</th>
-                    <th className="p-3 text-center text-sm">상태</th>
-                    <th className="p-3 text-center text-sm">최종<br/>갱신</th>
+                    <SortableHeader columnKey="transportNo" label={<>운송<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="vehicleNo" label={<>차량<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="driverName" label="기사명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="origin" label="출발지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="destination" label="도착지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="currentLocation" label={<>현재<br/>위치</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="progress" label="진행률" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="lastUpdate" label={<>최종<br/>갱신</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={10} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                         <td className="p-3 text-[#2563EB] font-medium">{row.transportNo}</td>
                         <td className="p-3 text-sm">{row.vehicleNo}</td>

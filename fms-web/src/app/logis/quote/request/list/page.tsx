@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
@@ -156,6 +157,7 @@ export default function QuoteRequestListPage() {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchMessage, setSearchMessage] = useState<string>('');
+  const { sortConfig, handleSort, sortData } = useSorting<QuoteRequest>();
   const pageSize = 10;
 
   // 필터링된 데이터
@@ -218,9 +220,10 @@ export default function QuoteRequestListPage() {
     }
   };
 
-  // 페이지네이션
-  const totalPages = Math.ceil(filteredList.length / pageSize);
-  const paginatedData = filteredList.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // 정렬 및 페이지네이션
+  const sortedData = sortData(filteredList);
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const paginatedData = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -451,16 +454,16 @@ export default function QuoteRequestListPage() {
                       />
                     </th>
                     <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">No</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">견적<br/>번호</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">등록<br/>일자</th>
-                    <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">구분</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">출발지</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">도착지</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">거래처</th>
-                    <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">무역<br/>조건</th>
-                    <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">상태</th>
-                    <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">견적<br/>금액</th>
-                    <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">담당자</th>
+                    <SortableHeader<QuoteRequest> columnKey="quoteNo" label={<>견적<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<QuoteRequest> columnKey="registrationDate" label={<>등록<br/>일자</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<QuoteRequest> columnKey="category" label="구분" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<QuoteRequest> columnKey="origin" label="출발지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<QuoteRequest> columnKey="destination" label="도착지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<QuoteRequest> columnKey="tradingPartner" label="거래처" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<QuoteRequest> columnKey="tradeTerms" label={<>무역<br/>조건</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<QuoteRequest> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<QuoteRequest> columnKey="totalAmount" label={<>견적<br/>금액</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader<QuoteRequest> columnKey="inputEmployee" label="담당자" sortConfig={sortConfig} onSort={handleSort} />
                   </tr>
                 </thead>
                 <tbody>

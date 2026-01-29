@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import * as XLSX from 'xlsx';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface ExchangeRate {
   rateId?: number;
@@ -148,6 +149,7 @@ export default function ExchangeRatePage() {
   const [dataSource, setDataSource] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { sortConfig, handleSort, sortData } = useSorting<ExchangeRate>();
 
   // 환율 조회
   const fetchExchangeRates = useCallback(async (date?: string) => {
@@ -482,16 +484,12 @@ export default function ExchangeRatePage() {
               <table className="w-full">
                 <thead className="bg-[var(--surface-200)]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold w-28">통화</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold w-32">통화명</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">매매<br/>기준율</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">
-                      <span className="text-red-400">송금<br/>보내실때</span>
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">
-                      <span className="text-blue-400">송금<br/>받으실때</span>
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold w-36">서울외국환<br/>중개</th>
+                    <SortableHeader<ExchangeRate> columnKey="currencyCode" label="통화" sortConfig={sortConfig} onSort={handleSort} width="7rem" />
+                    <SortableHeader<ExchangeRate> columnKey="currencyName" label="통화명" sortConfig={sortConfig} onSort={handleSort} width="8rem" />
+                    <SortableHeader<ExchangeRate> columnKey="dealBasR" label={<>매매<br/>기준율</>} sortConfig={sortConfig} onSort={handleSort} align="right" width="9rem" />
+                    <SortableHeader<ExchangeRate> columnKey="tts" label={<span className="text-red-400">송금<br/>보내실때</span>} sortConfig={sortConfig} onSort={handleSort} align="right" width="9rem" />
+                    <SortableHeader<ExchangeRate> columnKey="ttb" label={<span className="text-blue-400">송금<br/>받으실때</span>} sortConfig={sortConfig} onSort={handleSort} align="right" width="9rem" />
+                    <SortableHeader<ExchangeRate> columnKey="kftcDealBasR" label={<>서울외국환<br/>중개</>} sortConfig={sortConfig} onSort={handleSort} align="right" width="9rem" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
@@ -514,7 +512,7 @@ export default function ExchangeRatePage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredRates.map((rate, index) => {
+                    sortData(filteredRates).map((rate, index) => {
                       const isMainCurrency = MAIN_CURRENCIES.includes(rate.currencyCode);
                       return (
                         <tr

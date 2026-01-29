@@ -9,6 +9,7 @@ import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 import LocationCodeModal, { LocationType, LocationItem } from '@/components/popup/LocationCodeModal';
 
 // 운임정보 데이터 타입
@@ -90,6 +91,8 @@ export default function QuoteRequestPage() {
   // 선택된 행 관리
   const [selectedRateRows, setSelectedRateRows] = useState<number[]>([]);
   const [selectedTransportRows, setSelectedTransportRows] = useState<number[]>([]);
+  const { sortConfig: rateSortConfig, handleSort: handleRateSort, sortData: sortRateData } = useSorting<RateInfo>();
+  const { sortConfig: transportSortConfig, handleSort: handleTransportSort, sortData: sortTransportData } = useSorting<TransportRate>();
 
   // 섹션 접힘 상태
   const [expandedSections, setExpandedSections] = useState({
@@ -557,17 +560,17 @@ export default function QuoteRequestPage() {
                             className="rounded"
                           />
                         </th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임<br/>유형</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임<br/>코드</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">통화</th>
-                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">기본<br/>운임</th>
-                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">할증료</th>
-                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">합계</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">비고</th>
+                        <SortableHeader<RateInfo> columnKey="rateType" label={<>운임<br/>유형</>} sortConfig={rateSortConfig} onSort={handleRateSort} />
+                        <SortableHeader<RateInfo> columnKey="rateCode" label={<>운임<br/>코드</>} sortConfig={rateSortConfig} onSort={handleRateSort} />
+                        <SortableHeader<RateInfo> columnKey="currency" label="통화" sortConfig={rateSortConfig} onSort={handleRateSort} />
+                        <SortableHeader<RateInfo> columnKey="baseRate" label={<>기본<br/>운임</>} sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
+                        <SortableHeader<RateInfo> columnKey="surcharge" label="할증료" sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
+                        <SortableHeader<RateInfo> columnKey="total" label="합계" sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
+                        <SortableHeader<RateInfo> columnKey="remark" label="비고" sortConfig={rateSortConfig} onSort={handleRateSort} />
                       </tr>
                     </thead>
                     <tbody>
-                      {rateInfoList.map((row) => (
+                      {sortRateData(rateInfoList).map((row) => (
                         <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                           <td className="p-3 text-center">
                             <input
@@ -751,17 +754,17 @@ export default function QuoteRequestPage() {
                             className="rounded"
                           />
                         </th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운임코드</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">출발지</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">도착지</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">운송<br/>구분</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">차량<br/>구분</th>
-                        <th className="p-3 text-right text-sm font-medium text-[var(--foreground)]">금액</th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">연락처</th>
+                        <SortableHeader<TransportRate> columnKey="rateCode" label="운임코드" sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <SortableHeader<TransportRate> columnKey="origin" label="출발지" sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <SortableHeader<TransportRate> columnKey="destination" label="도착지" sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <SortableHeader<TransportRate> columnKey="transportType" label={<>운송<br/>구분</>} sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <SortableHeader<TransportRate> columnKey="vehicleType" label={<>차량<br/>구분</>} sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <SortableHeader<TransportRate> columnKey="amount" label="금액" sortConfig={transportSortConfig} onSort={handleTransportSort} align="right" />
+                        <SortableHeader<TransportRate> columnKey="contact" label="연락처" sortConfig={transportSortConfig} onSort={handleTransportSort} />
                       </tr>
                     </thead>
                     <tbody>
-                      {transportRateList.map((row) => (
+                      {sortTransportData(transportRateList).map((row) => (
                         <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                           <td className="p-3 text-center">
                             <input

@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { HBLConsoleModal, type HBLConsoleItem } from '@/components/popup';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface ConsoleBL {
   id: string;
@@ -82,6 +83,7 @@ export default function ConsoleBLImportPage() {
     onConfirmClose: handleConfirmClose,
   });
 
+  const { sortConfig, handleSort, sortData } = useSorting<ConsoleBL>();
   const [allData] = useState<ConsoleBL[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -251,25 +253,25 @@ export default function ConsoleBLImportPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">콘솔<br/>번호</th>
-                    <th className="p-3 text-left text-sm">콘솔<br/>일자</th>
-                    <th className="p-3 text-left text-sm">MBL No</th>
-                    <th className="p-3 text-center text-sm">HBL 수</th>
-                    <th className="p-3 text-left text-sm">선사</th>
-                    <th className="p-3 text-left text-sm">선명/항차</th>
-                    <th className="p-3 text-left text-sm">POL</th>
-                    <th className="p-3 text-left text-sm">POD</th>
-                    <th className="p-3 text-center text-sm">ETA</th>
-                    <th className="p-3 text-center text-sm">컨테이너</th>
-                    <th className="p-3 text-right text-sm">중량<br/>(kg)</th>
-                    <th className="p-3 text-center text-sm">상태</th>
+                    <SortableHeader columnKey="consoleNo" label={<>콘솔<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="consoleDate" label={<>콘솔<br/>일자</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="mblNo" label="MBL No" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="hblCount" label="HBL 수" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="carrier" label="선사" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="pol" label="POL" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="pod" label="POD" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="totalContainers" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="totalWeight" label={<>중량<br/>(kg)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={13} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
                         <td className="p-3 text-[#2563EB] font-medium">{row.consoleNo}</td>

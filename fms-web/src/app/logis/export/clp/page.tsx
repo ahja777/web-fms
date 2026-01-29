@@ -10,6 +10,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface CLPData {
   id: number;
@@ -61,6 +62,7 @@ export default function CLPPage() {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<CLPData[]>(mockData);
+  const { sortConfig, handleSort, sortData } = useSorting<CLPData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -73,13 +75,13 @@ export default function CLPPage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.clpNo && !item.clpNo.includes(appliedFilters.clpNo)) return false;
     if (appliedFilters.bookingNo && !item.bookingNo.includes(appliedFilters.bookingNo)) return false;
     if (appliedFilters.containerNo && !item.containerNo.includes(appliedFilters.containerNo)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -163,17 +165,17 @@ export default function CLPPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">CLP 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">B/L 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">PKG</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">G/W (KG)</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">CBM</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">작성일</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<CLPData> columnKey="clpNo" label="CLP 번호" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="blNo" label="B/L 번호" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="pol" label="구간" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="packages" label="PKG" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<CLPData> columnKey="grossWeight" label="G/W (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<CLPData> columnKey="volume" label="CBM" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<CLPData> columnKey="createdDate" label="작성일" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CLPData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

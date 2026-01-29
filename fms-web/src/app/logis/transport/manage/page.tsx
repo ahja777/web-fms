@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface TransportManage {
   id: string;
@@ -78,6 +79,7 @@ export default function TransportManagePage() {
     onConfirmClose: handleConfirmClose,
   });
 
+  const { sortConfig, handleSort, sortData } = useSorting<TransportManage>();
   const [allData] = useState<TransportManage[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -223,24 +225,24 @@ export default function TransportManagePage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">운송<br/>번호</th>
-                    <th className="p-3 text-left text-sm">요청<br/>번호</th>
-                    <th className="p-3 text-left text-sm">기사명</th>
-                    <th className="p-3 text-left text-sm">연락처</th>
-                    <th className="p-3 text-left text-sm">차량<br/>번호</th>
-                    <th className="p-3 text-left text-sm">차량<br/>종류</th>
-                    <th className="p-3 text-left text-sm">출발지</th>
-                    <th className="p-3 text-left text-sm">도착지</th>
-                    <th className="p-3 text-center text-sm">출발<br/>시간</th>
-                    <th className="p-3 text-center text-sm">도착<br/>시간</th>
-                    <th className="p-3 text-center text-sm">상태</th>
+                    <SortableHeader columnKey="transportNo" label={<>운송<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="requestNo" label={<>요청<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="driverName" label="기사명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="driverPhone" label="연락처" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="vehicleNo" label={<>차량<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="vehicleType" label={<>차량<br/>종류</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="origin" label="출발지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="destination" label="도착지" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="departureTime" label={<>출발<br/>시간</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="arrivalTime" label={<>도착<br/>시간</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={12} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
                         <td className="p-3 text-[#2563EB] font-medium">{row.transportNo}</td>

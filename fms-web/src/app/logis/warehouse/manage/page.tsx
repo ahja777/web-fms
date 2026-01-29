@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface Warehouse {
   id: string;
@@ -70,6 +71,7 @@ export default function WarehouseManagePage() {
     onConfirmClose: handleConfirmClose,
   });
 
+  const { sortConfig, handleSort, sortData } = useSorting<Warehouse>();
   const [allData] = useState<Warehouse[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -209,22 +211,22 @@ export default function WarehouseManagePage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">창고<br/>코드</th>
-                    <th className="p-3 text-left text-sm">창고명</th>
-                    <th className="p-3 text-left text-sm">유형</th>
-                    <th className="p-3 text-left text-sm">주소</th>
-                    <th className="p-3 text-center text-sm">용량</th>
-                    <th className="p-3 text-center text-sm">사용률</th>
-                    <th className="p-3 text-left text-sm">담당자</th>
-                    <th className="p-3 text-left text-sm">연락처</th>
-                    <th className="p-3 text-center text-sm">상태</th>
+                    <SortableHeader columnKey="warehouseCode" label={<>창고<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="warehouseName" label="창고명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="warehouseType" label="유형" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="address" label="주소" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="capacity" label="용량" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="usedCapacity" label="사용률" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="manager" label="담당자" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="contact" label="연락처" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={10} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
                         <td className="p-3 text-[#2563EB] font-medium">{row.warehouseCode}</td>

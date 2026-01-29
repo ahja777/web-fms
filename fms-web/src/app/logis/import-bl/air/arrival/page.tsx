@@ -9,6 +9,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { ANSearchModal, type ANItem } from '@/components/popup';
 import { ActionButton } from '@/components/buttons';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface AirArrivalData {
   id: number;
@@ -75,6 +76,7 @@ export default function AirArrivalPage() {
   const [data] = useState<AirArrivalData[]>(mockData);
   const [showANModal, setShowANModal] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { sortConfig, handleSort, sortData } = useSorting<AirArrivalData>();
 
   const handleANSelect = (item: ANItem) => {
     setFilters(prev => ({ ...prev, awbNo: item.blNo }));
@@ -99,7 +101,7 @@ export default function AirArrivalPage() {
     setSelectedIds(new Set());
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.awbNo && !item.awbNo.includes(appliedFilters.awbNo)) return false;
     if (appliedFilters.flightNo && !item.flightNo.toLowerCase().includes(appliedFilters.flightNo.toLowerCase())) return false;
     if (appliedFilters.consignee && !item.consignee.includes(appliedFilters.consignee)) return false;
@@ -110,7 +112,7 @@ export default function AirArrivalPage() {
     if (appliedFilters.ataDateFrom && item.ata && item.ata < appliedFilters.ataDateFrom) return false;
     if (appliedFilters.ataDateTo && item.ata && item.ata > appliedFilters.ataDateTo) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -404,18 +406,18 @@ export default function AirArrivalPage() {
                       />
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium">No</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">AWB No.</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">편명</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">ETA</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">ATA</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">수하인</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">PCS</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">G/W</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">화물<br/>상태</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">통관<br/>상태</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">A/N</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">R/O</th>
+                    <SortableHeader<AirArrivalData> columnKey="awbNo" label="AWB No." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="flightNo" label="편명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="ata" label="ATA" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="origin" label="구간" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="consignee" label="수하인" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="pieces" label="PCS" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader<AirArrivalData> columnKey="grossWeight" label="G/W" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader<AirArrivalData> columnKey="cargoStatus" label={<>화물<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="customsStatus" label={<>통관<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirArrivalData> columnKey="arrivalNotice" label="A/N" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirArrivalData> columnKey="releaseOrder" label="R/O" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">

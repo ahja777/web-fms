@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface CargoStatus {
   id: string;
@@ -81,6 +82,7 @@ export default function CargoStatusPage() {
     onConfirmClose: handleConfirmClose,
   });
 
+  const { sortConfig, handleSort, sortData } = useSorting<CargoStatus>();
   const [allData] = useState<CargoStatus[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -346,17 +348,17 @@ export default function CargoStatusPage() {
                         className="rounded"
                       />
                     </th>
-                    <th className="p-3 text-left text-sm">B/L No</th>
-                    <th className="p-3 text-left text-sm">컨테이너 No</th>
-                    <th className="p-3 text-left text-sm">고객사</th>
-                    <th className="p-3 text-left text-sm">품명</th>
-                    <th className="p-3 text-right text-sm">중량<br/>(kg)</th>
-                    <th className="p-3 text-right text-sm">용적<br/>(CBM)</th>
-                    <th className="p-3 text-left text-sm">보관<br/>장소</th>
-                    <th className="p-3 text-left text-sm">위치</th>
-                    <th className="p-3 text-center text-sm">입고일</th>
-                    <th className="p-3 text-center text-sm">통관<br/>상태</th>
-                    <th className="p-3 text-center text-sm">상태</th>
+                    <SortableHeader columnKey="blNo" label="B/L No" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="containerNo" label="컨테이너 No" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="customerName" label="고객사" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="commodity" label="품명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="weight" label={<>중량<br/>(kg)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader columnKey="volume" label={<>용적<br/>(CBM)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader columnKey="location" label={<>보관<br/>장소</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="warehouseZone" label="위치" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="inDate" label="입고일" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="customsStatus" label={<>통관<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
@@ -367,7 +369,7 @@ export default function CargoStatusPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr
                         key={row.id}
                         className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`}

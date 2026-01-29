@@ -11,6 +11,7 @@ import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { StuffingOrderModal, type StuffingOrderItem } from '@/components/popup';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface StuffingData {
   id: number;
@@ -62,6 +63,7 @@ export default function StuffingPage() {
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<StuffingData[]>(mockData);
   const [showSOModal, setShowSOModal] = useState(false);
+  const { sortConfig, handleSort, sortData } = useSorting<StuffingData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -79,13 +81,13 @@ export default function StuffingPage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.stuffingNo && !item.stuffingNo.includes(appliedFilters.stuffingNo)) return false;
     if (appliedFilters.bookingNo && !item.bookingNo.includes(appliedFilters.bookingNo)) return false;
     if (appliedFilters.shipper && !item.shipper.includes(appliedFilters.shipper)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -172,17 +174,17 @@ export default function StuffingPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">작업<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">작업<br/>일시</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">창고</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">PKG</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">G/W (KG)</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">CBM</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Seal No.</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<StuffingData> columnKey="stuffingNo" label={<>작업<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="stuffingDate" label={<>작업<br/>일시</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="warehouse" label="창고" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="packages" label="PKG" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<StuffingData> columnKey="grossWeight" label="G/W (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<StuffingData> columnKey="volume" label="CBM" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<StuffingData> columnKey="sealNo" label="Seal No." sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<StuffingData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

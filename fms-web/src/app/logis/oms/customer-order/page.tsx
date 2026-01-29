@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface CustomerOrder {
   id: number;
@@ -55,6 +56,7 @@ export default function CustomerOrderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<CustomerOrder | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { sortConfig, handleSort, sortData } = useSorting<CustomerOrder>();
 
   // 검색 필터
   const [searchFilters, setSearchFilters] = useState({
@@ -399,16 +401,16 @@ export default function CustomerOrderPage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">C/O No.</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">상태</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">오더타입</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">고객명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">POL</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">POD</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">ETD</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">품목</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">수량</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">중량(KG)</th>
+                <SortableHeader<CustomerOrder> columnKey="co_number" label="C/O No." sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="order_type_code" label="오더타입" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="customer_name" label="고객명" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="pol" label="POL" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="pod" label="POD" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="etd" label="ETD" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="commodity" label="품목" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="quantity" label="수량" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<CustomerOrder> columnKey="weight" label="중량(KG)" sortConfig={sortConfig} onSort={handleSort} />
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
               </tr>
             </thead>
@@ -426,7 +428,7 @@ export default function CustomerOrderPage() {
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                sortData(orders).map((order) => (
                   <tr key={order.id} className="hover:bg-[var(--surface-200)]/50 transition-colors">
                     <td className="px-4 py-3">
                       <input

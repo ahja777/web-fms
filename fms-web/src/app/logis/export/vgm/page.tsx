@@ -10,6 +10,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface VGMData {
   id: number;
@@ -63,6 +64,7 @@ export default function VGMPage() {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<VGMData[]>(mockData);
+  const { sortConfig, handleSort, sortData } = useSorting<VGMData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -75,13 +77,13 @@ export default function VGMPage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.vgmNo && !item.vgmNo.includes(appliedFilters.vgmNo)) return false;
     if (appliedFilters.containerNo && !item.containerNo.includes(appliedFilters.containerNo)) return false;
     if (appliedFilters.shipper && !item.shipper.includes(appliedFilters.shipper)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -168,17 +170,17 @@ export default function VGMPage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">VGM 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">Tare (KG)</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">Cargo (KG)</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">VGM (KG)</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Method</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Cut-Off</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">제출일</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<VGMData> columnKey="vgmNo" label="VGM 번호" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="tareWeight" label="Tare (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<VGMData> columnKey="cargoWeight" label="Cargo (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<VGMData> columnKey="vgmWeight" label="VGM (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<VGMData> columnKey="weighingMethod" label="Method" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="cutOffDate" label="Cut-Off" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="submittedDate" label="제출일" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<VGMData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                   <th className="px-4 py-3 text-center text-sm font-medium">액션</th>
                 </tr>
               </thead>

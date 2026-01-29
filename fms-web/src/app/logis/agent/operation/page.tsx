@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface AgentOperation {
   id: string;
@@ -79,6 +80,7 @@ export default function AgentOperationPage() {
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchMessage, setSearchMessage] = useState<string>('');
+  const { sortConfig, handleSort, sortData } = useSorting<AgentOperation>();
 
   const filteredList = useMemo(() => {
     return allData.filter(item => {
@@ -216,23 +218,23 @@ export default function AgentOperationPage() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <th className="p-3 text-left text-sm">대리점<br/>코드</th>
-                    <th className="p-3 text-left text-sm">대리점명</th>
-                    <th className="p-3 text-left text-sm">유형</th>
-                    <th className="p-3 text-center text-sm">국가</th>
-                    <th className="p-3 text-left text-sm">도시</th>
-                    <th className="p-3 text-left text-sm">담당자</th>
-                    <th className="p-3 text-left text-sm">이메일</th>
-                    <th className="p-3 text-center text-sm">계약<br/>기간</th>
-                    <th className="p-3 text-right text-sm">수수료(%)</th>
-                    <th className="p-3 text-center text-sm">상태</th>
+                    <SortableHeader<AgentOperation> columnKey="agentCode" label={<>대리점<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="agentName" label="대리점명" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="agentType" label="유형" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="country" label="국가" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AgentOperation> columnKey="city" label="도시" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="contactPerson" label="담당자" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="email" label="이메일" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AgentOperation> columnKey="contractStart" label={<>계약<br/>기간</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AgentOperation> columnKey="commission" label="수수료(%)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                    <SortableHeader<AgentOperation> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={11} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    filteredList.map((row) => (
+                    sortData(filteredList).map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
                         <td className="p-3 text-[#2563EB] font-medium">{row.agentCode}</td>

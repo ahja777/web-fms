@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface OrderType {
   id: number;
@@ -29,6 +30,7 @@ export default function OrderTypePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<OrderType | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { sortConfig, handleSort, sortData } = useSorting<OrderType>();
 
   // 검색 필터
   const [searchFilters, setSearchFilters] = useState({
@@ -319,12 +321,12 @@ export default function OrderTypePage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">타입<br/>코드</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">타입 명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">비즈니스<br/>타입</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">설명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">연계<br/>시스템</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">활성</th>
+                <SortableHeader<OrderType> columnKey="order_type_code" label={<>타입<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<OrderType> columnKey="order_type_name" label="타입 명" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<OrderType> columnKey="biz_type" label={<>비즈니스<br/>타입</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<OrderType> columnKey="description" label="설명" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<OrderType> columnKey="related_system" label={<>연계<br/>시스템</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<OrderType> columnKey="is_active" label="활성" sortConfig={sortConfig} onSort={handleSort} align="center" />
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
               </tr>
             </thead>
@@ -342,7 +344,7 @@ export default function OrderTypePage() {
                   </td>
                 </tr>
               ) : (
-                orderTypes.map((type) => (
+                sortData(orderTypes).map((type) => (
                   <tr key={type.id} className="hover:bg-[var(--surface-200)]/50 transition-colors">
                     <td className="px-4 py-3">
                       <input

@@ -10,6 +10,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface DocumentData {
   id: number;
@@ -72,6 +73,7 @@ export default function DocumentPage() {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<DocumentData[]>(mockData);
+  const { sortConfig, handleSort, sortData } = useSorting<DocumentData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -84,14 +86,14 @@ export default function DocumentPage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.docNo && !item.docNo.includes(appliedFilters.docNo)) return false;
     if (appliedFilters.blNo && !item.blNo.includes(appliedFilters.blNo)) return false;
     if (appliedFilters.docType && item.docType !== appliedFilters.docType) return false;
     if (appliedFilters.shipper && !item.shipper.includes(appliedFilters.shipper)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -190,15 +192,15 @@ export default function DocumentPage() {
               <thead className="bg-[var(--surface-100)]">
                 <tr>
                   <th className="px-2 py-3 text-center text-sm font-medium w-10"><input type="checkbox" /></th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">서류<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">유형</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">서류명</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">B/L 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">파일명</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">크기</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">업로드<br/>일</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<DocumentData> columnKey="docNo" label={<>서류<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="docType" label="유형" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="docName" label="서류명" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="blNo" label="B/L 번호" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="fileName" label="파일명" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="fileSize" label="크기" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="uploadDate" label={<>업로드<br/>일</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<DocumentData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                   <th className="px-4 py-3 text-center text-sm font-medium">액션</th>
                 </tr>
               </thead>

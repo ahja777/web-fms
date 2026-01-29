@@ -11,6 +11,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface CargoReleaseData {
   id: number;
@@ -66,6 +67,7 @@ export default function CargoReleasePage() {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<CargoReleaseData[]>(mockData);
+  const { sortConfig, handleSort, sortData } = useSorting<CargoReleaseData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -177,20 +179,20 @@ export default function CargoReleasePage() {
             <table className="w-full">
               <thead className="bg-[var(--surface-100)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">반출입<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">구분</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">B/L 번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">일시</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">장소</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">G/W (KG)</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">차량<br/>번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">통관</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<CargoReleaseData> columnKey="releaseNo" label={<>반출입<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="releaseType" label="구분" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="blNo" label="B/L 번호" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="releaseDate" label="일시" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="location" label="장소" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="grossWeight" label="G/W (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<CargoReleaseData> columnKey="truckNo" label={<>차량<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="customsStatus" label="통관" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<CargoReleaseData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {filteredData.map(item => (
+                {sortData(filteredData).map(item => (
                   <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
                     <td className="px-4 py-3"><Link href={`/logis/cargo/release/${item.id}`} className="text-blue-400 hover:underline">{item.releaseNo}</Link></td>
                     <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full ${item.releaseType === '반출' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{item.releaseType}</span></td>

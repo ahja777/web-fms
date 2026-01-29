@@ -2002,13 +2002,13 @@ function BLSeaRegisterContent() {
             <span className="text-sm text-[var(--muted)]">화면 ID: HBL-SEA-REG</span>
             <div className="flex gap-2">
               <button
-                onClick={() => { setFormData({}); }}
+                onClick={() => router.push('/logis/bl/sea/house/register')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
               >
                 신규
               </button>
               <button
-                onClick={() => { setFormData({}); }}
+                onClick={() => router.push('/logis/bl/sea/house/register')}
                 className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
               >
                 초기화

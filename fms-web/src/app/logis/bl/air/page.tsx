@@ -12,6 +12,7 @@ import SelectionAlertModal from '@/components/SelectionAlertModal';
 import EmailModal from '@/components/EmailModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
 import { ActionButton } from '@/components/buttons';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 // 화면설계서 UI-G-01-07-05 기준 검색조건 인터페이스
 interface SearchFilters {
@@ -115,6 +116,7 @@ export default function BLAirPage() {
   const [showSelectionAlert, setShowSelectionAlert] = useState(false);
 
   // 검색 팝업 상태
+  const { sortConfig, handleSort, sortData } = useSorting<AirAWB>();
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
   const [searchModalType, setSearchModalType] = useState<CodeType>('customer');
   const [searchTargetField, setSearchTargetField] = useState<keyof SearchFilters>('shipperCode');
@@ -150,7 +152,7 @@ export default function BLAirPage() {
   }, []);
 
   const filteredList = useMemo(() => {
-    return allData.filter(item => {
+    const filtered = allData.filter(item => {
       if (appliedFilters.ioType && item.ioType !== appliedFilters.ioType) return false;
       if (appliedFilters.obDateFrom && item.obDate < appliedFilters.obDateFrom) return false;
       if (appliedFilters.obDateTo && item.obDate > appliedFilters.obDateTo) return false;
@@ -162,7 +164,8 @@ export default function BLAirPage() {
       if (appliedFilters.flightNo && !item.flightNo?.toLowerCase().includes(appliedFilters.flightNo.toLowerCase())) return false;
       return true;
     });
-  }, [allData, appliedFilters]);
+    return sortData(filtered);
+  }, [allData, appliedFilters, sortData]);
 
   // 핸들러
   const handleSearch = useCallback(() => {
@@ -576,18 +579,18 @@ export default function BLAirPage() {
                       />
                     </th>
                     <th className="p-3 text-center text-sm font-semibold">No</th>
-                    <th className="p-3 text-center text-sm font-semibold">O/B.Date</th>
-                    <th className="p-3 text-center text-sm font-semibold">A/R.Date</th>
-                    <th className="p-3 text-left text-sm font-semibold">JOB.NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">MAWB NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">HAWB NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">L/C NO.</th>
-                    <th className="p-3 text-left text-sm font-semibold">P/O NO.</th>
-                    <th className="p-3 text-center text-sm font-semibold">TYPE</th>
-                    <th className="p-3 text-center text-sm font-semibold">D/C</th>
-                    <th className="p-3 text-center text-sm font-semibold">L/N</th>
-                    <th className="p-3 text-center text-sm font-semibold">PC</th>
-                    <th className="p-3 text-center text-sm font-semibold">INCO</th>
+                    <SortableHeader<AirAWB> columnKey="obDate" label="O/B.Date" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="arDate" label="A/R.Date" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="jobNo" label="JOB.NO." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirAWB> columnKey="mawbNo" label="MAWB NO." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirAWB> columnKey="hawbNo" label="HAWB NO." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirAWB> columnKey="lcNo" label="L/C NO." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirAWB> columnKey="poNo" label="P/O NO." sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<AirAWB> columnKey="type" label="TYPE" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="dc" label="D/C" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="ln" label="L/N" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="pc" label="PC" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<AirAWB> columnKey="inco" label="INCO" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   </tr>
                 </thead>
                 <tbody>

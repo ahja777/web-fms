@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import AWBSelectModal from '@/components/AWBSelectModal';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface AWBData {
   mawb_id: number;
@@ -95,6 +96,9 @@ export default function PreAlertPage() {
     use_yn: 'Y',
     addresses: [],
   });
+
+  const { sortConfig: settingsSortConfig, handleSort: handleSettingsSort, sortData: sortSettingsData } = useSorting<PreAlertSetting>();
+  const { sortConfig: logsSortConfig, handleSort: handleLogsSort, sortData: sortLogsData } = useSorting<MailLog>();
 
   const [logFilters, setLogFilters] = useState({
     docNo: '',
@@ -332,14 +336,14 @@ export default function PreAlertPage() {
                 <table className="w-full">
                   <thead className="bg-[var(--surface-100)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium">설정명</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Service</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Shipper</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Consignee</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">POL/POD</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Base Date</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Auto</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">사용</th>
+                      <SortableHeader<PreAlertSetting> columnKey="setting_name" label="설정명" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="service_group" label="Service" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="shipper_code" label="Shipper" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="consignee_code" label="Consignee" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="pol_code" label="POL/POD" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="base_date_type" label="Base Date" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="auto_send_yn" label="Auto" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
+                      <SortableHeader<PreAlertSetting> columnKey="use_yn" label="사용" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
                       <th className="px-4 py-3 text-center text-sm font-medium">관리</th>
                     </tr>
                   </thead>
@@ -357,7 +361,7 @@ export default function PreAlertPage() {
                         </td>
                       </tr>
                     ) : (
-                      settings.map(item => (
+                      sortSettingsData(settings).map(item => (
                         <tr key={item.setting_id} className="hover:bg-[var(--surface-50)]">
                           <td className="px-4 py-3 text-sm font-medium">{item.setting_name}</td>
                           <td className="px-4 py-3 text-sm">{item.service_group}</td>
@@ -465,13 +469,13 @@ export default function PreAlertPage() {
                 <table className="w-full">
                   <thead className="bg-[var(--surface-100)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">Doc No.</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">제목</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">From</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">To</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">발송일시</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">설정</th>
+                      <SortableHeader<MailLog> columnKey="status" label="상태" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="doc_no" label="Doc No." sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="mail_subject" label="제목" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="mail_from" label="From" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="mail_to" label="To" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="send_dt_fmt" label="발송일시" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <SortableHeader<MailLog> columnKey="setting_name" label="설정" sortConfig={logsSortConfig} onSort={handleLogsSort} />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
@@ -488,7 +492,7 @@ export default function PreAlertPage() {
                         </td>
                       </tr>
                     ) : (
-                      logs.map(log => (
+                      sortLogsData(logs).map(log => (
                         <tr key={log.log_id} className="hover:bg-[var(--surface-50)]">
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[log.status]?.color || 'bg-gray-500'}`}>

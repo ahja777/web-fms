@@ -12,6 +12,7 @@ import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import AWBPrintModal, { AWBData as AWBPrintData } from '@/components/AWBPrintModal';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface AWBData {
   mawb_id: number;
@@ -75,6 +76,7 @@ export default function ExportAWBListPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showSelectionAlert, setShowSelectionAlert] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const { sortConfig, handleSort, sortData } = useSorting<AWBData>();
 
   // 데이터 조회
   const fetchData = useCallback(async () => {
@@ -114,11 +116,12 @@ export default function ExportAWBListPage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredDataUnsorted = data.filter(item => {
     if (appliedFilters.flightNo && !item.flight_no?.toLowerCase().includes(appliedFilters.flightNo.toLowerCase())) return false;
     if (appliedFilters.shipper && !item.shipper_nm?.includes(appliedFilters.shipper)) return false;
     return true;
   });
+  const filteredData = sortData(filteredDataUnsorted);
 
   const summaryStats = {
     total: filteredData.length,
@@ -324,17 +327,17 @@ export default function ExportAWBListPage() {
                       className="rounded"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">MAWB No.</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">항공사</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">편명</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">ETD</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">품명</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">PCS</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">G/W</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">HAWB</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                  <SortableHeader<AWBData> columnKey="mawb_no" label="MAWB No." sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="carrier_name" label="항공사" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="flight_no" label="편명" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="etd_dt" label="ETD" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="origin_airport_cd" label="구간" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="shipper_nm" label="화주" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="commodity_desc" label="품명" sortConfig={sortConfig} onSort={handleSort} />
+                  <SortableHeader<AWBData> columnKey="pieces" label="PCS" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<AWBData> columnKey="gross_weight_kg" label="G/W" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<AWBData> columnKey="hawb_count" label="HAWB" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader<AWBData> columnKey="status_cd" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

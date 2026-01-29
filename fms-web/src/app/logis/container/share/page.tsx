@@ -10,6 +10,7 @@ import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface ContainerShareData {
   id: number;
@@ -78,6 +79,7 @@ export default function ContainerSharePage() {
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<ContainerShareData[]>(mockData);
   const [selectedShare, setSelectedShare] = useState<ContainerShareData | null>(null);
+  const { sortConfig, handleSort, sortData } = useSorting<ContainerShareData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -90,14 +92,14 @@ export default function ContainerSharePage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = data.filter(item => {
+  const filteredData = sortData(data.filter(item => {
     if (appliedFilters.shareNo && !item.shareNo.includes(appliedFilters.shareNo)) return false;
     if (appliedFilters.containerNo && !item.containerNo.includes(appliedFilters.containerNo)) return false;
     if (appliedFilters.pol && !item.pol.includes(appliedFilters.pol)) return false;
     if (appliedFilters.pod && !item.pod.includes(appliedFilters.pod)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  });
+  }));
 
   const summaryStats = {
     total: filteredData.length,
@@ -185,14 +187,14 @@ export default function ContainerSharePage() {
               <table className="w-full">
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">공유<br/>번호</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">컨테이너</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">구간</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">ETD</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">선명/항차</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">적입<br/>현황</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">HBL</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
+                    <SortableHeader<ContainerShareData> columnKey="shareNo" label={<>공유<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="pol" label="구간" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="etd" label="ETD" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="usedWeight" label={<>적입<br/>현황</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader<ContainerShareData> columnKey="hblCount" label="HBL" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <SortableHeader<ContainerShareData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">

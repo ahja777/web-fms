@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface SOControl {
   id: number;
@@ -51,6 +52,7 @@ export default function SOControlPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingControl, setEditingControl] = useState<SOControl | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { sortConfig, handleSort, sortData } = useSorting<SOControl>();
 
   // 폼 데이터
   const [formData, setFormData] = useState({
@@ -289,15 +291,15 @@ export default function SOControlPage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤<br/>코드</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">컨트롤<br/>명</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">고객<br/>코드</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">오더타입</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">유효성<br/>검사</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동<br/>릴리즈</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">자동값<br/>할당</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--foreground)]/70">처리<br/>방법</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">활성</th>
+                <SortableHeader<SOControl> columnKey="control_code" label={<>컨트롤<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="control_name" label={<>컨트롤<br/>명</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="customer_code" label={<>고객<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="order_type_code" label="오더타입" sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="check_validation" label={<>유효성<br/>검사</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="auto_release" label={<>자동<br/>릴리즈</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="auto_value_assignment" label={<>자동값<br/>할당</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                <SortableHeader<SOControl> columnKey="method_type" label={<>처리<br/>방법</>} sortConfig={sortConfig} onSort={handleSort} />
+                <SortableHeader<SOControl> columnKey="is_active" label="활성" sortConfig={sortConfig} onSort={handleSort} align="center" />
                 <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--foreground)]/70">작업</th>
               </tr>
             </thead>
@@ -315,7 +317,7 @@ export default function SOControlPage() {
                   </td>
                 </tr>
               ) : (
-                controls.map((control) => (
+                sortData(controls).map((control) => (
                   <tr key={control.id} className="hover:bg-[var(--surface-200)]/50 transition-colors">
                     <td className="px-4 py-3">
                       <input
