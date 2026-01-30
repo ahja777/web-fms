@@ -5,10 +5,10 @@ import { LIST_PATHS } from '@/constants/paths';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
+import SearchFilterPanel, { SearchFilterGrid, SearchFilterField, DateRangeField, TextField, SelectField } from '@/components/search/SearchFilterPanel';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 
@@ -38,13 +38,29 @@ interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-// 정렬 아이콘 컴포넌트
+// 정렬 아이콘 컴포넌트 (CSS 삼각형 스타일)
 const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof AMSData; sortConfig: SortConfig }) => {
   const isActive = sortConfig.key === columnKey;
   return (
-    <span className="inline-flex flex-col ml-1 text-[10px] leading-none">
-      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
-      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
     </span>
   );
 };
@@ -198,10 +214,10 @@ export default function AMSListPage() {
   // 정렬 가능한 헤더 컴포넌트
   const SortableHeader = ({ columnKey, children, className = '' }: { columnKey: keyof AMSData; children: React.ReactNode; className?: string }) => (
     <th
-      className={`px-4 py-3 text-left text-sm font-medium cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
+      className={`cursor-pointer select-none text-center ${className}`}
       onClick={() => handleSort(columnKey)}
     >
-      <span className="inline-flex items-center">
+      <span className="inline-flex items-center justify-center">
         {children}
         <SortIcon columnKey={columnKey} sortConfig={sortConfig} />
       </span>
@@ -276,82 +292,91 @@ export default function AMSListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="AMS 관리" subtitle="Logis > AMS > AMS 관리 (해상)" />
+        <PageLayout title="AMS 관리" subtitle="Logis > AMS > AMS 관리 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
-              <Link href="/logis/ams/sea/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
+              <Link href="/logis/ams/sea/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
                 신규 등록
               </Link>
             </div>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AMS 일자</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AMS 번호</label>
-                <input type="text" value={filters.amsNo} onChange={e => setFilters(prev => ({ ...prev, amsNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="AMS-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={e => setFilters(prev => ({ ...prev, blNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AMS 유형</label>
-                <select value={filters.amsType} onChange={e => setFilters(prev => ({ ...prev, amsType: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="AMS">AMS (미국)</option>
-                  <option value="ISF">ISF (미국)</option>
-                  <option value="ACI">ACI (캐나다)</option>
-                  <option value="ENS">ENS (EU)</option>
-                  <option value="AFR">AFR (일본)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">대상국가</label>
-                <select value={filters.targetCountry} onChange={e => setFilters(prev => ({ ...prev, targetCountry: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="USA">USA</option>
-                  <option value="Canada">Canada</option>
-                  <option value="EU">EU</option>
-                  <option value="Japan">Japan</option>
-                  <option value="Mexico">Mexico</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">화주</label>
-                <input type="text" value={filters.shipper} onChange={e => setFilters(prev => ({ ...prev, shipper: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="DRAFT">작성중</option>
-                  <option value="SENT">전송완료</option>
-                  <option value="ACCEPTED">접수완료</option>
-                  <option value="HOLD">HOLD</option>
-                  <option value="REJECTED">반려</option>
-                </select>
-              </div>
-              <div className="flex items-end gap-2">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
-            </div>
-          </div>
+          {/* 검색조건 - SearchFilterPanel 컴포넌트 사용 */}
+          <SearchFilterPanel onSearch={handleSearch} onReset={handleReset} className="mb-6">
+            <SearchFilterGrid columns={4}>
+              <SearchFilterField label="AMS 일자" colSpan={2}>
+                <DateRangeField
+                  startValue={filters.startDate}
+                  endValue={filters.endDate}
+                  onStartChange={(value) => setFilters(prev => ({ ...prev, startDate: value }))}
+                  onEndChange={(value) => setFilters(prev => ({ ...prev, endDate: value }))}
+                />
+                <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+              </SearchFilterField>
+              <SearchFilterField label="AMS 번호">
+                <TextField
+                  value={filters.amsNo}
+                  onChange={(value) => setFilters(prev => ({ ...prev, amsNo: value }))}
+                  placeholder="AMS-YYYY-XXXX"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="B/L 번호">
+                <TextField
+                  value={filters.blNo}
+                  onChange={(value) => setFilters(prev => ({ ...prev, blNo: value }))}
+                  placeholder="HDMU1234567"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="AMS 유형">
+                <SelectField
+                  value={filters.amsType}
+                  onChange={(value) => setFilters(prev => ({ ...prev, amsType: value }))}
+                  options={[
+                    { value: 'AMS', label: 'AMS (미국)' },
+                    { value: 'ISF', label: 'ISF (미국)' },
+                    { value: 'ACI', label: 'ACI (캐나다)' },
+                    { value: 'ENS', label: 'ENS (EU)' },
+                    { value: 'AFR', label: 'AFR (일본)' },
+                  ]}
+                />
+              </SearchFilterField>
+              <SearchFilterField label="대상국가">
+                <SelectField
+                  value={filters.targetCountry}
+                  onChange={(value) => setFilters(prev => ({ ...prev, targetCountry: value }))}
+                  options={[
+                    { value: 'USA', label: 'USA' },
+                    { value: 'Canada', label: 'Canada' },
+                    { value: 'EU', label: 'EU' },
+                    { value: 'Japan', label: 'Japan' },
+                    { value: 'Mexico', label: 'Mexico' },
+                  ]}
+                />
+              </SearchFilterField>
+              <SearchFilterField label="화주">
+                <TextField
+                  value={filters.shipper}
+                  onChange={(value) => setFilters(prev => ({ ...prev, shipper: value }))}
+                  placeholder="화주명"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="상태">
+                <SelectField
+                  value={filters.status}
+                  onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                  options={[
+                    { value: 'DRAFT', label: '작성중' },
+                    { value: 'SENT', label: '전송완료' },
+                    { value: 'ACCEPTED', label: '접수완료' },
+                    { value: 'HOLD', label: 'HOLD' },
+                    { value: 'REJECTED', label: '반려' },
+                  ]}
+                />
+              </SearchFilterField>
+            </SearchFilterGrid>
+          </SearchFilterPanel>
 
           <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
@@ -365,10 +390,10 @@ export default function AMSListPage() {
             {loading ? (
               <div className="p-8 text-center text-[var(--muted)]">데이터를 불러오는 중...</div>
             ) : (
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">
+                    <th className="text-center w-12">
                       <input type="checkbox" checked={selectedIds.length === sortedData.length && sortedData.length > 0} onChange={e => handleSelectAll(e.target.checked)} className="w-4 h-4" />
                     </th>
                     <SortableHeader columnKey="amsNo">AMS 번호</SortableHeader>
@@ -382,27 +407,27 @@ export default function AMSListPage() {
                     <SortableHeader columnKey="filingDeadline">Filing 마감</SortableHeader>
                     <SortableHeader columnKey="responseCode">Response</SortableHeader>
                     <SortableHeader columnKey="status">상태</SortableHeader>
-                    <th className="px-4 py-3 text-left text-sm font-medium">전송</th>
+                    <th className="text-center">전송</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {sortedData.map(item => (
                     <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={e => handleSelectOne(item.id, e.target.checked)} className="w-4 h-4" />
                       </td>
-                      <td className="px-4 py-3"><Link href={'/logis/ams/sea/' + item.id} className="text-blue-400 hover:underline">{item.amsNo}</Link></td>
-                      <td className="px-4 py-3 text-sm">{item.amsDate}</td>
-                      <td className="px-4 py-3 text-sm font-medium">{item.amsType}</td>
-                      <td className="px-4 py-3 text-sm">{item.targetCountry}</td>
-                      <td className="px-4 py-3 text-sm">{item.blNo}</td>
-                      <td className="px-4 py-3 text-sm">{item.shipper}</td>
-                      <td className="px-4 py-3 text-sm">{item.vessel}<br /><span className="text-[var(--muted)]">{item.voyage}</span></td>
-                      <td className="px-4 py-3 text-sm">{item.pol} → {item.pod}</td>
-                      <td className="px-4 py-3 text-sm text-xs">{item.filingDeadline}</td>
-                      <td className="px-4 py-3 text-sm"><span className={responseConfig[item.responseCode]?.color || 'text-gray-500'}>{responseConfig[item.responseCode]?.label || '-'}</span></td>
-                      <td className="px-4 py-3"><span className={'px-2 py-1 text-xs rounded-full text-white ' + (statusConfig[item.status]?.color || 'bg-gray-500')}>{statusConfig[item.status]?.label || item.status}</span></td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center"><Link href={'/logis/ams/sea/' + item.id} className="text-blue-400 hover:underline">{item.amsNo}</Link></td>
+                      <td className="px-4 py-3 text-sm text-center">{item.amsDate}</td>
+                      <td className="px-4 py-3 text-sm text-center font-medium">{item.amsType}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.targetCountry}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.blNo}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.shipper}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.vessel}<br /><span className="text-[var(--muted)]">{item.voyage}</span></td>
+                      <td className="px-4 py-3 text-sm text-center">{item.pol} → {item.pod}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.filingDeadline}</td>
+                      <td className="px-4 py-3 text-sm text-center"><span className={responseConfig[item.responseCode]?.color || 'text-gray-500'}>{responseConfig[item.responseCode]?.label || '-'}</span></td>
+                      <td className="px-4 py-3 text-center"><span className={'px-2 py-1 text-xs rounded-full text-white ' + (statusConfig[item.status]?.color || 'bg-gray-500')}>{statusConfig[item.status]?.label || item.status}</span></td>
+                      <td className="px-4 py-3 text-center">
                         {item.status === 'DRAFT' && (
                           <button onClick={() => handleSendAMS(item.id)} className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">전송</button>
                         )}
@@ -414,13 +439,11 @@ export default function AMSListPage() {
             )}
           </div>
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

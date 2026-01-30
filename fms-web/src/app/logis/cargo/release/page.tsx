@@ -5,13 +5,11 @@ import { LIST_PATHS } from '@/constants/paths';
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface CargoReleaseData {
   id: number;
@@ -67,7 +65,6 @@ export default function CargoReleasePage() {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<CargoReleaseData[]>(mockData);
-  const { sortConfig, handleSort, sortData } = useSorting<CargoReleaseData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -113,62 +110,67 @@ export default function CargoReleasePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="화물반출입관리" subtitle="Logis > B/L관리 > 화물반출입관리" />
+        <PageLayout title="화물반출입관리" subtitle="Logis > B/L관리 > 화물반출입관리" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <Link href="/logis/cargo/release/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+          <div className="flex justify-end items-center mb-6">
+            <Link href="/logis/cargo/release/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
               신규 등록
             </Link>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">반출입 일자</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">반출입 일자</label>
+                  <div className="flex gap-2 items-center flex-nowrap">
+                    <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <span className="text-[var(--muted)] flex-shrink-0">~</span>
+                    <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호</label>
+                  <input type="text" value={filters.blNo} onChange={e => setFilters(prev => ({ ...prev, blNo: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="HDMU1234567" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">컨테이너 번호</label>
+                  <input type="text" value={filters.containerNo} onChange={e => setFilters(prev => ({ ...prev, containerNo: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="HDMU1234567" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">구분</label>
+                  <select value={filters.releaseType} onChange={e => setFilters(prev => ({ ...prev, releaseType: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="반출">반출</option>
+                    <option value="반입">반입</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="REQUESTED">요청</option>
+                    <option value="APPROVED">승인</option>
+                    <option value="IN_PROGRESS">진행중</option>
+                    <option value="COMPLETED">완료</option>
+                  </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={e => setFilters(prev => ({ ...prev, blNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">컨테이너 번호</label>
-                <input type="text" value={filters.containerNo} onChange={e => setFilters(prev => ({ ...prev, containerNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">구분</label>
-                <select value={filters.releaseType} onChange={e => setFilters(prev => ({ ...prev, releaseType: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="반출">반출</option>
-                  <option value="반입">반입</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="REQUESTED">요청</option>
-                  <option value="APPROVED">승인</option>
-                  <option value="IN_PROGRESS">진행중</option>
-                  <option value="COMPLETED">완료</option>
-                </select>
-              </div>
-              <div className="flex items-end gap-2 col-span-3">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.requested}</div><div className="text-sm text-[var(--muted)]">요청</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-yellow-500">{summaryStats.inProgress}</div><div className="text-sm text-[var(--muted)]">진행중</div></div>
@@ -176,48 +178,46 @@ export default function CargoReleasePage() {
           </div>
 
           <div className="card overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <SortableHeader<CargoReleaseData> columnKey="releaseNo" label={<>반출입<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="releaseType" label="구분" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="blNo" label="B/L 번호" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="releaseDate" label="일시" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="location" label="장소" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="grossWeight" label="G/W (KG)" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader<CargoReleaseData> columnKey="truckNo" label={<>차량<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="customsStatus" label="통관" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader<CargoReleaseData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
+                  <th className="text-center">반출입번호</th>
+                  <th className="text-center">구분</th>
+                  <th className="text-center">B/L 번호</th>
+                  <th className="text-center">컨테이너</th>
+                  <th className="text-center">일시</th>
+                  <th className="text-center">장소</th>
+                  <th className="text-center">G/W (KG)</th>
+                  <th className="text-center">차량번호</th>
+                  <th className="text-center">통관</th>
+                  <th className="text-center">상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {sortData(filteredData).map(item => (
+                {filteredData.map(item => (
                   <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                    <td className="px-4 py-3"><Link href={`/logis/cargo/release/${item.id}`} className="text-blue-400 hover:underline">{item.releaseNo}</Link></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full ${item.releaseType === '반출' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{item.releaseType}</span></td>
-                    <td className="px-4 py-3 text-sm">{item.blNo}</td>
-                    <td className="px-4 py-3 text-sm">{item.containerNo} ({item.containerType})</td>
-                    <td className="px-4 py-3 text-sm">{item.releaseDate} {item.releaseTime}</td>
-                    <td className="px-4 py-3 text-sm">{item.location}</td>
-                    <td className="px-4 py-3 text-sm text-right">{item.grossWeight.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm">{item.truckNo || '-'}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${item.customsStatus === 'CLEARED' ? 'bg-green-500' : 'bg-yellow-500'}`}>{item.customsStatus === 'CLEARED' ? '통관완료' : '대기'}</span></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
+                    <td className="px-4 py-3 text-center"><Link href={`/logis/cargo/release/${item.id}`} className="text-blue-400 hover:underline">{item.releaseNo}</Link></td>
+                    <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full ${item.releaseType === '반출' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>{item.releaseType}</span></td>
+                    <td className="px-4 py-3 text-sm text-center">{item.blNo}</td>
+                    <td className="px-4 py-3 text-sm text-center">{item.containerNo} ({item.containerType})</td>
+                    <td className="px-4 py-3 text-sm text-center">{item.releaseDate} {item.releaseTime}</td>
+                    <td className="px-4 py-3 text-sm text-center">{item.location}</td>
+                    <td className="px-4 py-3 text-sm text-center">{item.grossWeight.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-center">{item.truckNo || '-'}</td>
+                    <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full text-white ${item.customsStatus === 'CLEARED' ? 'bg-green-500' : 'bg-yellow-500'}`}>{item.customsStatus === 'CLEARED' ? '통관완료' : '대기'}</span></td>
+                    <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,12 +2,11 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
 import ExchangeRateModal from '@/components/ExchangeRateModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
-import { useScreenClose } from '@/hooks/useScreenClose';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { DimensionsCalculatorModal } from '@/components/popup';
 
 export default function ExportAWBRegisterPage() {
@@ -15,7 +14,8 @@ export default function ExportAWBRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-    const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,21 +59,18 @@ export default function ExportAWBRegisterPage() {
     remarks: '',
   });
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const handleConfirmClose = () => {
+    setShowCloseModal(false);
+    router.push('/logis/export-awb/air');
+  };
 
-  // 화면닫기 통합 훅
-  const {
+  useCloseConfirm({
     showModal: showCloseModal,
-    handleCloseClick,
-    handleModalClose,
-    handleDiscard: handleDiscardChanges,
-  } = useScreenClose({
-    hasChanges: hasUnsavedChanges,
-    listPath: '/logis/export-awb/air',
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setHasUnsavedChanges(true);
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -149,7 +146,7 @@ export default function ExportAWBRegisterPage() {
   };
 
   const handleCancel = () => {
-    handleCloseClick();
+    setShowCloseModal(true);
   };
 
   const handleExchangeRateSelect = (rate: { currencyCode: string; dealBasR: number }) => {
@@ -158,15 +155,61 @@ export default function ExportAWBRegisterPage() {
     setExchangeRate(rate.dealBasR);
   };
 
+  const handleFillTestData = () => {
+    setFormData({
+      awb_type: 'MAWB',
+      mawb_no: '',
+      airline_code: 'KE',
+      carrier_id: '',
+      flight_no: 'KE001',
+      origin_airport_cd: 'ICN',
+      dest_airport_cd: 'LAX',
+      etd_dt: '2026-01-25',
+      etd_time: '10:00',
+      eta_dt: '2026-01-25',
+      eta_time: '08:30',
+      atd_dt: '',
+      atd_time: '',
+      ata_dt: '',
+      ata_time: '',
+      issue_dt: new Date().toISOString().split('T')[0],
+      issue_place: 'SEOUL',
+      shipper_nm: '삼성전자 주식회사',
+      shipper_addr: '경기도 수원시 영통구 삼성로 129',
+      consignee_nm: 'Samsung America Inc.',
+      consignee_addr: '85 Challenger Road, Ridgefield Park, NJ 07660',
+      notify_party: 'SAME AS CONSIGNEE',
+      pieces: '100',
+      gross_weight_kg: '5000',
+      charge_weight_kg: '5500',
+      volume_cbm: '35.5',
+      commodity_desc: 'ELECTRONIC COMPONENTS',
+      hs_code: '8528.72',
+      dimensions: '120x80x100 CM',
+      special_handling: '',
+      declared_value: '150000',
+      declared_currency: 'USD',
+      insurance_value: '155000',
+      freight_charges: '5500',
+      other_charges: '850',
+      payment_terms: 'PREPAID',
+      remarks: '파손주의 (FRAGILE)',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="AWB 등록 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 신규 등록" onClose={handleCancel} />
-        <main ref={formRef} className="p-6">
+      <Header title="AWB 등록 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 신규 등록" showCloseButton={false} />
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] text-sm"
+              >
+                테스트데이터
+              </button>
             </div>
             <div className="text-sm text-[var(--muted)]">
               <span className="text-red-500">*</span> 필수 입력 항목
@@ -178,12 +221,12 @@ export default function ExportAWBRegisterPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">AWB 타입</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AWB 타입 *</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">AWB 타입 *</label>
                 <select
                   name="awb_type"
                   value={formData.awb_type}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="MAWB">MAWB (Master)</option>
                   <option value="HAWB">HAWB (House)</option>
@@ -191,35 +234,35 @@ export default function ExportAWBRegisterPage() {
               </div>
               {formData.awb_type === 'HAWB' && (
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB 번호</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MAWB 번호</label>
                   <input
                     type="text"
                     name="mawb_no"
                     value={formData.mawb_no}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="180-12345678"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">발행일자</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발행일자</label>
                 <input
                   type="date"
                   name="issue_dt"
                   value={formData.issue_dt}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">발행지</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발행지</label>
                 <input
                   type="text"
                   name="issue_place"
                   value={formData.issue_place}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="SEOUL"
                 />
               </div>
@@ -231,127 +274,127 @@ export default function ExportAWBRegisterPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">항공편 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사 코드</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사 코드</label>
                 <input
                   type="text"
                   name="airline_code"
                   value={formData.airline_code}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="180"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">편명</label>
                 <input
                   type="text"
                   name="flight_no"
                   value={formData.flight_no}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="KE001"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발공항 *</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발공항 *</label>
                 <input
                   type="text"
                   name="origin_airport_cd"
                   value={formData.origin_airport_cd}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="ICN"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착공항 *</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착공항 *</label>
                 <input
                   type="text"
                   name="dest_airport_cd"
                   value={formData.dest_airport_cd}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="LAX"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 일자</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 일자</label>
                 <input
                   type="date"
                   name="etd_dt"
                   value={formData.etd_dt}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 시간</label>
                 <input
                   type="time"
                   name="etd_time"
                   value={formData.etd_time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 일자</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 일자</label>
                 <input
                   type="date"
                   name="eta_dt"
                   value={formData.eta_dt}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 시간</label>
                 <input
                   type="time"
                   name="eta_time"
                   value={formData.eta_time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD 일자 (실제출발)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATD 일자 (실제출발)</label>
                 <input
                   type="date"
                   name="atd_dt"
                   value={formData.atd_dt}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATD 시간</label>
                 <input
                   type="time"
                   name="atd_time"
                   value={formData.atd_time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 일자 (실제도착)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATA 일자 (실제도착)</label>
                 <input
                   type="date"
                   name="ata_dt"
                   value={formData.ata_dt}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATA 시간</label>
                 <input
                   type="time"
                   name="ata_time"
                   value={formData.ata_time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
             </div>
@@ -362,53 +405,53 @@ export default function ExportAWBRegisterPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">거래처 정보</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">송하인 (Shipper)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">송하인 (Shipper)</label>
                 <input
                   type="text"
                   name="shipper_nm"
                   value={formData.shipper_nm}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 (Consignee)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 (Consignee)</label>
                 <input
                   type="text"
                   name="consignee_nm"
                   value={formData.consignee_nm}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">송하인 주소</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">송하인 주소</label>
                 <textarea
                   name="shipper_addr"
                   value={formData.shipper_addr}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   rows={2}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 주소</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 주소</label>
                 <textarea
                   name="consignee_addr"
                   value={formData.consignee_addr}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   rows={2}
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">통지처 (Notify Party)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">통지처 (Notify Party)</label>
                 <input
                   type="text"
                   name="notify_party"
                   value={formData.notify_party}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
             </div>
@@ -419,39 +462,39 @@ export default function ExportAWBRegisterPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">화물 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">개수 (PCS)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">개수 (PCS)</label>
                 <input
                   type="number"
                   name="pieces"
                   value={formData.pieces}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">총중량 (KG)</label>
                 <input
                   type="number"
                   step="0.001"
                   name="gross_weight_kg"
                   value={formData.gross_weight_kg}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">청구중량 (KG)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">청구중량 (KG)</label>
                 <input
                   type="number"
                   step="0.001"
                   name="charge_weight_kg"
                   value={formData.charge_weight_kg}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">용적 (CBM)</label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -459,56 +502,56 @@ export default function ExportAWBRegisterPage() {
                     name="volume_cbm"
                     value={formData.volume_cbm}
                     onChange={handleChange}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                   <button
                     type="button"
                     onClick={() => setShowDimensionsModal(true)}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap"
+                    className="h-[38px] px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap"
                   >
                     계산
                   </button>
                 </div>
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">품명</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품명</label>
                 <input
                   type="text"
                   name="commodity_desc"
                   value={formData.commodity_desc}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">HS Code</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">HS Code</label>
                 <input
                   type="text"
                   name="hs_code"
                   value={formData.hs_code}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">치수 (Dimensions)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">치수 (Dimensions)</label>
                 <input
                   type="text"
                   name="dimensions"
                   value={formData.dimensions}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="100x50x30cm"
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">특수취급 (Special Handling)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">특수취급 (Special Handling)</label>
                 <input
                   type="text"
                   name="special_handling"
                   value={formData.special_handling}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="예: FRAGILE, PERISHABLE"
                 />
               </div>
@@ -520,36 +563,36 @@ export default function ExportAWBRegisterPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">운임 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">결제조건</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">결제조건</label>
                 <select
                   name="payment_terms"
                   value={formData.payment_terms}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="PREPAID">PREPAID (선불)</option>
                   <option value="COLLECT">COLLECT (착불)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">신고가액</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">신고가액</label>
                 <input
                   type="number"
                   step="0.01"
                   name="declared_value"
                   value={formData.declared_value}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">통화</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">통화</label>
                 <div className="flex gap-2">
                   <select
                     name="declared_currency"
                     value={formData.declared_currency}
                     onChange={handleChange}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="USD">USD</option>
                     <option value="KRW">KRW</option>
@@ -563,7 +606,7 @@ export default function ExportAWBRegisterPage() {
                   <button
                     type="button"
                     onClick={() => setShowExchangeRateModal(true)}
-                    className="px-3 py-2 bg-[#E8A838] text-[#0C1222] rounded-lg hover:bg-[#D4943A] text-sm font-medium whitespace-nowrap"
+                    className="h-[38px] px-3 bg-[#E8A838] text-[#0C1222] rounded-lg hover:bg-[#D4943A] text-sm font-medium whitespace-nowrap"
                   >
                     환율조회
                   </button>
@@ -575,36 +618,36 @@ export default function ExportAWBRegisterPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">보험가액</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">보험가액</label>
                 <input
                   type="number"
                   step="0.01"
                   name="insurance_value"
                   value={formData.insurance_value}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">운임</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운임</label>
                 <input
                   type="number"
                   step="0.01"
                   name="freight_charges"
                   value={formData.freight_charges}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">기타비용</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">기타비용</label>
                 <input
                   type="number"
                   step="0.01"
                   name="other_charges"
                   value={formData.other_charges}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
             </div>
@@ -617,7 +660,7 @@ export default function ExportAWBRegisterPage() {
               name="remarks"
               value={formData.remarks}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+              className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
               rows={3}
             />
           </div>
@@ -640,13 +683,10 @@ export default function ExportAWBRegisterPage() {
             </button>
           </div>
         </main>
-      </div>
-
-      <UnsavedChangesModal
+      <CloseConfirmModal
         isOpen={showCloseModal}
-        onClose={handleModalClose}
-        onDiscard={handleDiscardChanges}
-        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+        onClose={() => setShowCloseModal(false)}
+        onConfirm={handleConfirmClose}
       />
 
       <ExchangeRateModal

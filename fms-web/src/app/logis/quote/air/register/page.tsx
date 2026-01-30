@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import FreightSearchModal from '@/components/FreightSearchModal';
@@ -502,15 +501,87 @@ function QuoteAirRegisterPageContent() {
     setHasUnsavedChanges(false);
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    setBasicInfo({
+      quoteNo: '',
+      registrationDate: new Date().toISOString().split('T')[0],
+      exportImport: 'export',
+      businessType: 'LOCAL',
+      tradeTerms: 'FOB',
+      customerCode: '1', // CUSTOMER_ID (숫자)
+      customerName: '삼성전자',
+      customerManager: '김담당',
+      customerPhone: '02-1234-5678',
+      senderName: 'Samsung Electronics',
+      senderManager: 'John Kim',
+      senderPhone: '+82-2-1234-5678',
+      origin: 'ICN',
+      originName: '인천국제공항',
+      inputEmployee: '홍길동',
+      toBy1: '',
+      toBy1Name: '',
+      toBy2: '',
+      toBy2Name: '',
+      destination: 'JFK',
+      destinationName: 'JFK 국제공항',
+      airline: 'KE',
+      airlineName: '대한항공',
+      airlineManager: '이항공',
+      airlineTel: '02-9876-5432',
+      airlineFax: '02-9876-5433',
+      flightNo: 'KE081',
+      etd: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      validFrom: new Date().toISOString().split('T')[0],
+      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    });
+    setCargoInfo({
+      cargoType: 'general',
+      pieces: 50,
+      grossWeight: 500,
+      chargeableWeight: 520,
+      volume: 3.5,
+      commodity: '전자부품',
+      hsCode: '8542.31.0000',
+      dimensions: '60 x 40 x 40 cm',
+      specialCargo: false,
+      dangerousGoods: false,
+      dgClass: '',
+      unNumber: '',
+    });
+    setFreightItems([
+      {
+        id: '1',
+        freightType: 'AFC',
+        freightCode: 'AFC',
+        currency: 'USD',
+        exchangeRate: 1350,
+        minCharge: 150,
+        under45: 4.5,
+        under100: 4.2,
+        under300: 3.8,
+        under500: 3.5,
+        over500: 3.2,
+        vatYn: 'N',
+        unitPrice: 3.5,
+        amountForeign: 1820,
+        amountKrw: 2457000,
+        vat: 0,
+        totalAmount: 2457000,
+      },
+    ]);
+    setHasUnsavedChanges(true);
+    alert('테스트 데이터가 입력되었습니다.');
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="견적관리 등록 (항공)" subtitle="물류견적관리  견적관리 (항공) > 견적관리 등록 (항공)" onClose={handleCloseClick} />
+      <Header title="견적관리 등록 (항공)" subtitle="물류견적관리  견적관리 (항공) > 견적관리 등록 (항공)" showCloseButton={false} />
 
-        <main ref={formRef} className="p-6">
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex items-center gap-4">
               {/* 에러 카운트 표시 */}
               {errorCount > 0 && (
@@ -522,6 +593,17 @@ function QuoteAirRegisterPageContent() {
                 </div>
               )}
               <div className="flex items-center gap-2">
+                {/* 테스트 데이터 버튼 */}
+                <button
+                  onClick={handleFillTestData}
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  테스트데이터
+                </button>
+
                 {/* 스케줄조회 버튼 */}
                 <button
                   onClick={() => setShowScheduleModal(true)}
@@ -547,7 +629,7 @@ function QuoteAirRegisterPageContent() {
                 {/* 환율조회 버튼 */}
                 <button
                   onClick={() => setShowExchangeRateModal(true)}
-                  className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -664,7 +746,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.quoteNo || '자동생성'}
                     disabled
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                   />
                 </div>
                 <div>
@@ -673,7 +755,7 @@ function QuoteAirRegisterPageContent() {
                     type="date"
                     value={basicInfo.registrationDate}
                     onChange={(e) => setBasicInfo({ ...basicInfo, registrationDate: e.target.value })}
-                    className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${
+                    className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${
                       errors.registrationDate ? 'border-red-500' : 'border-[var(--border)]'
                     }`}
                   />
@@ -684,7 +766,7 @@ function QuoteAirRegisterPageContent() {
                   <select
                     value={basicInfo.exportImport}
                     onChange={(e) => setBasicInfo({ ...basicInfo, exportImport: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="export">수출</option>
                     <option value="import">수입</option>
@@ -695,7 +777,7 @@ function QuoteAirRegisterPageContent() {
                   <select
                     value={basicInfo.businessType}
                     onChange={(e) => setBasicInfo({ ...basicInfo, businessType: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="LOCAL">LOCAL</option>
                     <option value="CROSS">CROSS</option>
@@ -709,7 +791,7 @@ function QuoteAirRegisterPageContent() {
                   <select
                     value={basicInfo.tradeTerms}
                     onChange={(e) => setBasicInfo({ ...basicInfo, tradeTerms: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="CFR">CFR</option>
                     <option value="CIF">CIF</option>
@@ -726,7 +808,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.customerName}
                       onChange={(e) => setBasicInfo({ ...basicInfo, customerName: e.target.value })}
-                      className={`flex-1 px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${
+                      className={`flex-1 h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${
                         errors.customerName ? 'border-red-500' : 'border-[var(--border)]'
                       }`}
                       placeholder="거래처명"
@@ -743,7 +825,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.customerManager}
                     onChange={(e) => setBasicInfo({ ...basicInfo, customerManager: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="담당자명"
                   />
                 </div>
@@ -753,7 +835,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.customerPhone}
                     onChange={(e) => setBasicInfo({ ...basicInfo, customerPhone: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -766,7 +848,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.origin}
                       onChange={(e) => setBasicInfo({ ...basicInfo, origin: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="ICN"
                     />
                     <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -781,7 +863,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.toBy1}
                       onChange={(e) => setBasicInfo({ ...basicInfo, toBy1: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="경유공항1"
                     />
                     <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -796,7 +878,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.toBy2}
                       onChange={(e) => setBasicInfo({ ...basicInfo, toBy2: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="경유공항2"
                     />
                     <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -811,7 +893,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.destination}
                       onChange={(e) => setBasicInfo({ ...basicInfo, destination: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="JFK"
                     />
                     <button
@@ -831,7 +913,7 @@ function QuoteAirRegisterPageContent() {
                       type="text"
                       value={basicInfo.airlineName}
                       onChange={(e) => setBasicInfo({ ...basicInfo, airlineName: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="항공사명"
                     />
                     <button
@@ -848,7 +930,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.airlineManager}
                     onChange={(e) => setBasicInfo({ ...basicInfo, airlineManager: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="담당자명"
                   />
                 </div>
@@ -858,7 +940,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.airlineTel}
                     onChange={(e) => setBasicInfo({ ...basicInfo, airlineTel: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -868,7 +950,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.airlineFax}
                     onChange={(e) => setBasicInfo({ ...basicInfo, airlineFax: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -880,7 +962,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.flightNo}
                     onChange={(e) => setBasicInfo({ ...basicInfo, flightNo: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="KE081"
                   />
                 </div>
@@ -890,7 +972,7 @@ function QuoteAirRegisterPageContent() {
                     type="datetime-local"
                     value={basicInfo.etd}
                     onChange={(e) => setBasicInfo({ ...basicInfo, etd: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -899,7 +981,7 @@ function QuoteAirRegisterPageContent() {
                     type="datetime-local"
                     value={basicInfo.eta}
                     onChange={(e) => setBasicInfo({ ...basicInfo, eta: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -908,7 +990,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={basicInfo.inputEmployee}
                     disabled
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                   />
                 </div>
 
@@ -920,14 +1002,14 @@ function QuoteAirRegisterPageContent() {
                       type="date"
                       value={basicInfo.validFrom}
                       onChange={(e) => setBasicInfo({ ...basicInfo, validFrom: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                     <span>~</span>
                     <input
                       type="date"
                       value={basicInfo.validTo}
                       onChange={(e) => setBasicInfo({ ...basicInfo, validTo: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                 </div>
@@ -950,7 +1032,7 @@ function QuoteAirRegisterPageContent() {
                   <select
                     value={cargoInfo.cargoType}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, cargoType: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="general">일반화물</option>
                     <option value="express">특송화물</option>
@@ -965,7 +1047,7 @@ function QuoteAirRegisterPageContent() {
                     type="number"
                     value={cargoInfo.pieces}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, pieces: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -974,7 +1056,7 @@ function QuoteAirRegisterPageContent() {
                     type="number"
                     value={cargoInfo.grossWeight}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, grossWeight: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -983,7 +1065,7 @@ function QuoteAirRegisterPageContent() {
                     type="number"
                     value={cargoInfo.chargeableWeight}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, chargeableWeight: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -992,7 +1074,7 @@ function QuoteAirRegisterPageContent() {
                     type="number"
                     value={cargoInfo.volume}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, volume: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -1001,7 +1083,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={cargoInfo.commodity}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, commodity: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="품명"
                   />
                 </div>
@@ -1011,7 +1093,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={cargoInfo.hsCode}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, hsCode: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="0000.00.0000"
                   />
                 </div>
@@ -1021,7 +1103,7 @@ function QuoteAirRegisterPageContent() {
                     type="text"
                     value={cargoInfo.dimensions}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, dimensions: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="100 x 80 x 60 cm"
                   />
                 </div>
@@ -1055,7 +1137,7 @@ function QuoteAirRegisterPageContent() {
                         type="text"
                         value={cargoInfo.dgClass}
                         onChange={(e) => setCargoInfo({ ...cargoInfo, dgClass: e.target.value })}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="Class 3"
                       />
                     </div>
@@ -1065,7 +1147,7 @@ function QuoteAirRegisterPageContent() {
                         type="text"
                         value={cargoInfo.unNumber}
                         onChange={(e) => setCargoInfo({ ...cargoInfo, unNumber: e.target.value })}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="UN1234"
                       />
                     </div>
@@ -1096,21 +1178,21 @@ function QuoteAirRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-2 text-center"><input type="checkbox" /></th>
-                    <th className="p-2 text-left">운임<br/>유형</th>
-                    <th className="p-2 text-left">운임<br/>코드</th>
+                    <th className="p-2 text-center">운임유형</th>
+                    <th className="p-2 text-center">운임코드</th>
                     <th className="p-2 text-center">통화</th>
-                    <th className="p-2 text-right">환율</th>
-                    <th className="p-2 text-right">M/C</th>
-                    <th className="p-2 text-right">-45K</th>
-                    <th className="p-2 text-right">-100K</th>
-                    <th className="p-2 text-right">-300K</th>
-                    <th className="p-2 text-right">-500K</th>
-                    <th className="p-2 text-right">+500K</th>
+                    <th className="p-2 text-center">환율</th>
+                    <th className="p-2 text-center">M/C</th>
+                    <th className="p-2 text-center">-45K</th>
+                    <th className="p-2 text-center">-100K</th>
+                    <th className="p-2 text-center">-300K</th>
+                    <th className="p-2 text-center">-500K</th>
+                    <th className="p-2 text-center">+500K</th>
                     <th className="p-2 text-center">VAT</th>
-                    <th className="p-2 text-right">AMOUNT<br/>(외화)</th>
-                    <th className="p-2 text-right">AMOUNT<br/>(원화)</th>
-                    <th className="p-2 text-right">VAT</th>
-                    <th className="p-2 text-right">합계</th>
+                    <th className="p-2 text-center">AMOUNT(외화)</th>
+                    <th className="p-2 text-center">AMOUNT(원화)</th>
+                    <th className="p-2 text-center">VAT</th>
+                    <th className="p-2 text-center">합계</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1184,40 +1266,40 @@ function QuoteAirRegisterPageContent() {
               <div>
                 <label className="block text-sm font-medium mb-1">운송사</label>
                 <div className="flex gap-2">
-                  <input type="text" className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="운송사명" />
+                  <input type="text" className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="운송사명" />
                   <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">찾기</button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 담당자</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 Tel</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 Fax</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고/터미널</label>
                 <div className="flex gap-2">
-                  <input type="text" className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="창고/터미널명" />
+                  <input type="text" className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="창고/터미널명" />
                   <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">찾기</button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 담당자</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 Tel</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 Fax</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -1225,20 +1307,20 @@ function QuoteAirRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-2 text-center"><input type="checkbox" /></th>
-                    <th className="p-2 text-left">운임코드</th>
-                    <th className="p-2 text-left">출발지</th>
-                    <th className="p-2 text-left">출발지명</th>
-                    <th className="p-2 text-left">도착지</th>
-                    <th className="p-2 text-left">도착지명</th>
-                    <th className="p-2 text-right">-45K</th>
-                    <th className="p-2 text-right">-100K</th>
-                    <th className="p-2 text-right">-300K</th>
-                    <th className="p-2 text-right">+300K</th>
+                    <th className="p-2 text-center">운임코드</th>
+                    <th className="p-2 text-center">출발지</th>
+                    <th className="p-2 text-center">출발지명</th>
+                    <th className="p-2 text-center">도착지</th>
+                    <th className="p-2 text-center">도착지명</th>
+                    <th className="p-2 text-center">-45K</th>
+                    <th className="p-2 text-center">-100K</th>
+                    <th className="p-2 text-center">-300K</th>
+                    <th className="p-2 text-center">+300K</th>
                     <th className="p-2 text-center">VAT</th>
-                    <th className="p-2 text-right">단가</th>
-                    <th className="p-2 text-right">AMOUNT</th>
-                    <th className="p-2 text-right">VAT</th>
-                    <th className="p-2 text-right">합계</th>
+                    <th className="p-2 text-center">단가</th>
+                    <th className="p-2 text-center">AMOUNT</th>
+                    <th className="p-2 text-center">VAT</th>
+                    <th className="p-2 text-center">합계</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1325,8 +1407,6 @@ function QuoteAirRegisterPageContent() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 스케줄조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}

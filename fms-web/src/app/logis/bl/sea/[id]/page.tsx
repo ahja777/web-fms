@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { ReportPrintModal } from '@/components/reports';
@@ -248,8 +247,8 @@ export default function BLSeaDetailPage() {
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-[var(--muted)]">Loading...</div>
       </div>
-    );
-  }
+  );
+}
 
   if (!data) {
     return (
@@ -274,7 +273,7 @@ export default function BLSeaDetailPage() {
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <h3 className="font-bold">Main Information</h3>
@@ -289,38 +288,38 @@ export default function BLSeaDetailPage() {
         <div className="p-4">
           <div className="grid grid-cols-6 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">수출입구분</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">수출입구분</label>
               <p className="font-medium">{data.ioType === 'OUT' ? '수출(OUT)' : '수입(IN)'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">JOB NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">JOB NO</label>
               <p className="font-medium text-[#E8A838]">{data.jobNo}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">BOOKING NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">BOOKING NO</label>
               <p className="font-medium">{data.bookingNo || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">업무유형</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">업무유형</label>
               <p className="font-medium">{data.businessType}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">B/L TYPE</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">B/L TYPE</label>
               <p className="font-medium">{data.blType}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">S/R NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">S/R NO</label>
               <p className="font-medium">{data.srNo || '-'}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-6 gap-4 mb-4">
             <div className="col-span-3">
-              <label className="block text-xs text-[var(--muted)] mb-1">M B/L NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">M B/L NO</label>
               <p className="font-medium text-lg">{data.mblNo}</p>
             </div>
             <div className="col-span-3">
-              <label className="block text-xs text-[var(--muted)] mb-1">H B/L NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">H B/L NO</label>
               <p className="font-medium text-lg">{data.hblNo}</p>
             </div>
           </div>
@@ -328,17 +327,17 @@ export default function BLSeaDetailPage() {
           {/* Shipper / Consignee / Notify */}
           <div className="grid grid-cols-3 gap-4">
             <div className="p-3 bg-[var(--surface-50)] rounded-lg">
-              <label className="block text-xs text-[var(--muted)] mb-1">SHIPPER</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">SHIPPER</label>
               <p className="font-medium">{data.shipperName}</p>
               <p className="text-sm text-[var(--muted)] whitespace-pre-line">{data.shipperAddress}</p>
             </div>
             <div className="p-3 bg-[var(--surface-50)] rounded-lg">
-              <label className="block text-xs text-[var(--muted)] mb-1">CONSIGNEE</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">CONSIGNEE</label>
               <p className="font-medium">{data.consigneeName}</p>
               <p className="text-sm text-[var(--muted)] whitespace-pre-line">{data.consigneeAddress}</p>
             </div>
             <div className="p-3 bg-[var(--surface-50)] rounded-lg">
-              <label className="block text-xs text-[var(--muted)] mb-1">NOTIFY PARTY</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">NOTIFY PARTY</label>
               <p className="font-medium">{data.notifyName || '-'}</p>
               <p className="text-sm text-[var(--muted)] whitespace-pre-line">{data.notifyAddress}</p>
             </div>
@@ -349,7 +348,7 @@ export default function BLSeaDetailPage() {
       {/* Schedule Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <h3 className="font-bold">Schedule Information</h3>
@@ -357,50 +356,50 @@ export default function BLSeaDetailPage() {
         <div className="p-4">
           <div className="grid grid-cols-6 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Place of Receipt</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Place of Receipt</label>
               <p className="font-medium">{data.placeOfReceipt || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">LINE</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">LINE</label>
               <p className="font-medium">{data.lineName || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Port of Loading</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Port of Loading</label>
               <p className="font-medium">{data.portOfLoading}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Port of Discharge</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Port of Discharge</label>
               <p className="font-medium">{data.portOfDischarge}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Onboard Date</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Onboard Date</label>
               <p className="font-medium">{data.onboardDate || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">SERVICE TERM</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">SERVICE TERM</label>
               <p className="font-medium">{data.serviceTerm}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-6 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs text-[var(--muted)] mb-1">Vessel Name & Voyage No</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Vessel Name & Voyage No</label>
               <p className="font-medium">{data.vesselName} / {data.voyageNo}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">ETD</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">ETD</label>
               <p className="font-medium">{data.etd}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">ETA</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">ETA</label>
               <p className="font-medium">{data.eta}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">FREIGHT TERM</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">FREIGHT TERM</label>
               <p className="font-medium">{data.freightTerm}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Final Destination</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Final Destination</label>
               <p className="font-medium">{data.finalDestination || '-'}</p>
             </div>
           </div>
@@ -415,7 +414,7 @@ export default function BLSeaDetailPage() {
       {/* Cargo Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
           <h3 className="font-bold">Cargo Information</h3>
@@ -423,23 +422,23 @@ export default function BLSeaDetailPage() {
         <div className="p-4">
           <div className="grid grid-cols-6 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">컨테이너 규격</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">컨테이너 규격</label>
               <p className="font-medium">{data.containerType}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Package</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Package</label>
               <p className="font-medium">{data.packageQty.toLocaleString()} {data.packageUnit}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Gross Weight (KG)</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Gross Weight (KG)</label>
               <p className="font-medium">{data.grossWeight.toLocaleString()}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Measurement (CBM)</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Measurement (CBM)</label>
               <p className="font-medium">{data.measurement.toLocaleString()}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">R.TON</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">R.TON</label>
               <p className="font-medium">{data.rton.toFixed(3)}</p>
             </div>
           </div>
@@ -453,19 +452,19 @@ export default function BLSeaDetailPage() {
             <h3 className="font-bold">Container Information</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="p-2 text-center text-xs font-semibold">No</th>
-                  <th className="p-2 text-left text-xs font-semibold">Container No</th>
-                  <th className="p-2 text-center text-xs font-semibold">규격</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 1</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 2</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 3</th>
-                  <th className="p-2 text-right text-xs font-semibold">Package</th>
-                  <th className="p-2 text-center text-xs font-semibold">Unit</th>
-                  <th className="p-2 text-right text-xs font-semibold">G.Weight</th>
-                  <th className="p-2 text-right text-xs font-semibold">Measurement</th>
+                  <th className="text-center">No</th>
+                  <th>Container No</th>
+                  <th className="text-center">규격</th>
+                  <th>Seal 1</th>
+                  <th>Seal 2</th>
+                  <th>Seal 3</th>
+                  <th className="text-center">Package</th>
+                  <th className="text-center">Unit</th>
+                  <th className="text-center">G.Weight</th>
+                  <th className="text-center">Measurement</th>
                 </tr>
               </thead>
               <tbody>
@@ -477,10 +476,10 @@ export default function BLSeaDetailPage() {
                     <td className="p-2 text-sm">{container.seal1No || '-'}</td>
                     <td className="p-2 text-sm">{container.seal2No || '-'}</td>
                     <td className="p-2 text-sm">{container.seal3No || '-'}</td>
-                    <td className="p-2 text-right text-sm">{container.packageQty.toLocaleString()}</td>
+                    <td className="p-2 text-center text-sm">{container.packageQty.toLocaleString()}</td>
                     <td className="p-2 text-center text-sm">{container.packageUnit}</td>
-                    <td className="p-2 text-right text-sm">{container.grossWeight.toLocaleString()}</td>
-                    <td className="p-2 text-right text-sm">{container.measurement.toLocaleString()}</td>
+                    <td className="p-2 text-center text-sm">{container.grossWeight.toLocaleString()}</td>
+                    <td className="p-2 text-center text-sm">{container.measurement.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -496,15 +495,15 @@ export default function BLSeaDetailPage() {
             <h3 className="font-bold">Other Charges</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="p-2 text-center text-xs font-semibold">No</th>
-                  <th className="p-2 text-left text-xs font-semibold">CODE</th>
-                  <th className="p-2 text-left text-xs font-semibold">Charges</th>
-                  <th className="p-2 text-center text-xs font-semibold">Cur</th>
-                  <th className="p-2 text-right text-xs font-semibold">Prepaid</th>
-                  <th className="p-2 text-right text-xs font-semibold">Collect</th>
+                  <th className="text-center">No</th>
+                  <th>CODE</th>
+                  <th>Charges</th>
+                  <th className="text-center">Cur</th>
+                  <th className="text-center">Prepaid</th>
+                  <th className="text-center">Collect</th>
                 </tr>
               </thead>
               <tbody>
@@ -514,18 +513,18 @@ export default function BLSeaDetailPage() {
                     <td className="p-2 text-sm font-medium">{charge.code}</td>
                     <td className="p-2 text-sm">{charge.charges}</td>
                     <td className="p-2 text-center text-sm">{charge.currency}</td>
-                    <td className="p-2 text-right text-sm">{charge.prepaid.toLocaleString()}</td>
-                    <td className="p-2 text-right text-sm">{charge.collect.toLocaleString()}</td>
+                    <td className="p-2 text-center text-sm">{charge.prepaid.toLocaleString()}</td>
+                    <td className="p-2 text-center text-sm">{charge.collect.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="bg-[var(--surface-50)]">
                 <tr className="border-t border-[var(--border)] font-medium">
-                  <td colSpan={4} className="p-2 text-right text-sm">Total:</td>
-                  <td className="p-2 text-right text-sm">
+                  <td colSpan={4} className="p-2 text-center text-sm">Total:</td>
+                  <td className="p-2 text-center text-sm">
                     {data.otherCharges.reduce((sum, c) => sum + c.prepaid, 0).toLocaleString()}
                   </td>
-                  <td className="p-2 text-right text-sm">
+                  <td className="p-2 text-center text-sm">
                     {data.otherCharges.reduce((sum, c) => sum + c.collect, 0).toLocaleString()}
                   </td>
                 </tr>
@@ -538,7 +537,7 @@ export default function BLSeaDetailPage() {
       {/* Issue Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Issue Information</h3>
@@ -546,19 +545,19 @@ export default function BLSeaDetailPage() {
         <div className="p-4">
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Issue Place</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Issue Place</label>
               <p className="font-medium">{data.issuePlace || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">Issue Date</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">Issue Date</label>
               <p className="font-medium">{data.issueDate || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">B/L Issue Type</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">B/L Issue Type</label>
               <p className="font-medium">{data.blIssueType || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">No. of Original B/L</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">No. of Original B/L</label>
               <p className="font-medium">{data.noOfOriginalBL}</p>
             </div>
           </div>
@@ -572,7 +571,7 @@ export default function BLSeaDetailPage() {
     <div className="space-y-6">
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Other Information</h3>
@@ -580,37 +579,37 @@ export default function BLSeaDetailPage() {
         <div className="p-4">
           <div className="grid grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">AGENT</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">AGENT</label>
               <p className="font-medium">{data.agentName || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">PARTNER</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">PARTNER</label>
               <p className="font-medium">{data.partnerName || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">국가코드</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">국가코드</label>
               <p className="font-medium">{data.countryCode || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">지역코드</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">지역코드</label>
               <p className="font-medium">{data.regionCode || '-'}</p>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">L/C NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">L/C NO</label>
               <p className="font-medium">{data.lcNo || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">P/O NO</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">P/O NO</label>
               <p className="font-medium">{data.poNo || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">최초등록일</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">최초등록일</label>
               <p className="font-medium">{data.createdAt || '-'}</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--muted)] mb-1">최종수정일</label>
+              <label className="block text-xs text-[var(--foreground)] mb-1">최종수정일</label>
               <p className="font-medium">{data.updatedAt || '-'}</p>
             </div>
           </div>
@@ -634,14 +633,11 @@ export default function BLSeaDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="B/L 상세조회 (해상)"
-          subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 상세조회"
-         
-        />
+    <PageLayout
+      title="B/L 상세조회 (해상)"
+      subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 상세조회"
+      showCloseButton={false}
+    >
         <main className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-4">
@@ -662,7 +658,7 @@ export default function BLSeaDetailPage() {
               </button>
               <button
                 onClick={handleEdit}
-                className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
               >
                 수정
               </button>
@@ -670,15 +666,15 @@ export default function BLSeaDetailPage() {
           </div>
 
           {/* TAB 영역 */}
-          <div className="flex gap-1 mb-4">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             {(['MAIN', 'CARGO', 'OTHER'] as TabType[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 rounded-t-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                   activeTab === tab
-                    ? 'bg-[#E8A838] text-white'
-                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                    ? 'bg-[#2563EB] text-white'
+                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
                 }`}
               >
                 {tab}
@@ -689,8 +685,6 @@ export default function BLSeaDetailPage() {
           {/* TAB 컨텐츠 */}
           {renderTabContent()}
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
@@ -703,6 +697,6 @@ export default function BLSeaDetailPage() {
         reportType="BL"
         data={data as unknown as Record<string, unknown>}
       />
-    </div>
+    </PageLayout>
   );
 }

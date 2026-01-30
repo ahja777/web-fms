@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
@@ -122,29 +121,27 @@ export default function ManifestSeaDetailPage() {
   const handleConfirmClose = () => { setShowCloseModal(false); router.back(); };
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">적하목록을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/manifest/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
+  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
+  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">적하목록을 찾을 수 없습니다.</div>;
 
   const displayData = isEditing ? editData! : data;
   const statusInfo = statusConfig[displayData.status] || { label: displayData.status, color: 'bg-gray-500' };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" />
+        <PageLayout title="적하목록 상세조회 (해상)" subtitle="Logis > 적하목록 > 적하목록 상세조회 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button onClick={() => router.push('/logis/manifest/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
               {isEditing ? (
                 <>
                   <button onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">취소</button>
-                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">저장</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+                  <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
                 </>
               )}
             </div>
@@ -154,29 +151,29 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Filing No</label><input type="text" value={displayData.filingNo || ''} disabled={!isEditing} onChange={e => handleChange('filingNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Filing No</label><input type="text" value={displayData.filingNo || ''} disabled={!isEditing} onChange={e => handleChange('filingNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   {isEditing ? (
-                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
+                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
                       <option value="DRAFT">작성중</option><option value="SUBMITTED">전송</option><option value="ACCEPTED">수리</option><option value="REJECTED">반려</option>
                     </select>
                   ) : (
                     <div className="flex items-center gap-2 px-3 py-2"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusInfo.color}`}>{statusInfo.label}</span></div>
                   )}
                 </div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Filing Type</label><input type="text" value={displayData.filingType || ''} disabled={!isEditing} onChange={e => handleChange('filingType', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Filing Date</label><input type="date" value={displayData.filingDate || ''} disabled={!isEditing} onChange={e => handleChange('filingDate', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">M B/L No</label><input type="text" value={displayData.mblNo || ''} disabled={!isEditing} onChange={e => handleChange('mblNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">H B/L No</label><input type="text" value={displayData.hblNo || ''} disabled={!isEditing} onChange={e => handleChange('hblNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Filing Type</label><input type="text" value={displayData.filingType || ''} disabled={!isEditing} onChange={e => handleChange('filingType', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Filing Date</label><input type="date" value={displayData.filingDate || ''} disabled={!isEditing} onChange={e => handleChange('filingDate', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">M B/L No</label><input type="text" value={displayData.mblNo || ''} disabled={!isEditing} onChange={e => handleChange('mblNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">H B/L No</label><input type="text" value={displayData.hblNo || ''} disabled={!isEditing} onChange={e => handleChange('hblNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">응답 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Response Code</label><input type="text" value={displayData.responseCode || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Response Message</label><textarea value={displayData.responseMsg || ''} disabled rows={2} className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Response Code</label><input type="text" value={displayData.responseCode || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Response Message</label><textarea value={displayData.responseMsg || ''} disabled rows={2} className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
               </div>
             </div>
           </div>
@@ -185,22 +182,22 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Shipper</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Name</label><input type="text" value={displayData.shipperName || ''} disabled={!isEditing} onChange={e => handleChange('shipperName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Address</label><textarea value={displayData.shipperAddr || ''} disabled={!isEditing} onChange={e => handleChange('shipperAddr', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Name</label><input type="text" value={displayData.shipperName || ''} disabled={!isEditing} onChange={e => handleChange('shipperName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Address</label><textarea value={displayData.shipperAddr || ''} disabled={!isEditing} onChange={e => handleChange('shipperAddr', e.target.value)} rows={2} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Consignee</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Name</label><input type="text" value={displayData.consigneeName || ''} disabled={!isEditing} onChange={e => handleChange('consigneeName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Address</label><textarea value={displayData.consigneeAddr || ''} disabled={!isEditing} onChange={e => handleChange('consigneeAddr', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Name</label><input type="text" value={displayData.consigneeName || ''} disabled={!isEditing} onChange={e => handleChange('consigneeName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Address</label><textarea value={displayData.consigneeAddr || ''} disabled={!isEditing} onChange={e => handleChange('consigneeAddr', e.target.value)} rows={2} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Notify Party</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Name</label><input type="text" value={displayData.notifyName || ''} disabled={!isEditing} onChange={e => handleChange('notifyName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Address</label><textarea value={displayData.notifyAddr || ''} disabled={!isEditing} onChange={e => handleChange('notifyAddr', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Name</label><input type="text" value={displayData.notifyName || ''} disabled={!isEditing} onChange={e => handleChange('notifyName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Address</label><textarea value={displayData.notifyAddr || ''} disabled={!isEditing} onChange={e => handleChange('notifyAddr', e.target.value)} rows={2} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
           </div>
@@ -208,18 +205,17 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
           <div className="card p-6 mb-6">
             <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물/컨테이너 정보</h3>
             <div className="grid grid-cols-4 gap-4">
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Container No</label><input type="text" value={displayData.containerNo || ''} disabled={!isEditing} onChange={e => handleChange('containerNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Seal No</label><input type="text" value={displayData.sealNo || ''} disabled={!isEditing} onChange={e => handleChange('sealNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Weight</label><input type="number" value={displayData.weight || 0} disabled={!isEditing} onChange={e => handleChange('weight', parseFloat(e.target.value) || 0)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">단위</label><input type="text" value={displayData.weightUnit || ''} disabled={!isEditing} onChange={e => handleChange('weightUnit', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-              <div className="col-span-4"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Goods Description</label><textarea value={displayData.goodsDesc || ''} disabled={!isEditing} onChange={e => handleChange('goodsDesc', e.target.value)} rows={2} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Container No</label><input type="text" value={displayData.containerNo || ''} disabled={!isEditing} onChange={e => handleChange('containerNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Seal No</label><input type="text" value={displayData.sealNo || ''} disabled={!isEditing} onChange={e => handleChange('sealNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Weight</label><input type="number" value={displayData.weight || 0} disabled={!isEditing} onChange={e => handleChange('weight', parseFloat(e.target.value) || 0)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">단위</label><input type="text" value={displayData.weightUnit || ''} disabled={!isEditing} onChange={e => handleChange('weightUnit', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div className="col-span-4"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Goods Description</label><textarea value={displayData.goodsDesc || ''} disabled={!isEditing} onChange={e => handleChange('goodsDesc', e.target.value)} rows={2} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
             </div>
           </div>
 
           <div className="text-sm text-[var(--muted)]"><span>등록일: {data.createdAt}</span></div>
         </main>
-      </div>
       <CloseConfirmModal isOpen={showCloseModal} onClose={() => setShowCloseModal(false)} onConfirm={handleConfirmClose} />
-    </div>
+    </PageLayout>
   );
 }

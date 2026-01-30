@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import AWBPrintModal, { AWBData as AWBPrintData } from '@/components/AWBPrintModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -207,41 +206,30 @@ export default function ExportAWBDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--background)]">
-        <Sidebar />
-        <div className="ml-72">
-          <Header title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" />
+          <PageLayout title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" showCloseButton={false}>
           <main className="p-6 flex items-center justify-center">
             <div className="text-[var(--muted)]">로딩 중...</div>
           </main>
-        </div>
-      </div>
-    );
-  }
+      </PageLayout>
+  );
+}
 
   if (!formData) {
     return (
-      <div className="min-h-screen bg-[var(--background)]">
-        <Sidebar />
-        <div className="ml-72">
-          <Header title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" />
+          <PageLayout title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" showCloseButton={false}>
           <main className="p-6 flex items-center justify-center">
             <div className="text-red-500">AWB 정보를 찾을 수 없습니다.</div>
           </main>
-        </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const inputClass = isEditing
-    ? "w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
-    : "w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg cursor-not-allowed";
+    ? "w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+    : "w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg cursor-not-allowed";
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" />
+        <PageLayout title="AWB 상세 (항공수출)" subtitle="Logis > 항공수출 > AWB 관리 > 상세" >
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
@@ -263,7 +251,7 @@ export default function ExportAWBDetailPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">항공편 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사 코드</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사 코드</label>
                 <input
                   type="text"
                   name="airline_code"
@@ -274,7 +262,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">편명</label>
                 <input
                   type="text"
                   name="flight_no"
@@ -285,7 +273,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발공항</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발공항</label>
                 <input
                   type="text"
                   name="origin_airport_cd"
@@ -296,7 +284,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착공항</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착공항</label>
                 <input
                   type="text"
                   name="dest_airport_cd"
@@ -307,7 +295,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 일자</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 일자</label>
                 <input
                   type="date"
                   name="etd_dt"
@@ -318,7 +306,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 시간</label>
                 <input
                   type="time"
                   name="etd_time"
@@ -329,7 +317,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 일자</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 일자</label>
                 <input
                   type="date"
                   name="eta_dt"
@@ -340,7 +328,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 시간</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 시간</label>
                 <input
                   type="time"
                   name="eta_time"
@@ -358,7 +346,7 @@ export default function ExportAWBDetailPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">거래처 정보</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">송하인 (Shipper)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">송하인 (Shipper)</label>
                 <input
                   type="text"
                   name="shipper_nm"
@@ -369,7 +357,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 (Consignee)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 (Consignee)</label>
                 <input
                   type="text"
                   name="consignee_nm"
@@ -380,7 +368,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">송하인 주소</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">송하인 주소</label>
                 <textarea
                   name="shipper_addr"
                   value={formData.shipper_addr || ''}
@@ -391,7 +379,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 주소</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 주소</label>
                 <textarea
                   name="consignee_addr"
                   value={formData.consignee_addr || ''}
@@ -402,7 +390,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">통지처 (Notify Party)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">통지처 (Notify Party)</label>
                 <input
                   type="text"
                   name="notify_party"
@@ -420,7 +408,7 @@ export default function ExportAWBDetailPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">화물 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">개수 (PCS)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">개수 (PCS)</label>
                 <input
                   type="number"
                   name="pieces"
@@ -431,7 +419,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">총중량 (KG)</label>
                 <input
                   type="number"
                   step="0.001"
@@ -443,7 +431,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">청구중량 (KG)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">청구중량 (KG)</label>
                 <input
                   type="number"
                   step="0.001"
@@ -455,7 +443,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">용적 (CBM)</label>
                 <input
                   type="number"
                   step="0.001"
@@ -467,7 +455,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">품명</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품명</label>
                 <input
                   type="text"
                   name="commodity_desc"
@@ -478,7 +466,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">HS Code</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">HS Code</label>
                 <input
                   type="text"
                   name="hs_code"
@@ -489,7 +477,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">치수</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">치수</label>
                 <input
                   type="text"
                   name="dimensions"
@@ -500,7 +488,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">특수취급</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">특수취급</label>
                 <input
                   type="text"
                   name="special_handling"
@@ -518,7 +506,7 @@ export default function ExportAWBDetailPage() {
             <h3 className="text-lg font-semibold mb-4 text-[var(--foreground)]">운임 정보</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">결제조건</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">결제조건</label>
                 <select
                   name="payment_terms"
                   value={formData.payment_terms || 'PREPAID'}
@@ -531,7 +519,7 @@ export default function ExportAWBDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">신고가액</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">신고가액</label>
                 <input
                   type="number"
                   step="0.01"
@@ -543,7 +531,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">통화</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">통화</label>
                 <select
                   name="declared_currency"
                   value={formData.declared_currency || 'USD'}
@@ -559,7 +547,7 @@ export default function ExportAWBDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">보험가액</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">보험가액</label>
                 <input
                   type="number"
                   step="0.01"
@@ -571,7 +559,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">운임</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운임</label>
                 <input
                   type="number"
                   step="0.01"
@@ -583,7 +571,7 @@ export default function ExportAWBDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">기타비용</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">기타비용</label>
                 <input
                   type="number"
                   step="0.01"
@@ -614,7 +602,7 @@ export default function ExportAWBDetailPage() {
           <div className="flex justify-end gap-3">
             <button
               onClick={handleCancel}
-              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
             >
               {isEditing ? '취소' : '닫기'}
             </button>
@@ -622,8 +610,7 @@ export default function ExportAWBDetailPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 font-semibold rounded-lg disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}
+                className="px-6 py-2 font-semibold rounded-lg disabled:opacity-50 bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]"
               >
                 {saving ? '저장 중...' : '저장'}
               </button>
@@ -631,7 +618,7 @@ export default function ExportAWBDetailPage() {
               <>
                 <button
                   onClick={() => setShowPrintModal(true)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -640,14 +627,13 @@ export default function ExportAWBDetailPage() {
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
                 >
                   삭제
                 </button>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 font-semibold rounded-lg"
-                  style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}
+                  className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]"
                 >
                   수정
                 </button>
@@ -655,8 +641,6 @@ export default function ExportAWBDetailPage() {
             )}
           </div>
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
@@ -668,6 +652,6 @@ export default function ExportAWBDetailPage() {
         onClose={() => setShowPrintModal(false)}
         awbData={awbPrintData}
       />
-    </div>
+    </PageLayout>
   );
 }

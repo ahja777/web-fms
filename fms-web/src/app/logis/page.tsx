@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 
@@ -217,12 +216,9 @@ export default function LogisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="Logis" subtitle="디지털물류네트워크 Shipping 관리" />
+      <PageLayout title="Logis" subtitle="디지털물류네트워크 Shipping 관리" showCloseButton={false} >
 
-        <main className="p-8">
+        <main className="p-6">
           {/* Page Title */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
@@ -349,7 +345,6 @@ export default function LogisPage() {
             </div>
           </div>
         </main>
-      </div>
 
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
@@ -357,6 +352,6 @@ export default function LogisPage() {
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

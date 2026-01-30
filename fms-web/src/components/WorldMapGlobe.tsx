@@ -756,6 +756,41 @@ function splitPathAtDateLine(path: [number, number][]): [number, number][][] {
   return [adjustPathForPacificCrossing(path)];
 }
 
+// ============================================================
+// 대한민국 기준 좌표 (서울)
+// ============================================================
+const KOREA_CENTER = { lat: 37.5665, lng: 126.9780 };
+
+/**
+ * 대한민국 기준 수출/수입 판단
+ * @param from 출발지
+ * @param to 도착지
+ * @returns 'export' | 'import' | 'transit'
+ */
+function determineTradeDirection(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number }
+): 'export' | 'import' | 'transit' {
+  // 한국과의 거리 계산 (간단한 유클리드 거리)
+  const fromKoreaDistance = Math.sqrt(
+    Math.pow(from.lat - KOREA_CENTER.lat, 2) +
+    Math.pow(from.lng - KOREA_CENTER.lng, 2)
+  );
+  const toKoreaDistance = Math.sqrt(
+    Math.pow(to.lat - KOREA_CENTER.lat, 2) +
+    Math.pow(to.lng - KOREA_CENTER.lng, 2)
+  );
+
+  // 한국 근처 판정 (위도/경도 5도 이내)
+  const KOREA_THRESHOLD = 5;
+  const isFromKorea = fromKoreaDistance < KOREA_THRESHOLD;
+  const isToKorea = toKoreaDistance < KOREA_THRESHOLD;
+
+  if (isFromKorea && !isToKorea) return 'export';
+  if (!isFromKorea && isToKorea) return 'import';
+  return 'transit';
+}
+
 // 날짜 포맷
 function formatDate(dateStr: string | undefined): string {
   if (!dateStr) return '-';
@@ -1073,11 +1108,11 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
     return () => clearInterval(interval);
   }, []);
 
-  // 애니메이션
+  // 애니메이션 (한 주기 약 50초 - 확실히 느린 속도)
   useEffect(() => {
     const interval = setInterval(() => {
       setAnimationProgress((prev) => (prev + 0.2) % 100);
-    }, 50);
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 
@@ -1141,7 +1176,9 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
     };
   }, [selectedRoute]);
 
-  // 선박 아이콘 (해상운송)
+  // ============================================================
+  // 선박 아이콘 (해상운송) - 기존 스타일 유지 (회전 없음)
+  // ============================================================
   const createShipIcon = useCallback((color: string, size: number, isHovered: boolean = false) => {
     if (!L) return undefined;
     const actualSize = isHovered ? size * 1.3 : size;
@@ -1166,11 +1203,17 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
     });
   }, [L]);
 
-  // 비행기 아이콘 (항공운송)
-  const createAirplaneIcon = useCallback((color: string, size: number, isHovered: boolean = false) => {
+  // ============================================================
+  // 비행기 아이콘 (항공운송) - 대한민국 기준 수출/수입 방향
+  // isExport: true = 수출(한국→해외, 오른쪽), false = 수입(해외→한국, 왼쪽)
+  // SVG 기본: 위쪽 방향 → 90deg = 오른쪽, -90deg = 왼쪽
+  // ============================================================
+  const createAirplaneIcon = useCallback((color: string, size: number, isHovered: boolean = false, isExport: boolean = true) => {
     if (!L) return undefined;
     const actualSize = isHovered ? size * 1.3 : size;
     const glow = isHovered ? '20px' : '10px';
+    // 수출: 오른쪽(90도), 수입: 왼쪽(-90도)
+    const rotation = isExport ? 90 : -90;
 
     return L.divIcon({
       html: `<div style="
@@ -1181,7 +1224,7 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
         display: flex; align-items: center; justify-content: center;
         cursor: pointer; transition: all 0.2s;
       ">
-        <svg width="${actualSize * 0.6}" height="${actualSize * 0.6}" viewBox="0 0 24 24" fill="white">
+        <svg width="${actualSize * 0.6}" height="${actualSize * 0.6}" viewBox="0 0 24 24" fill="white" style="transform: rotate(${rotation}deg);">
           <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
         </svg>
       </div>`,
@@ -1191,7 +1234,9 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
     });
   }, [L]);
 
-  // 트럭 아이콘 (내륙운송)
+  // ============================================================
+  // 트럭 아이콘 (내륙운송) - 기존 스타일 유지 (회전 없음)
+  // ============================================================
   const createTruckIcon = useCallback((color: string, size: number, isHovered: boolean = false) => {
     if (!L) return undefined;
     const actualSize = isHovered ? size * 1.3 : size;
@@ -1232,12 +1277,19 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
     });
   }, [L]);
 
+  // ============================================================
   // 운송 유형별 아이콘 선택
-  const getTransportIcon = useCallback((route: ShipmentRoute, isHovered: boolean = false) => {
+  // 항공만 대한민국 기준 수출/수입 방향 적용
+  // ============================================================
+  const getTransportIcon = useCallback((
+    route: ShipmentRoute,
+    isHovered: boolean = false,
+    isExport: boolean = true  // 항공 전용: 수출/수입 방향
+  ) => {
     const size = 28;
     switch (route.type) {
       case 'air':
-        return createAirplaneIcon(route.color, size, isHovered);
+        return createAirplaneIcon(route.color, size, isHovered, isExport);
       case 'truck':
         return createTruckIcon(route.color, size, isHovered);
       case 'sea':
@@ -1428,7 +1480,10 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
           ));
         })}
 
+        {/* ============================================================ */}
         {/* 운송 마커 (선박/비행기/트럭) - Phase 3: 포커스 아웃 처리 */}
+        {/* 항공: 대한민국 기준 수출/수입 방향으로 비행기 회전 */}
+        {/* ============================================================ */}
         {routes.map((route, routeIndex) => {
           // 경로 유효성 검사
           if (!route?.from?.lat || !route?.to?.lat) {
@@ -1459,6 +1514,21 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
           // 이렇게 하면 100%에서 0%로 갑자기 점프하지 않고 자연스럽게 돌아옴
           const rawProgress = (animationProgress * speed + routeOffset) % 200;
           const animatedProgress = rawProgress <= 100 ? rawProgress : 200 - rawProgress;
+
+          // ============================================================
+          // 항공기 방향 결정 (대한민국 기준 수출/수입)
+          // - 수출: 한국 → 해외 (오른쪽 방향)
+          // - 수입: 해외 → 한국 (왼쪽 방향)
+          // 왕복 애니메이션: 돌아올 때 방향 반전
+          // ============================================================
+          const tradeDirection = determineTradeDirection(route.from, route.to);
+          const isExport = tradeDirection === 'export';
+
+          // 돌아오는 구간 판단 (rawProgress > 100이면 돌아오는 중)
+          const isReturning = rawProgress > 100;
+          // 돌아올 때는 방향 반전 (수출→수입 방향, 수입→수출 방향)
+          const finalDirection = isReturning ? !isExport : isExport;
+
           // 조정된 경로에서 위치 계산 - 마커가 폴리라인 위에 정확히 표시됨
           const position = getPositionOnPath(finalPath, animatedProgress);
           const isHovered = hoveredRoute?.id === route.id || selectedRoute?.id === route.id;
@@ -1467,7 +1537,7 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
             <Marker
               key={`${route.id}-vehicle`}
               position={position as LatLngExpression}
-              icon={getTransportIcon(route, isHovered)}
+              icon={getTransportIcon(route, isHovered, finalDirection)}
               eventHandlers={{
                 click: () => {
                   setSelectedRoute(route);
@@ -1485,9 +1555,26 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
                   {/* 헤더 */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-bold text-gray-800 text-base">{route.shipmentNo}</div>
-                    <span className="px-2 py-0.5 rounded text-white text-xs" style={{ backgroundColor: route.color }}>
-                      {route.type === 'air' ? '항공' : route.type === 'truck' ? '내륙' : '해상'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {/* 수출/수입 방향 표시 */}
+                      {route.type === 'air' && (() => {
+                        const direction = determineTradeDirection(route.from, route.to);
+                        const dirConfig = {
+                          export: { label: '수출', color: 'bg-blue-500', icon: '✈️↗' },
+                          import: { label: '수입', color: 'bg-green-500', icon: '✈️↙' },
+                          transit: { label: '환적', color: 'bg-purple-500', icon: '✈️↔' }
+                        };
+                        const config = dirConfig[direction];
+                        return (
+                          <span className={`px-1.5 py-0.5 rounded text-white text-[10px] font-medium ${config.color}`}>
+                            {config.icon} {config.label}
+                          </span>
+                        );
+                      })()}
+                      <span className="px-2 py-0.5 rounded text-white text-xs" style={{ backgroundColor: route.color }}>
+                        {route.type === 'air' ? '항공' : route.type === 'truck' ? '내륙' : '해상'}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-sm text-gray-500">{route.from.name} → {route.to.name}</div>
 
@@ -1571,25 +1658,49 @@ function LeafletMap({ viewMode = 'compact', compactHeight }: { viewMode?: 'compa
         })}
       </MapContainer>
 
-      {/* 범례 */}
-      <div className="absolute bottom-3 left-3 flex gap-2 z-[1000]">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <svg className="w-4 h-4 text-[#E8A838]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2z"/>
-          </svg>
-          <span className="text-[11px] text-white/90 font-medium">해상 (대권항로)</span>
+      {/* 범례 - 운송 유형 + 항공 방향 */}
+      <div className="absolute bottom-3 left-3 flex flex-col gap-2 z-[1000]">
+        {/* 운송 유형 범례 */}
+        <div className="flex gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <svg className="w-4 h-4 text-[#E8A838]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2z"/>
+            </svg>
+            <span className="text-[11px] text-white/90 font-medium">해상</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <svg className="w-4 h-4 text-[#F97316]" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
+            <span className="text-[11px] text-white/90 font-medium">항공</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <svg className="w-4 h-4 text-[#22C55E]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/>
+            </svg>
+            <span className="text-[11px] text-white/90 font-medium">내륙</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <svg className="w-4 h-4 text-[#F97316]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-          </svg>
-          <span className="text-[11px] text-white/90 font-medium">항공 (고도곡선)</span>
-        </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <svg className="w-4 h-4 text-[#22C55E]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/>
-          </svg>
-          <span className="text-[11px] text-white/90 font-medium">내륙</span>
+        {/* 항공 방향 범례 */}
+        <div className="flex gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <span className="text-[11px]">✈️</span>
+            <svg className="w-3 h-3 text-blue-400" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(45deg)' }}>
+              <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+            </svg>
+            <span className="text-[10px] text-blue-400 font-medium">수출 (KR→)</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <span className="text-[11px]">✈️</span>
+            <svg className="w-3 h-3 text-green-400" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(-135deg)' }}>
+              <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+            </svg>
+            <span className="text-[10px] text-green-400 font-medium">수입 (→KR)</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-md" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <span className="text-[11px]">🇰🇷</span>
+            <span className="text-[10px] text-white/70 font-medium">대한민국 기준</span>
+          </div>
         </div>
       </div>
 

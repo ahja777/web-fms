@@ -3,10 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -73,43 +72,7 @@ export default function SNListPage() {
   const router = useRouter();
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
-  const [data, setData] = useState<SNData[]>(mockData);
-
-  // API에서 데이터 조회
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/api/sn/sea');
-        if (!res.ok) return;
-        const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0) {
-          const mapped: SNData[] = rows.map((r: Record<string, unknown>) => ({
-            id: Number(r.id),
-            snNo: (r.snNo as string) || '',
-            snDate: (r.createdAt as string)?.substring(0, 10) || '',
-            srNo: (r.srNo as string) || '',
-            blNo: (r.blNo as string) || '',
-            shipper: (r.senderName as string) || '',
-            consignee: (r.recipientName as string) || '',
-            carrier: (r.carrierName as string) || '',
-            vessel: (r.vesselFlight as string) || '',
-            voyage: (r.voyageNo as string) || '',
-            pol: (r.pol as string) || '',
-            pod: (r.pod as string) || '',
-            etd: (r.etd as string) || '',
-            atd: '',
-            eta: (r.eta as string) || '',
-            containerQty: Number(r.packageQty) || 0,
-            status: (r.status as string) || 'DRAFT',
-          }));
-          setData(mapped);
-        }
-      } catch (e) {
-        console.error('S/N 목록 조회 오류:', e);
-      }
-    };
-    fetchData();
-  }, []);
+  const [data] = useState<SNData[]>(mockData);
 
   // 정렬 훅
   const { sortConfig, handleSort, sortData, getSortStatusText, resetSort } = useSorting<SNData>();
@@ -178,69 +141,75 @@ export default function SNListPage() {
 
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="선적통지 목록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 목록 (해상)" />
+        <PageLayout title="선적통지 목록 (S/N)" subtitle="Logis > 선적관리 > 선적통지 목록 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <Link href="/logis/sn/sea/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+          <div className="flex justify-end items-center mb-6">
+            <Link href="/logis/sn/sea/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
               신규 등록
             </Link>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/N 일자</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+          {/* 검색조건 - Booking Sea 스타일 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/N 일자</label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/N 번호</label>
+                  <input type="text" value={filters.snNo} onChange={(e) => setFilters(prev => ({ ...prev, snNo: e.target.value }))} placeholder="SN-YYYY-XXXX" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/R 번호</label>
+                  <input type="text" value={filters.srNo} onChange={(e) => setFilters(prev => ({ ...prev, srNo: e.target.value }))} placeholder="SR-YYYY-XXXX" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호</label>
+                  <input type="text" value={filters.blNo} onChange={(e) => setFilters(prev => ({ ...prev, blNo: e.target.value }))} placeholder="HDMU1234567" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">화주</label>
+                  <input type="text" value={filters.shipper} onChange={(e) => setFilters(prev => ({ ...prev, shipper: e.target.value }))} placeholder="화주명" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label>
+                  <select value={filters.carrier} onChange={(e) => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="MAERSK">MAERSK</option>
+                    <option value="MSC">MSC</option>
+                    <option value="HMM">HMM</option>
+                    <option value="EVERGREEN">EVERGREEN</option>
+                    <option value="ONE">ONE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="PENDING">대기</option>
+                    <option value="SENT">발송완료</option>
+                    <option value="CONFIRMED">확인완료</option>
+                    <option value="DEPARTED">출항완료</option>
+                  </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/N 번호</label>
-                <input type="text" value={filters.snNo} onChange={e => setFilters(prev => ({ ...prev, snNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="SN-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/R 번호</label>
-                <input type="text" value={filters.srNo} onChange={e => setFilters(prev => ({ ...prev, srNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="SR-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={e => setFilters(prev => ({ ...prev, blNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">화주</label>
-                <input type="text" value={filters.shipper} onChange={e => setFilters(prev => ({ ...prev, shipper: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label>
-                <select value={filters.carrier} onChange={e => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="MAERSK">MAERSK</option>
-                  <option value="MSC">MSC</option>
-                  <option value="HMM">HMM</option>
-                  <option value="EVERGREEN">EVERGREEN</option>
-                  <option value="ONE">ONE</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="PENDING">대기</option>
-                  <option value="SENT">발송완료</option>
-                  <option value="CONFIRMED">확인완료</option>
-                  <option value="DEPARTED">출항완료</option>
-                </select>
-              </div>
-              <div className="flex items-end gap-2">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
@@ -258,8 +227,8 @@ export default function SNListPage() {
               <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">{filteredData.length}건</span>
               <SortStatusBadge statusText={getSortStatusText(columnLabels)} onReset={resetSort} />
             </div>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
                   <SortableHeader columnKey="snNo" label="S/N 번호" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="snDate" label="S/N 일자" sortConfig={sortConfig} onSort={handleSort} />
@@ -276,30 +245,28 @@ export default function SNListPage() {
               <tbody className="divide-y divide-[var(--border)]">
                 {sortedList.map(item => (
                   <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                    <td className="px-4 py-3"><Link href={`/logis/sn/sea/${item.id}`} className="text-blue-400 hover:underline">{item.snNo}</Link></td>
-                    <td className="px-4 py-3 text-sm">{item.snDate}</td>
-                    <td className="px-4 py-3 text-sm">{item.srNo}</td>
-                    <td className="px-4 py-3 text-sm">{item.blNo || '-'}</td>
-                    <td className="px-4 py-3 text-sm">{item.shipper}</td>
-                    <td className="px-4 py-3 text-sm">{item.carrier} / {item.vessel}</td>
-                    <td className="px-4 py-3 text-sm">{item.pol} → {item.pod}</td>
-                    <td className="px-4 py-3 text-sm">{item.etd}{item.atd && ` / ${item.atd}`}</td>
-                    <td className="px-4 py-3 text-sm">{item.containerQty}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status).color}`}>{getStatusConfig(item.status).label}</span></td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap"><Link href={`/logis/sn/sea/${item.id}`} className="text-blue-400 hover:underline">{item.snNo}</Link></td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.snDate}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.srNo}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.blNo || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.shipper}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.carrier} / {item.vessel}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.pol} → {item.pod}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.etd}{item.atd && ` / ${item.atd}`}</td>
+                    <td className="px-4 py-3 text-sm text-center whitespace-nowrap">{item.containerQty}</td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status).color}`}>{getStatusConfig(item.status).label}</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

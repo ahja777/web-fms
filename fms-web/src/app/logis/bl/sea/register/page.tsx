@@ -2,10 +2,9 @@
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
-import { useScreenClose } from '@/hooks/useScreenClose';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
 import SRSearchModal, { SRData } from '@/components/popup/SRSearchModal';
 
@@ -249,9 +248,9 @@ function BLSeaRegisterContent() {
   const [mainData, setMainData] = useState<MainData>(initialMainData);
   const [cargoData, setCargoData] = useState<CargoData>(initialCargoData);
   const [otherData, setOtherData] = useState<OtherData>(initialOtherData);
-    const [isLoading, setIsLoading] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 검색 팝업 상태
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
@@ -301,15 +300,16 @@ function BLSeaRegisterContent() {
     setShowSRSearchModal(false);
   };
 
-  // 화면닫기 통합 훅
-  const {
+  // 화면닫기 핸들러
+  const handleConfirmClose = () => {
+    setShowCloseModal(false);
+    router.push('/logis/bl/sea');
+  };
+
+  useCloseConfirm({
     showModal: showCloseModal,
-    handleCloseClick,
-    handleModalClose,
-    handleDiscard: handleDiscardChanges,
-  } = useScreenClose({
-    hasChanges: hasUnsavedChanges,
-    listPath: '/logis/bl/sea',
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
 
   // 수정 모드일 경우 데이터 로드
@@ -411,7 +411,6 @@ function BLSeaRegisterContent() {
 
   // 핸들러
   const handleMainChange = (field: keyof MainData, value: string | boolean) => {
-    setHasUnsavedChanges(true);
     setMainData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -560,7 +559,7 @@ function BLSeaRegisterContent() {
       {/* Main Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <h3 className="font-bold">Main Information</h3>
@@ -569,13 +568,13 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* 수출입구분 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                 수출입구분 <span className="text-red-500">*</span>
               </label>
               <select
                 value={mainData.ioType}
                 onChange={e => handleMainChange('ioType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="OUT">수출(OUT)</option>
                 <option value="IN">수입(IN)</option>
@@ -583,24 +582,24 @@ function BLSeaRegisterContent() {
             </div>
             {/* JOB NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">JOB NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">JOB NO</label>
               <input
                 type="text"
                 value={mainData.jobNo}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
             {/* BOOKING NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">BOOKING NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">BOOKING NO</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.bookingNo}
                   onChange={e => handleMainChange('bookingNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button className="px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] text-sm">
                   부킹조회
@@ -609,11 +608,11 @@ function BLSeaRegisterContent() {
             </div>
             {/* 영업유형 / 지불방법 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">영업유형</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">영업유형</label>
               <select
                 value={mainData.salesType}
                 onChange={e => handleMainChange('salesType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="">선택</option>
                 <option value="NOMINATED">Nominated</option>
@@ -622,11 +621,11 @@ function BLSeaRegisterContent() {
             </div>
             {/* 업무유형 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">업무유형</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">업무유형</label>
               <select
                 value={mainData.businessType}
                 onChange={e => handleMainChange('businessType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="SIMPLE">Simple</option>
                 <option value="CONSOL">Consol</option>
@@ -635,11 +634,11 @@ function BLSeaRegisterContent() {
             </div>
             {/* BL TYPE */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L TYPE</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L TYPE</label>
               <select
                 value={mainData.blType}
                 onChange={e => handleMainChange('blType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="ORIGINAL">Original</option>
                 <option value="SWB">Sea Waybill</option>
@@ -651,13 +650,13 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* M BL NO */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">M B/L NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">M B/L NO</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.mblNo}
                   onChange={e => handleMainChange('mblNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="M B/L NO"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -669,7 +668,7 @@ function BLSeaRegisterContent() {
             </div>
             {/* H BL NO */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                 H B/L NO <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-1">
@@ -677,7 +676,7 @@ function BLSeaRegisterContent() {
                   type="text"
                   value={mainData.hblNo}
                   onChange={e => handleMainChange('hblNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="H B/L NO"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -689,13 +688,13 @@ function BLSeaRegisterContent() {
             </div>
             {/* S/R NO */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/R NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/R NO</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.srNo}
                   onChange={e => handleMainChange('srNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="S/R NO"
                 />
                 <button
@@ -722,20 +721,20 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-3 gap-4">
             {/* SHIPPER */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">SHIPPER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">SHIPPER</label>
               <div className="flex gap-1 mb-2">
                 <input
                   type="text"
                   value={mainData.shipperCode}
                   onChange={e => handleMainChange('shipperCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={mainData.shipperName}
                   onChange={e => handleMainChange('shipperName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Shipper Name"
                 />
                 <button
@@ -753,15 +752,15 @@ function BLSeaRegisterContent() {
                 value={mainData.shipperAddress}
                 onChange={e => handleMainChange('shipperAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
               />
             </div>
             {/* CONSIGNEE */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-[var(--muted)]">CONSIGNEE</label>
-                <label className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                <label className="block text-sm font-medium text-[var(--foreground)]">CONSIGNEE</label>
+                <label className="flex items-center gap-1 text-xs text-[var(--foreground)]">
                   <input
                     type="checkbox"
                     checked={mainData.consigneeCopy}
@@ -776,14 +775,14 @@ function BLSeaRegisterContent() {
                   type="text"
                   value={mainData.consigneeCode}
                   onChange={e => handleMainChange('consigneeCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={mainData.consigneeName}
                   onChange={e => handleMainChange('consigneeName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Consignee Name"
                 />
                 <button
@@ -801,16 +800,16 @@ function BLSeaRegisterContent() {
                 value={mainData.consigneeAddress}
                 onChange={e => handleMainChange('consigneeAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
               />
             </div>
             {/* NOTIFY */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-[var(--muted)]">NOTIFY PARTY</label>
+                <label className="block text-sm font-medium text-[var(--foreground)]">NOTIFY PARTY</label>
                 <div className="flex gap-2">
-                  <label className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                  <label className="flex items-center gap-1 text-xs text-[var(--foreground)]">
                     <input
                       type="checkbox"
                       checked={mainData.notifyToOrder}
@@ -819,7 +818,7 @@ function BLSeaRegisterContent() {
                     />
                     To Order
                   </label>
-                  <label className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                  <label className="flex items-center gap-1 text-xs text-[var(--foreground)]">
                     <input
                       type="checkbox"
                       checked={mainData.notifySameAs}
@@ -835,7 +834,7 @@ function BLSeaRegisterContent() {
                   type="text"
                   value={mainData.notifyCode}
                   onChange={e => handleMainChange('notifyCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                   disabled={mainData.notifyToOrder || mainData.notifySameAs}
                 />
@@ -843,7 +842,7 @@ function BLSeaRegisterContent() {
                   type="text"
                   value={mainData.notifyName}
                   onChange={e => handleMainChange('notifyName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Notify Name"
                   disabled={mainData.notifyToOrder || mainData.notifySameAs}
                 />
@@ -863,7 +862,7 @@ function BLSeaRegisterContent() {
                 value={mainData.notifyAddress}
                 onChange={e => handleMainChange('notifyAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
                 disabled={mainData.notifyToOrder || mainData.notifySameAs}
               />
@@ -875,7 +874,7 @@ function BLSeaRegisterContent() {
       {/* Schedule Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <h3 className="font-bold">Schedule Information</h3>
@@ -884,13 +883,13 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* Place of Receipt */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Place of Receipt</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Place of Receipt</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.placeOfReceipt}
                   onChange={e => handleMainChange('placeOfReceipt', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('seaport', (item) => {
@@ -906,20 +905,20 @@ function BLSeaRegisterContent() {
             </div>
             {/* LINE */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">LINE</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">LINE</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.lineCode}
                   onChange={e => handleMainChange('lineCode', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={mainData.lineName}
                   onChange={e => handleMainChange('lineName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('carrier', (item) => {
@@ -935,33 +934,33 @@ function BLSeaRegisterContent() {
             </div>
             {/* Pre-carriage by */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Pre-carriage by</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Pre-carriage by</label>
               <input
                 type="text"
                 value={mainData.preCarriageBy}
                 onChange={e => handleMainChange('preCarriageBy', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* Call Sign */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Call Sign</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Call Sign</label>
               <input
                 type="text"
                 value={mainData.callSign}
                 onChange={e => handleMainChange('callSign', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* Port of Loading */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Port of Loading</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Port of Loading</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.portOfLoading}
                   onChange={e => handleMainChange('portOfLoading', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('seaport', (item) => {
@@ -977,19 +976,19 @@ function BLSeaRegisterContent() {
             </div>
             {/* Onboard Date */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Onboard Date</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Onboard Date</label>
               <div className="flex gap-1">
                 <input
                   type="date"
                   value={mainData.onboardDate}
                   onChange={e => handleMainChange('onboardDate', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <input
                   type="time"
                   value={mainData.onboardTime}
                   onChange={e => handleMainChange('onboardTime', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
               </div>
             </div>
@@ -998,33 +997,33 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* Vessel Name */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Vessel Name & Voyage No</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Vessel Name & Voyage No</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={mainData.vesselName}
                   onChange={e => handleMainChange('vesselName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Vessel Name"
                 />
                 <input
                   type="text"
                   value={mainData.voyageNo}
                   onChange={e => handleMainChange('voyageNo', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Voyage"
                 />
               </div>
             </div>
             {/* Port of Discharge */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Port of Discharge</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Port of Discharge</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.portOfDischarge}
                   onChange={e => handleMainChange('portOfDischarge', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('seaport', (item) => {
@@ -1040,33 +1039,33 @@ function BLSeaRegisterContent() {
             </div>
             {/* ETD */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD</label>
               <input
                 type="date"
                 value={mainData.etd}
                 onChange={e => handleMainChange('etd', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* ETA */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label>
               <input
                 type="date"
                 value={mainData.eta}
                 onChange={e => handleMainChange('eta', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* Place of Delivery */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Place of Delivery</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Place of Delivery</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.placeOfDelivery}
                   onChange={e => handleMainChange('placeOfDelivery', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('seaport', (item) => {
@@ -1085,21 +1084,21 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4">
             {/* Freight Payable at */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Freight Payable at</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Freight Payable at</label>
               <input
                 type="text"
                 value={mainData.freightPayableAt}
                 onChange={e => handleMainChange('freightPayableAt', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* FREIGHT TERM */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">FREIGHT TERM</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">FREIGHT TERM</label>
               <select
                 value={mainData.freightTerm}
                 onChange={e => handleFreightTermChange(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="PREPAID">Prepaid</option>
                 <option value="COLLECT">Collect</option>
@@ -1107,13 +1106,13 @@ function BLSeaRegisterContent() {
             </div>
             {/* Final Destination */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Final Destination</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Final Destination</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.finalDestination}
                   onChange={e => handleMainChange('finalDestination', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('seaport', (item) => {
@@ -1129,11 +1128,11 @@ function BLSeaRegisterContent() {
             </div>
             {/* SERVICE TERM */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">SERVICE TERM</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">SERVICE TERM</label>
               <select
                 value={mainData.serviceTerm}
                 onChange={e => handleMainChange('serviceTerm', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="CY/CY">CY/CY</option>
                 <option value="CFS/CFS">CFS/CFS</option>
@@ -1156,7 +1155,7 @@ function BLSeaRegisterContent() {
       {/* Cargo Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
           <h3 className="font-bold">Cargo Information</h3>
@@ -1165,7 +1164,7 @@ function BLSeaRegisterContent() {
           <div className="flex gap-6 mb-4">
             {/* 컨테이너 규격 */}
             <div>
-              <label className="block text-sm font-medium mb-2 text-[var(--muted)]">컨테이너 규격</label>
+              <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">컨테이너 규격</label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2">
                   <input
@@ -1213,18 +1212,18 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* Package */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Package</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Package</label>
               <div className="flex gap-1">
                 <input
                   type="number"
                   value={cargoData.packageQty}
                   onChange={e => handleCargoChange('packageQty', parseInt(e.target.value) || 0)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
                 />
                 <select
                   value={cargoData.packageUnit}
                   onChange={e => handleCargoChange('packageUnit', e.target.value)}
-                  className="w-20 px-2 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 >
                   <option value="PKG">PKG</option>
                   <option value="CTN">CTN</option>
@@ -1235,44 +1234,42 @@ function BLSeaRegisterContent() {
             </div>
             {/* Gross Weight */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Gross Weight (KG)</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Gross Weight (KG)</label>
               <input
                 type="number"
-                step="0.01"
                 value={cargoData.grossWeight}
                 onChange={e => handleCargoChange('grossWeight', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
               />
             </div>
             {/* Measurement */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Measurement (CBM)</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Measurement (CBM)</label>
               <input
                 type="number"
-                step="0.001"
                 value={cargoData.measurement}
                 onChange={e => handleCargoChange('measurement', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
               />
             </div>
             {/* R.TON */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">R.TON</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">R.TON</label>
               <input
                 type="text"
                 value={cargoData.rton.toFixed(3)}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm text-right"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm text-right"
               />
             </div>
             {/* Container 20 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Container 20</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Container 20</label>
               <div className="flex gap-1">
                 <select
                   value={cargoData.container20Type}
                   onChange={e => handleCargoChange('container20Type', e.target.value)}
-                  className="flex-1 px-2 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   disabled={cargoData.containerType === 'LCL'}
                 >
                   <option value="">선택</option>
@@ -1285,19 +1282,19 @@ function BLSeaRegisterContent() {
                   type="number"
                   value={cargoData.container20Qty}
                   onChange={e => handleCargoChange('container20Qty', parseInt(e.target.value) || 0)}
-                  className="w-16 px-2 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                  className="w-16 h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
                   disabled={cargoData.containerType === 'LCL'}
                 />
               </div>
             </div>
             {/* Container 40 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Container 40</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Container 40</label>
               <div className="flex gap-1">
                 <select
                   value={cargoData.container40Type}
                   onChange={e => handleCargoChange('container40Type', e.target.value)}
-                  className="flex-1 px-2 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   disabled={cargoData.containerType === 'LCL'}
                 >
                   <option value="">선택</option>
@@ -1310,7 +1307,7 @@ function BLSeaRegisterContent() {
                   type="number"
                   value={cargoData.container40Qty}
                   onChange={e => handleCargoChange('container40Qty', parseInt(e.target.value) || 0)}
-                  className="w-16 px-2 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                  className="w-16 h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
                   disabled={cargoData.containerType === 'LCL'}
                 />
               </div>
@@ -1334,19 +1331,19 @@ function BLSeaRegisterContent() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="p-2 text-center text-xs font-semibold w-12"></th>
-                  <th className="p-2 text-left text-xs font-semibold">Container No</th>
-                  <th className="p-2 text-center text-xs font-semibold">규격</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 1</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 2</th>
-                  <th className="p-2 text-left text-xs font-semibold">Seal 3</th>
-                  <th className="p-2 text-right text-xs font-semibold">Package</th>
-                  <th className="p-2 text-center text-xs font-semibold">Unit</th>
-                  <th className="p-2 text-right text-xs font-semibold">G.Weight</th>
-                  <th className="p-2 text-right text-xs font-semibold">Measurement</th>
+                  <th className="text-center w-12"></th>
+                  <th>Container No</th>
+                  <th className="text-center">규격</th>
+                  <th>Seal 1</th>
+                  <th>Seal 2</th>
+                  <th>Seal 3</th>
+                  <th className="text-center">Package</th>
+                  <th className="text-center">Unit</th>
+                  <th className="text-center">G.Weight</th>
+                  <th className="text-center">Measurement</th>
                 </tr>
               </thead>
               <tbody>
@@ -1464,7 +1461,6 @@ function BLSeaRegisterContent() {
                     <td className="p-2">
                       <input
                         type="number"
-                        step="0.01"
                         value={container.grossWeight}
                         onChange={e => {
                           const updated = [...cargoData.containers];
@@ -1477,7 +1473,6 @@ function BLSeaRegisterContent() {
                     <td className="p-2">
                       <input
                         type="number"
-                        step="0.001"
                         value={container.measurement}
                         onChange={e => {
                           const updated = [...cargoData.containers];
@@ -1509,15 +1504,15 @@ function BLSeaRegisterContent() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="p-2 text-center text-xs font-semibold w-12"></th>
-                <th className="p-2 text-left text-xs font-semibold">CODE</th>
-                <th className="p-2 text-left text-xs font-semibold">Charges</th>
-                <th className="p-2 text-center text-xs font-semibold">Cur</th>
-                <th className="p-2 text-right text-xs font-semibold">Prepaid</th>
-                <th className="p-2 text-right text-xs font-semibold">Collect</th>
+                <th className="text-center w-12"></th>
+                <th>CODE</th>
+                <th>Charges</th>
+                <th className="text-center">Cur</th>
+                <th className="text-center">Prepaid</th>
+                <th className="text-center">Collect</th>
               </tr>
             </thead>
             <tbody>
@@ -1616,11 +1611,11 @@ function BLSeaRegisterContent() {
             {cargoData.otherCharges.length > 0 && (
               <tfoot className="bg-[var(--surface-50)]">
                 <tr className="border-t border-[var(--border)] font-medium">
-                  <td colSpan={4} className="p-2 text-right text-sm">Total:</td>
-                  <td className="p-2 text-right text-sm">
+                  <td colSpan={4} className="p-2 text-center text-sm">Total:</td>
+                  <td className="p-2 text-center text-sm">
                     {cargoData.otherCharges.reduce((sum, c) => sum + c.prepaid, 0).toLocaleString()}
                   </td>
-                  <td className="p-2 text-right text-sm">
+                  <td className="p-2 text-center text-sm">
                     {cargoData.otherCharges.reduce((sum, c) => sum + c.collect, 0).toLocaleString()}
                   </td>
                 </tr>
@@ -1633,7 +1628,7 @@ function BLSeaRegisterContent() {
       {/* Issue Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Issue Information</h3>
@@ -1642,13 +1637,13 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-6 gap-4">
             {/* Issue Place */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Issue Place</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Issue Place</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={cargoData.issuePlace}
                   onChange={e => handleCargoChange('issuePlace', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1659,21 +1654,21 @@ function BLSeaRegisterContent() {
             </div>
             {/* Issue Date */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Issue Date</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Issue Date</label>
               <input
                 type="date"
                 value={cargoData.issueDate}
                 onChange={e => handleCargoChange('issueDate', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* BL Issue Type */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L Issue Type</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L Issue Type</label>
               <select
                 value={cargoData.blIssueType}
                 onChange={e => handleCargoChange('blIssueType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="ORIGINAL">Original</option>
                 <option value="COPY">Copy</option>
@@ -1682,34 +1677,34 @@ function BLSeaRegisterContent() {
             </div>
             {/* No. of original B/L */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">No. of Original B/L</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">No. of Original B/L</label>
               <input
                 type="number"
                 value={cargoData.noOfOriginalBL}
                 onChange={e => handleCargoChange('noOfOriginalBL', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
                 min={0}
                 max={10}
               />
             </div>
             {/* Signature */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Signature</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Signature</label>
               <input
                 type="text"
                 value={cargoData.signature}
                 onChange={e => handleCargoChange('signature', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* Issuing Carrier */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Issuing Carrier or Agent</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Issuing Carrier or Agent</label>
               <input
                 type="text"
                 value={cargoData.issuingCarrier}
                 onChange={e => handleCargoChange('issuingCarrier', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1724,7 +1719,7 @@ function BLSeaRegisterContent() {
       {/* Other Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Other Information</h3>
@@ -1733,20 +1728,20 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-4 gap-4 mb-4">
             {/* AGENT CODE */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">AGENT CODE</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">AGENT CODE</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.agentCode}
                   onChange={e => handleOtherChange('agentCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.agentName}
                   onChange={e => handleOtherChange('agentName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1762,20 +1757,20 @@ function BLSeaRegisterContent() {
             </div>
             {/* SUB AGENT */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">SUB AGENT</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">SUB AGENT</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.subAgentCode}
                   onChange={e => handleOtherChange('subAgentCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.subAgentName}
                   onChange={e => handleOtherChange('subAgentName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1791,20 +1786,20 @@ function BLSeaRegisterContent() {
             </div>
             {/* PARTNER */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">PARTNER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">PARTNER</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.partnerCode}
                   onChange={e => handleOtherChange('partnerCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.partnerName}
                   onChange={e => handleOtherChange('partnerName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1820,12 +1815,12 @@ function BLSeaRegisterContent() {
             </div>
             {/* 입력사원 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">입력사원</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">입력사원</label>
               <input
                 type="text"
                 value={otherData.inputEmployee}
                 onChange={e => handleOtherChange('inputEmployee', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1833,11 +1828,11 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-4 gap-4 mb-4">
             {/* 본/지사 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">본/지사</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">본/지사</label>
               <select
                 value={otherData.branchType}
                 onChange={e => handleOtherChange('branchType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="HEAD">본사</option>
                 <option value="BRANCH">지사</option>
@@ -1845,13 +1840,13 @@ function BLSeaRegisterContent() {
             </div>
             {/* 국가코드 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">국가코드</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">국가코드</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.countryCode}
                   onChange={e => handleOtherChange('countryCode', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('country', (item) => {
@@ -1867,13 +1862,13 @@ function BLSeaRegisterContent() {
             </div>
             {/* 지역코드 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">지역코드</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">지역코드</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.regionCode}
                   onChange={e => handleOtherChange('regionCode', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('region', (item) => {
@@ -1889,12 +1884,12 @@ function BLSeaRegisterContent() {
             </div>
             {/* ITEM */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ITEM</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ITEM</label>
               <input
                 type="text"
                 value={otherData.item}
                 onChange={e => handleOtherChange('item', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1902,42 +1897,42 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-4 gap-4 mb-4">
             {/* L/C NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">L/C NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">L/C NO</label>
               <input
                 type="text"
                 value={otherData.lcNo}
                 onChange={e => handleOtherChange('lcNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* P/O NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">P/O NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">P/O NO</label>
               <input
                 type="text"
                 value={otherData.poNo}
                 onChange={e => handleOtherChange('poNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* INV VALUE */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">INV VALUE</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">INV VALUE</label>
               <input
                 type="text"
                 value={otherData.invValue}
                 onChange={e => handleOtherChange('invValue', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* INV NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">INV NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">INV NO</label>
               <input
                 type="text"
                 value={otherData.invNo}
                 onChange={e => handleOtherChange('invNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1945,43 +1940,43 @@ function BLSeaRegisterContent() {
           <div className="grid grid-cols-4 gap-4">
             {/* MRN NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MRN NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MRN NO</label>
               <input
                 type="text"
                 value={otherData.mrnNo}
                 onChange={e => handleOtherChange('mrnNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* MSN */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MSN</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MSN</label>
               <input
                 type="text"
                 value={otherData.msn}
                 onChange={e => handleOtherChange('msn', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* 최초등록일 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">최초등록일</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">최초등록일</label>
               <input
                 type="text"
                 value={otherData.createdAt}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
             {/* 최종수정일 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">최종수정일</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">최종수정일</label>
               <input
                 type="text"
                 value={otherData.updatedAt}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
@@ -1993,14 +1988,12 @@ function BLSeaRegisterContent() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title={editId ? "B/L 수정 (해상)" : "B/L 등록 (해상)"}
-          subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 등록"
-          onClose={handleCloseClick}
-        />
-        <main className="p-6">
+      <Header
+        title={editId ? "B/L 수정 (해상)" : "B/L 등록 (해상)"}
+        subtitle="HOME > 선적관리 > B/L 관리(해상) > B/L 등록"
+        showCloseButton={false}
+      />
+      <main className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
@@ -2022,7 +2015,7 @@ function BLSeaRegisterContent() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium disabled:opacity-50"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium disabled:opacity-50"
               >
                 {isLoading ? '저장중...' : '저장'}
               </button>
@@ -2030,15 +2023,15 @@ function BLSeaRegisterContent() {
           </div>
 
           {/* TAB 영역 */}
-          <div className="flex gap-1 mb-4">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             {(['MAIN', 'CARGO', 'OTHER'] as TabType[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 rounded-t-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                   activeTab === tab
-                    ? 'bg-[#E8A838] text-white'
-                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                    ? 'bg-[#2563EB] text-white'
+                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
                 }`}
               >
                 {tab}
@@ -2049,13 +2042,10 @@ function BLSeaRegisterContent() {
           {/* TAB 컨텐츠 */}
           {renderTabContent()}
         </main>
-      </div>
-
-      <UnsavedChangesModal
+      <CloseConfirmModal
         isOpen={showCloseModal}
-        onClose={handleModalClose}
-        onDiscard={handleDiscardChanges}
-        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+        onClose={() => setShowCloseModal(false)}
+        onConfirm={handleConfirmClose}
       />
 
       <CodeSearchModal

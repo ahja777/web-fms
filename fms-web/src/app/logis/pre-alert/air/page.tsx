@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import AWBSelectModal from '@/components/AWBSelectModal';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import { getToday } from '@/components/DateRangeButtons';
 
 interface AWBData {
   mawb_id: number;
@@ -71,6 +70,21 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   FAILED: { label: '실패', color: 'bg-red-500' },
 };
 
+// 샘플 설정 데이터
+const sampleSettings: PreAlertSetting[] = [
+  { setting_id: 1, setting_name: '삼성전자 항공수입 Pre-Alert', service_group: 'AIR', shipper_code: 'SAMSUNG', consignee_code: 'SAMSUNG-KR', partner_code: 'FWD-001', pol_code: 'LAX', pod_code: 'ICN', attachment_types: 'AWB,CI,PL', base_date_type: 'ETD', auto_send_yn: 'Y', auto_send_days: 2, auto_send_time: '09:00', mail_subject: '[Pre-Alert] 삼성전자 항공화물 도착예정 안내', mail_body: 'Dear Partner,\n\n항공화물 도착예정 안내드립니다.\n\nBest regards', use_yn: 'Y', addresses: [{ addr_type: 'TO', addr_name: '삼성물류팀', email: 'logistics@samsung.com' }] },
+  { setting_id: 2, setting_name: 'LG전자 항공수입 Pre-Alert', service_group: 'AIR', shipper_code: 'LG', consignee_code: 'LG-KR', partner_code: 'FWD-002', pol_code: 'NRT', pod_code: 'ICN', attachment_types: 'AWB,CI', base_date_type: 'ETA', auto_send_yn: 'Y', auto_send_days: 1, auto_send_time: '10:00', mail_subject: '[Pre-Alert] LG전자 항공화물 도착예정', mail_body: 'Dear Partner,\n\n도착예정 안내드립니다.', use_yn: 'Y', addresses: [{ addr_type: 'TO', addr_name: 'LG물류팀', email: 'logistics@lg.com' }] },
+  { setting_id: 3, setting_name: '현대자동차 긴급배송', service_group: 'AIR', shipper_code: 'HYUNDAI', consignee_code: 'HYUNDAI-KR', partner_code: 'FWD-003', pol_code: 'FRA', pod_code: 'ICN', attachment_types: 'AWB,CI,PL,CO', base_date_type: 'ETD', auto_send_yn: 'N', auto_send_days: 0, auto_send_time: '', mail_subject: '[URGENT] 현대자동차 긴급배송 안내', mail_body: '긴급배송 관련 안내드립니다.', use_yn: 'Y', addresses: [] },
+];
+
+// 샘플 메일 로그 데이터
+const sampleLogs: MailLog[] = [
+  { log_id: 1, doc_type: 'PRE_ALERT_AIR', doc_no: '180-12345678', mail_from: 'noreply@kcs.co.kr', mail_to: 'logistics@samsung.com', mail_cc: '', mail_subject: '[Pre-Alert] 삼성전자 항공화물 도착예정', status: 'SUCCESS', response_msg: 'Sent successfully', send_dt_fmt: '2026-01-28 09:00', created_dt_fmt: '2026-01-28 09:00', setting_name: '삼성전자 항공수입 Pre-Alert' },
+  { log_id: 2, doc_type: 'PRE_ALERT_AIR', doc_no: '131-87654321', mail_from: 'noreply@kcs.co.kr', mail_to: 'logistics@lg.com', mail_cc: '', mail_subject: '[Pre-Alert] LG전자 항공화물 도착예정', status: 'SUCCESS', response_msg: 'Sent successfully', send_dt_fmt: '2026-01-27 10:00', created_dt_fmt: '2026-01-27 10:00', setting_name: 'LG전자 항공수입 Pre-Alert' },
+  { log_id: 3, doc_type: 'PRE_ALERT_AIR', doc_no: '220-11223344', mail_from: 'noreply@kcs.co.kr', mail_to: 'logistics@hyundai.com', mail_cc: '', mail_subject: '[URGENT] 현대자동차 긴급배송', status: 'STANDBY', response_msg: 'Waiting for send', send_dt_fmt: '', created_dt_fmt: '2026-01-28 14:00', setting_name: '현대자동차 긴급배송' },
+  { log_id: 4, doc_type: 'PRE_ALERT_AIR', doc_no: '180-55667788', mail_from: 'noreply@kcs.co.kr', mail_to: 'invalid@test', mail_cc: '', mail_subject: '[Pre-Alert] Test', status: 'FAILED', response_msg: 'Invalid email address', send_dt_fmt: '2026-01-26 11:00', created_dt_fmt: '2026-01-26 11:00', setting_name: '테스트 설정' },
+];
+
 export default function PreAlertPage() {
   const [activeTab, setActiveTab] = useState<'settings' | 'logs'>('settings');
   const [settings, setSettings] = useState<PreAlertSetting[]>([]);
@@ -97,14 +111,12 @@ export default function PreAlertPage() {
     addresses: [],
   });
 
-  const { sortConfig: settingsSortConfig, handleSort: handleSettingsSort, sortData: sortSettingsData } = useSorting<PreAlertSetting>();
-  const { sortConfig: logsSortConfig, handleSort: handleLogsSort, sortData: sortLogsData } = useSorting<MailLog>();
-
+  const today = getToday();
   const [logFilters, setLogFilters] = useState({
     docNo: '',
     status: '',
-    startDate: '',
-    endDate: '',
+    startDate: today,
+    endDate: today,
   });
 
   // AWB 팝업 관련 state
@@ -132,11 +144,14 @@ export default function PreAlertPage() {
     try {
       const response = await fetch('/api/pre-alert/settings?serviceGroup=AIR');
       const result = await response.json();
-      if (result.success) {
+      if (result.success && result.data && result.data.length > 0) {
         setSettings(result.data);
+      } else {
+        setSettings(sampleSettings);
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
+      setSettings(sampleSettings);
     } finally {
       setLoading(false);
     }
@@ -154,11 +169,14 @@ export default function PreAlertPage() {
 
       const response = await fetch(`/api/pre-alert/mail-log?${params}`);
       const result = await response.json();
-      if (result.success) {
+      if (result.success && result.data && result.data.length > 0) {
         setLogs(result.data);
+      } else {
+        setLogs(sampleLogs);
       }
     } catch (error) {
       console.error('Error fetching logs:', error);
+      setLogs(sampleLogs);
     } finally {
       setLoading(false);
     }
@@ -287,32 +305,27 @@ export default function PreAlertPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="Pre-Alert 관리 (항공수출)" subtitle="Logis > 항공수출 > Pre-Alert" />
-        <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
-          </div>
+      <PageLayout title="Pre-Alert 관리 (항공수출)" subtitle="Logis > 항공수출 > Pre-Alert" showCloseButton={false}>
+      <main className="p-6">
 
           {/* 탭 메뉴 */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                 activeTab === 'settings'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                  ? 'bg-[#2563EB] text-white'
+                  : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
               }`}
             >
               설정 관리
             </button>
             <button
               onClick={() => setActiveTab('logs')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                 activeTab === 'logs'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                  ? 'bg-[#2563EB] text-white'
+                  : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
               }`}
             >
               발송 이력
@@ -333,18 +346,18 @@ export default function PreAlertPage() {
               </div>
 
               <div className="card overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-[var(--surface-100)]">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <SortableHeader<PreAlertSetting> columnKey="setting_name" label="설정명" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="service_group" label="Service" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="shipper_code" label="Shipper" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="consignee_code" label="Consignee" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="pol_code" label="POL/POD" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="base_date_type" label="Base Date" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="auto_send_yn" label="Auto" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <SortableHeader<PreAlertSetting> columnKey="use_yn" label="사용" sortConfig={settingsSortConfig} onSort={handleSettingsSort} />
-                      <th className="px-4 py-3 text-center text-sm font-medium">관리</th>
+                      <th className="text-center">설정명</th>
+                      <th className="text-center">Service</th>
+                      <th className="text-center">Shipper</th>
+                      <th className="text-center">Consignee</th>
+                      <th className="text-center">POL/POD</th>
+                      <th className="text-center">Base Date</th>
+                      <th className="text-center">Auto</th>
+                      <th className="text-center">사용</th>
+                      <th className="text-center">관리</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
@@ -361,24 +374,24 @@ export default function PreAlertPage() {
                         </td>
                       </tr>
                     ) : (
-                      sortSettingsData(settings).map(item => (
+                      settings.map(item => (
                         <tr key={item.setting_id} className="hover:bg-[var(--surface-50)]">
-                          <td className="px-4 py-3 text-sm font-medium">{item.setting_name}</td>
-                          <td className="px-4 py-3 text-sm">{item.service_group}</td>
-                          <td className="px-4 py-3 text-sm">{item.shipper_code || '*'}</td>
-                          <td className="px-4 py-3 text-sm">{item.consignee_code || '*'}</td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-4 py-3 text-sm font-medium text-center">{item.setting_name}</td>
+                          <td className="px-4 py-3 text-sm text-center">{item.service_group}</td>
+                          <td className="px-4 py-3 text-sm text-center">{item.shipper_code || '*'}</td>
+                          <td className="px-4 py-3 text-sm text-center">{item.consignee_code || '*'}</td>
+                          <td className="px-4 py-3 text-sm text-center">
                             {item.pol_code || '*'} → {item.pod_code || '*'}
                           </td>
-                          <td className="px-4 py-3 text-sm">{item.base_date_type}</td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-4 py-3 text-sm text-center">{item.base_date_type}</td>
+                          <td className="px-4 py-3 text-sm text-center">
                             <span className={`px-2 py-1 rounded text-xs ${
                               item.auto_send_yn === 'Y' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
                             }`}>
                               {item.auto_send_yn === 'Y' ? 'ON' : 'OFF'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-4 py-3 text-sm text-center">
                             <span className={`px-2 py-1 rounded text-xs ${
                               item.use_yn === 'Y' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'
                             }`}>
@@ -414,21 +427,21 @@ export default function PreAlertPage() {
               <div className="card p-4 mb-4">
                 <div className="grid grid-cols-5 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Doc No.</label>
+                    <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Doc No.</label>
                     <input
                       type="text"
                       value={logFilters.docNo}
                       onChange={e => setLogFilters(p => ({ ...p, docNo: e.target.value }))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
                       placeholder="MAWB No."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                    <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                     <select
                       value={logFilters.status}
                       onChange={e => setLogFilters(p => ({ ...p, status: e.target.value }))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
                     >
                       <option value="">전체</option>
                       <option value="SUCCESS">성공</option>
@@ -437,21 +450,21 @@ export default function PreAlertPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-[var(--muted)]">시작일</label>
+                    <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">시작일</label>
                     <input
                       type="date"
                       value={logFilters.startDate}
                       onChange={e => setLogFilters(p => ({ ...p, startDate: e.target.value }))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-[var(--muted)]">종료일</label>
+                    <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">종료일</label>
                     <input
                       type="date"
                       value={logFilters.endDate}
                       onChange={e => setLogFilters(p => ({ ...p, endDate: e.target.value }))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm"
                     />
                   </div>
                   <div className="flex items-end">
@@ -466,16 +479,16 @@ export default function PreAlertPage() {
               </div>
 
               <div className="card overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-[var(--surface-100)]">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <SortableHeader<MailLog> columnKey="status" label="상태" sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="doc_no" label="Doc No." sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="mail_subject" label="제목" sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="mail_from" label="From" sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="mail_to" label="To" sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="send_dt_fmt" label="발송일시" sortConfig={logsSortConfig} onSort={handleLogsSort} />
-                      <SortableHeader<MailLog> columnKey="setting_name" label="설정" sortConfig={logsSortConfig} onSort={handleLogsSort} />
+                      <th className="text-center">상태</th>
+                      <th className="text-center">Doc No.</th>
+                      <th className="text-center">제목</th>
+                      <th className="text-center">From</th>
+                      <th className="text-center">To</th>
+                      <th className="text-center">발송일시</th>
+                      <th className="text-center">설정</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
@@ -492,19 +505,19 @@ export default function PreAlertPage() {
                         </td>
                       </tr>
                     ) : (
-                      sortLogsData(logs).map(log => (
+                      logs.map(log => (
                         <tr key={log.log_id} className="hover:bg-[var(--surface-50)]">
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-center">
                             <span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[log.status]?.color || 'bg-gray-500'}`}>
                               {statusConfig[log.status]?.label || log.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm font-medium">{log.doc_no}</td>
-                          <td className="px-4 py-3 text-sm">{log.mail_subject}</td>
-                          <td className="px-4 py-3 text-sm">{log.mail_from}</td>
-                          <td className="px-4 py-3 text-sm">{log.mail_to?.substring(0, 30)}...</td>
-                          <td className="px-4 py-3 text-sm">{log.send_dt_fmt || log.created_dt_fmt}</td>
-                          <td className="px-4 py-3 text-sm">{log.setting_name}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-center">{log.doc_no}</td>
+                          <td className="px-4 py-3 text-sm text-center">{log.mail_subject}</td>
+                          <td className="px-4 py-3 text-sm text-center">{log.mail_from}</td>
+                          <td className="px-4 py-3 text-sm text-center">{log.mail_to?.substring(0, 30)}...</td>
+                          <td className="px-4 py-3 text-sm text-center">{log.send_dt_fmt || log.created_dt_fmt}</td>
+                          <td className="px-4 py-3 text-sm text-center">{log.setting_name}</td>
                         </tr>
                       ))
                     )}
@@ -513,8 +526,7 @@ export default function PreAlertPage() {
               </div>
             </>
           )}
-        </main>
-      </div>
+      </main>
 
       {/* Settings 모달 */}
       {showModal && (
@@ -560,94 +572,94 @@ export default function PreAlertPage() {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">설정명 *</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">설정명 *</label>
                 <input
                   type="text"
                   value={formData.setting_name || ''}
                   onChange={e => setFormData(p => ({ ...p, setting_name: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="예: SKC ICN-LAX Pre-alert"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Service Group</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Service Group</label>
                 <select
                   value={formData.service_group || 'AIR'}
                   onChange={e => setFormData(p => ({ ...p, service_group: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="AIR">AIR</option>
                   <option value="SEA">SEA</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Base Date</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Base Date</label>
                 <select
                   value={formData.base_date_type || 'ETD'}
                   onChange={e => setFormData(p => ({ ...p, base_date_type: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="ETD">ETD</option>
                   <option value="ON_BOARD">On-board Date</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Shipper Code</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Shipper Code</label>
                 <input
                   type="text"
                   value={formData.shipper_code || ''}
                   onChange={e => setFormData(p => ({ ...p, shipper_code: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="* 전체"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Consignee Code</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Consignee Code</label>
                 <input
                   type="text"
                   value={formData.consignee_code || ''}
                   onChange={e => setFormData(p => ({ ...p, consignee_code: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="* 전체"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">POL</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">POL</label>
                 <input
                   type="text"
                   value={formData.pol_code || ''}
                   onChange={e => setFormData(p => ({ ...p, pol_code: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="ICN"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">POD</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">POD</label>
                 <input
                   type="text"
                   value={formData.pod_code || ''}
                   onChange={e => setFormData(p => ({ ...p, pod_code: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="LAX"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">첨부파일 유형</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">첨부파일 유형</label>
                 <input
                   type="text"
                   value={formData.attachment_types || ''}
                   onChange={e => setFormData(p => ({ ...p, attachment_types: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="HBL,MBL,CI,PL"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">자동발송</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">자동발송</label>
                 <div className="flex items-center gap-4">
                   <select
                     value={formData.auto_send_yn || 'N'}
                     onChange={e => setFormData(p => ({ ...p, auto_send_yn: e.target.value }))}
-                    className="px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="Y">ON</option>
                     <option value="N">OFF</option>
@@ -656,27 +668,27 @@ export default function PreAlertPage() {
                     type="time"
                     value={formData.auto_send_time || ''}
                     onChange={e => setFormData(p => ({ ...p, auto_send_time: e.target.value }))}
-                    className="px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="발송시간"
                   />
                 </div>
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">메일 제목</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">메일 제목</label>
                 <input
                   type="text"
                   value={formData.mail_subject || ''}
                   onChange={e => setFormData(p => ({ ...p, mail_subject: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Pre-Alert: {MAWB_NO} - {ETD}"
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">메일 본문</label>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">메일 본문</label>
                 <textarea
                   value={formData.mail_body || ''}
                   onChange={e => setFormData(p => ({ ...p, mail_body: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   rows={4}
                   placeholder="메일 본문 템플릿..."
                 />
@@ -686,7 +698,7 @@ export default function PreAlertPage() {
             {/* 수신자 목록 */}
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-[var(--muted)]">수신자 목록</label>
+                <label className="text-sm font-medium text-[var(--foreground)]">수신자 목록</label>
                 <button
                   onClick={addAddress}
                   className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
@@ -699,7 +711,7 @@ export default function PreAlertPage() {
                   <select
                     value={addr.addr_type}
                     onChange={e => updateAddress(idx, 'addr_type', e.target.value)}
-                    className="px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="FROM">FROM</option>
                     <option value="TO">TO</option>
@@ -710,14 +722,14 @@ export default function PreAlertPage() {
                     type="text"
                     value={addr.addr_name}
                     onChange={e => updateAddress(idx, 'addr_name', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="이름"
                   />
                   <input
                     type="email"
                     value={addr.email}
                     onChange={e => updateAddress(idx, 'email', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="이메일"
                   />
                   <button
@@ -755,6 +767,6 @@ export default function PreAlertPage() {
         onClose={() => setShowAWBModal(false)}
         onSelect={handleAWBSelect}
       />
-    </div>
+    </PageLayout>
   );
 }

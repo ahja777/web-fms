@@ -1,195 +1,314 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
-import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
-import { useSorting, SortableHeader, SortStatusBadge } from '@/components/table';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import PageLayout from '@/components/PageLayout';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 
-interface BillingData {
-  id: number;
-  invoiceNo: string;
-  invoiceDate: string;
-  blNo: string;
-  customerName: string;
-  customerType: string;
-  amount: number;
-  currency: string;
-  status: string;
-  dueDate: string;
-  paidDate: string | null;
-}
-
-const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-  DRAFT: { label: '작성중', color: 'bg-gray-500', bgColor: '#F3F4F6' },
-  ISSUED: { label: '발행', color: 'bg-blue-500', bgColor: '#DBEAFE' },
-  SENT: { label: '발송', color: 'bg-purple-500', bgColor: '#F3E8FF' },
-  PAID: { label: '수금완료', color: 'bg-green-500', bgColor: '#D1FAE5' },
-  OVERDUE: { label: '연체', color: 'bg-red-500', bgColor: '#FEE2E2' },
-  CANCELLED: { label: '취소', color: 'bg-gray-500', bgColor: '#F3F4F6' },
-};
-
-const getStatusConfig = (status: string) => statusConfig[status] || { label: status || '미정', color: 'bg-gray-500', bgColor: '#F3F4F6' };
-
-const mockData: BillingData[] = [
-  { id: 1, invoiceNo: 'INV-2026-0001', invoiceDate: '2026-01-20', blNo: 'HDMU1234567', customerName: '삼성전자', customerType: 'SHIPPER', amount: 5500000, currency: 'KRW', status: 'PAID', dueDate: '2026-02-20', paidDate: '2026-02-15' },
-  { id: 2, invoiceNo: 'INV-2026-0002', invoiceDate: '2026-01-19', blNo: 'MAEU5678901', customerName: 'LG전자', customerType: 'SHIPPER', amount: 7200000, currency: 'KRW', status: 'ISSUED', dueDate: '2026-02-19', paidDate: null },
-  { id: 3, invoiceNo: 'INV-2026-0003', invoiceDate: '2026-01-18', blNo: 'MSCU9012345', customerName: '현대자동차', customerType: 'SHIPPER', amount: 12500, currency: 'USD', status: 'SENT', dueDate: '2026-02-18', paidDate: null },
-  { id: 4, invoiceNo: 'INV-2026-0004', invoiceDate: '2026-01-10', blNo: 'EGLV3456789', customerName: 'SK하이닉스', customerType: 'SHIPPER', amount: 3200000, currency: 'KRW', status: 'OVERDUE', dueDate: '2026-01-25', paidDate: null },
-  { id: 5, invoiceNo: 'INV-2026-0005', invoiceDate: '2026-01-22', blNo: '', customerName: 'CJ대한통운', customerType: 'CARRIER', amount: 8900, currency: 'USD', status: 'DRAFT', dueDate: '2026-02-22', paidDate: null },
+const menuCategories = [
+  {
+    id: 'sales',
+    title: '1. 매출관리',
+    description: '매출등록, 매출조회, 매출현황',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    color: '#059669',
+    subMenus: [
+      { id: 'sales-register', title: '매출등록', href: '/billing/sales/register' },
+      { id: 'sales-list', title: '매출조회', href: '/billing/sales/list' },
+      { id: 'sales-status', title: '매출현황', href: '/billing/sales/status' },
+    ],
+  },
+  {
+    id: 'purchase',
+    title: '2. 매입관리',
+    description: '매입등록, 매입조회, 매입현황',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+      </svg>
+    ),
+    color: '#DC2626',
+    subMenus: [
+      { id: 'purchase-register', title: '매입등록', href: '/billing/purchase/register' },
+      { id: 'purchase-list', title: '매입조회', href: '/billing/purchase/list' },
+      { id: 'purchase-status', title: '매입현황', href: '/billing/purchase/status' },
+    ],
+  },
+  {
+    id: 'invoice',
+    title: '3. 청구관리',
+    description: '청구서발행, 청구현황, 수금관리',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    ),
+    color: '#7C3AED',
+    subMenus: [
+      { id: 'invoice-issue', title: '청구서발행', href: '/billing/invoice/issue' },
+      { id: 'invoice-status', title: '청구현황', href: '/billing/invoice/status' },
+      { id: 'invoice-collection', title: '수금관리', href: '/billing/invoice/collection' },
+    ],
+  },
+  {
+    id: 'payment',
+    title: '4. 지급관리',
+    description: '지급요청, 지급현황, 지급내역',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+      </svg>
+    ),
+    color: '#0284C7',
+    subMenus: [
+      { id: 'payment-request', title: '지급요청', href: '/billing/payment/request' },
+      { id: 'payment-status', title: '지급현황', href: '/billing/payment/status' },
+      { id: 'payment-history', title: '지급내역', href: '/billing/payment/history' },
+    ],
+  },
+  {
+    id: 'settlement',
+    title: '5. 정산관리',
+    description: '정산현황, 손익분석, 마감관리',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    ),
+    color: '#EA580C',
+    subMenus: [
+      { id: 'settlement-status', title: '정산현황', href: '/billing/settlement/status' },
+      { id: 'settlement-profit', title: '손익분석', href: '/billing/settlement/profit' },
+      { id: 'settlement-close', title: '마감관리', href: '/billing/settlement/close' },
+    ],
+  },
+  {
+    id: 'rate',
+    title: '6. 요율관리',
+    description: '기본요율관리, 계약요율관리, 환율관리',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+    color: '#14B8A6',
+    subMenus: [
+      { id: 'rate-base', title: '기본요율관리', href: '/logis/rate/base' },
+      { id: 'rate-contract', title: '계약요율관리', href: '/logis/rate/corporate' },
+      { id: 'rate-exchange', title: '환율관리', href: '/logis/exchange-rate' },
+    ],
+  },
 ];
 
+// 샘플 통계 데이터
+const summaryStats = {
+  totalSales: 1250000000,
+  totalPurchase: 980000000,
+  profit: 270000000,
+  profitRate: 21.6,
+  pendingInvoice: 45,
+  pendingPayment: 32,
+};
+
 export default function BillingPage() {
-  const today = getToday();
-  const [filters, setFilters] = useState({
-    startDate: today,
-    endDate: today,
-    invoiceNo: '',
-    customerName: '',
-    status: '',
+  const router = useRouter();
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+
+  const handleConfirmClose = () => {
+    setShowCloseModal(false);
+    router.back();
+  };
+
+  useCloseConfirm({
+    showModal: showCloseModal,
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
-  const [appliedFilters, setAppliedFilters] = useState(filters);
-  const [data] = useState<BillingData[]>(mockData);
 
-  const { sortConfig, handleSort, sortData, getSortStatusText, resetSort } = useSorting<BillingData>();
-
-  const columnLabels: Record<string, string> = {
-    invoiceNo: '인보이스 번호',
-    invoiceDate: '발행일',
-    blNo: 'B/L 번호',
-    customerName: '거래처',
-    amount: '금액',
-    status: '상태',
-    dueDate: '결제예정일',
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
   };
 
-  const handleDateRangeSelect = (startDate: string, endDate: string) => {
-    setFilters(prev => ({ ...prev, startDate, endDate }));
-  };
-
-  const handleSearch = () => setAppliedFilters(filters);
-  const handleReset = () => {
-    const resetFilters = { startDate: today, endDate: today, invoiceNo: '', customerName: '', status: '' };
-    setFilters(resetFilters);
-    setAppliedFilters(resetFilters);
-  };
-
-  const filteredData = useMemo(() => data.filter(item => {
-    if (appliedFilters.invoiceNo && !item.invoiceNo.toLowerCase().includes(appliedFilters.invoiceNo.toLowerCase())) return false;
-    if (appliedFilters.customerName && !item.customerName.toLowerCase().includes(appliedFilters.customerName.toLowerCase())) return false;
-    if (appliedFilters.status && item.status !== appliedFilters.status) return false;
-    return true;
-  }), [data, appliedFilters]);
-
-  const sortedList = useMemo(() => sortData(filteredData), [filteredData, sortData]);
-
-  const summaryStats = useMemo(() => ({
-    total: filteredData.length,
-    draft: filteredData.filter(d => d.status === 'DRAFT').length,
-    issued: filteredData.filter(d => d.status === 'ISSUED').length,
-    paid: filteredData.filter(d => d.status === 'PAID').length,
-    overdue: filteredData.filter(d => d.status === 'OVERDUE').length,
-  }), [filteredData]);
-
-  const formatAmount = (amount: number, currency: string) => {
-    if (currency === 'KRW') {
-      return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
-    }
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('ko-KR').format(value);
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="정산 관리" subtitle="Billing > 정산 관리" showCloseButton={false} />
-        <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <button className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
-              신규 등록
-            </button>
+    <PageLayout title="Billing" subtitle="정산관리 시스템" showCloseButton={false}>
+      <main className="p-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-6 gap-4 mb-8">
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">총 매출</div>
+            <div className="text-xl font-bold text-[#059669]">{formatCurrency(summaryStats.totalSales)}</div>
+            <div className="text-xs text-[var(--muted)]">원</div>
           </div>
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">총 매입</div>
+            <div className="text-xl font-bold text-[#DC2626]">{formatCurrency(summaryStats.totalPurchase)}</div>
+            <div className="text-xs text-[var(--muted)]">원</div>
+          </div>
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">순이익</div>
+            <div className="text-xl font-bold text-[#7C3AED]">{formatCurrency(summaryStats.profit)}</div>
+            <div className="text-xs text-[var(--muted)]">원</div>
+          </div>
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">이익률</div>
+            <div className="text-xl font-bold text-[#EA580C]">{summaryStats.profitRate}%</div>
+            <div className="text-xs text-[var(--muted)]">전월 대비 +2.3%</div>
+          </div>
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">미청구</div>
+            <div className="text-xl font-bold text-[#0284C7]">{summaryStats.pendingInvoice}건</div>
+            <div className="text-xs text-[var(--muted)]">청구 대기</div>
+          </div>
+          <div className="card p-4">
+            <div className="text-sm text-[var(--muted)] mb-1">미지급</div>
+            <div className="text-xl font-bold text-[#14B8A6]">{summaryStats.pendingPayment}건</div>
+            <div className="text-xs text-[var(--muted)]">지급 대기</div>
+          </div>
+        </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">발행일</label>
-                <div className="flex gap-2 items-center">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">인보이스 번호</label>
-                <input type="text" value={filters.invoiceNo} onChange={e => setFilters(prev => ({ ...prev, invoiceNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="INV-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">거래처</label>
-                <input type="text" value={filters.customerName} onChange={e => setFilters(prev => ({ ...prev, customerName: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="거래처명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <div className="flex gap-2">
-                  <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                    <option value="">전체</option>
-                    <option value="DRAFT">작성중</option>
-                    <option value="ISSUED">발행</option>
-                    <option value="SENT">발송</option>
-                    <option value="PAID">수금완료</option>
-                    <option value="OVERDUE">연체</option>
-                  </select>
-                  <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                  <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-                </div>
-              </div>
+        {/* Page Title */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)' }}
+            >
+              <svg className="w-5 h-5 text-[#0C1222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-[var(--foreground)]">정산관리 메뉴</h2>
+              <p className="text-sm text-[var(--muted)]">매출/매입/청구/지급/정산 통합 관리</p>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-5 gap-4 mb-6">
-            <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-gray-500">{summaryStats.draft}</div><div className="text-sm text-[var(--muted)]">작성중</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.issued}</div><div className="text-sm text-[var(--muted)]">발행</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-green-500">{summaryStats.paid}</div><div className="text-sm text-[var(--muted)]">수금완료</div></div>
-            <div className="card p-4 text-center"><div className="text-2xl font-bold text-red-500">{summaryStats.overdue}</div><div className="text-sm text-[var(--muted)]">연체</div></div>
-          </div>
+        {/* Menu Categories Grid */}
+        <div className="grid grid-cols-2 gap-6">
+          {menuCategories.map((category, idx) => (
+            <div
+              key={category.id}
+              className="card overflow-hidden"
+            >
+              {/* Category Header */}
+              <div
+                className="p-6 cursor-pointer hover:bg-[var(--surface-50)] transition-colors"
+                onClick={() => toggleCategory(category.id)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${category.color}15`, color: category.color }}
+                    >
+                      {category.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-[var(--foreground)] mb-1">
+                        {category.title}
+                      </h3>
+                      <p className="text-sm text-[var(--muted)]">{category.description}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs font-medium px-2 py-1 rounded-full"
+                          style={{ background: `${category.color}15`, color: category.color }}
+                        >
+                          {category.subMenus.length}개 메뉴
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="p-2 rounded-lg hover:bg-[var(--surface-100)] transition-colors">
+                    <svg
+                      className={`w-5 h-5 text-[var(--muted)] transition-transform duration-200 ${
+                        expandedCategory === category.id ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-          <div className="card overflow-hidden">
-            <div className="p-4 border-b border-[var(--border)] flex items-center gap-3">
-              <h3 className="font-bold">정산 목록</h3>
-              <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">{filteredData.length}건</span>
-              <SortStatusBadge statusText={getSortStatusText(columnLabels)} onReset={resetSort} />
+              {/* Sub Menus */}
+              {expandedCategory === category.id && (
+                <div className="border-t border-[var(--border)] bg-[var(--surface-50)]">
+                  <div className="p-4 grid gap-2">
+                    {category.subMenus.map((subMenu, subIdx) => (
+                      <Link
+                        key={subMenu.id}
+                        href={subMenu.href}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-white transition-all group"
+                        style={{ animationDelay: `${subIdx * 0.03}s` }}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: category.color }}
+                        />
+                        <span className="text-sm font-medium text-[var(--foreground)] group-hover:text-[var(--amber-500)] transition-colors">
+                          {subMenu.title}
+                        </span>
+                        <svg
+                          className="w-4 h-4 text-[var(--muted)] ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
-                <tr>
-                  <SortableHeader columnKey="invoiceNo" label="인보이스 번호" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="invoiceDate" label="발행일" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="blNo" label="B/L 번호" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="customerName" label="거래처" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="amount" label="금액" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="dueDate" label="결제예정일" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {sortedList.map(item => (
-                  <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                    <td className="px-4 py-3"><span className="text-blue-400 hover:underline">{item.invoiceNo}</span></td>
-                    <td className="px-4 py-3 text-sm">{item.invoiceDate}</td>
-                    <td className="px-4 py-3 text-sm">{item.blNo || '-'}</td>
-                    <td className="px-4 py-3 text-sm">{item.customerName}</td>
-                    <td className="px-4 py-3 text-sm text-right">{formatAmount(item.amount, item.currency)}</td>
-                    <td className="px-4 py-3 text-sm">{item.dueDate}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status).color}`}>{getStatusConfig(item.status).label}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          ))}
+        </div>
+
+        {/* Quick Access Section */}
+        <div className="mt-8">
+          <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">자주 사용하는 메뉴</h3>
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { title: '매출등록', href: '/billing/sales/register', icon: '💰' },
+              { title: '청구서발행', href: '/billing/invoice/issue', icon: '📄' },
+              { title: '정산현황', href: '/billing/settlement/status', icon: '📊' },
+              { title: '손익분석', href: '/billing/settlement/profit', icon: '📈' },
+            ].map((item, idx) => (
+              <Link
+                key={idx}
+                href={item.href}
+                className="card p-4 flex items-center gap-3 hover:shadow-lg transition-all group"
+              >
+                <span className="text-2xl">{item.icon}</span>
+                <span className="font-medium text-[var(--foreground)] group-hover:text-[var(--amber-500)] transition-colors">
+                  {item.title}
+                </span>
+              </Link>
+            ))}
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </main>
+
+      {/* 화면 닫기 확인 모달 */}
+      <CloseConfirmModal
+        isOpen={showCloseModal}
+        onClose={() => setShowCloseModal(false)}
+        onConfirm={handleConfirmClose}
+      />
+    </PageLayout>
   );
 }

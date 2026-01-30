@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import FreightSearchModal from '@/components/FreightSearchModal';
@@ -554,15 +553,85 @@ function QuoteSeaRegisterPageContent() {
     setHasUnsavedChanges(false);
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    setBasicInfo({
+      quoteNo: '',
+      registrationDate: new Date().toISOString().split('T')[0],
+      exportImport: 'export',
+      businessType: 'LOCAL',
+      tradeTerms: 'FOB',
+      customerCode: '1', // CUSTOMER_ID (숫자)
+      customerName: '삼성전자',
+      customerManager: '김담당',
+      customerPhone: '02-1234-5678',
+      senderName: 'Samsung Electronics',
+      senderManager: 'John Kim',
+      senderPhone: '+82-2-1234-5678',
+      origin: 'KRPUS',
+      originName: '부산항',
+      inputEmployee: '홍길동',
+      toBy1: '',
+      toBy1Name: '',
+      toBy2: '',
+      toBy2Name: '',
+      destination: 'USLAX',
+      destinationName: '로스앤젤레스',
+      carrier: 'MAERSK',
+      carrierName: '머스크라인',
+      carrierManager: '이선사',
+      carrierTel: '02-9876-5432',
+      carrierFax: '02-9876-5433',
+      cyCfs: '',
+      cyCfsName: '',
+      cyCfsManager: '',
+      cyCfsTel: '',
+      cyCfsFax: '',
+      vesselName: 'MAERSK EINDHOVEN',
+      voyageNo: '001E',
+      etd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      eta: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      validFrom: new Date().toISOString().split('T')[0],
+      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    });
+    setFreightItems([
+      {
+        id: '1',
+        freightType: 'O/F',
+        freightCode: 'O/F',
+        currency: 'USD',
+        exchangeRate: 1350,
+        rateMin: 10,
+        rateBL: 20,
+        rateRTon: 30,
+        containerDry20: 1500,
+        containerDry40: 2800,
+        containerTypeACode: '20FH',
+        containerTypeARate: 10,
+        containerTypeBCode: '20RF',
+        containerTypeBRate: 20,
+        containerTypeCCode: '40DR',
+        containerTypeCRate: 30,
+        bulkRate: 5,
+        vatYn: 'N',
+        unitPrice: 3000,
+        amountForeign: 3000,
+        amountKrw: 4050000,
+        vat: 0,
+        totalAmount: 4050000,
+      },
+    ]);
+    setHasUnsavedChanges(true);
+    alert('테스트 데이터가 입력되었습니다.');
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="견적관리 등록 (해상)" subtitle="물류견적관리  견적관리 (해상) > 견적관리 등록 (해상)" onClose={handleCloseClick} />
+      <Header title="견적관리 등록 (해상)" subtitle="물류견적관리  견적관리 (해상) > 견적관리 등록 (해상)" showCloseButton={false} />
 
-        <main ref={formRef} className="p-6">
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex items-center gap-4">
               {/* 에러 카운트 표시 */}
               {errorCount > 0 && (
@@ -574,6 +643,17 @@ function QuoteSeaRegisterPageContent() {
                 </div>
               )}
               <div className="flex items-center gap-2">
+                {/* 테스트 데이터 버튼 */}
+                <button
+                  onClick={handleFillTestData}
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  테스트데이터
+                </button>
+
                 {/* 스케줄조회 버튼 */}
                 <button
                   onClick={() => setShowScheduleModal(true)}
@@ -611,11 +691,7 @@ function QuoteSeaRegisterPageContent() {
                 <button
                   onClick={() => setShowPrintModal(true)}
                   disabled={isNewMode}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
-                    isNewMode
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-[#E8A838] text-[#0C1222] hover:bg-[#D4943A]'
-                  }`}
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -627,11 +703,7 @@ function QuoteSeaRegisterPageContent() {
                 <button
                   onClick={handleNew}
                   disabled={isNewMode}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
-                    isNewMode
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -642,7 +714,7 @@ function QuoteSeaRegisterPageContent() {
                 {/* 초기화 버튼 */}
                 <button
                   onClick={handleReset}
-                  className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -665,7 +737,7 @@ function QuoteSeaRegisterPageContent() {
                 {isEditMode && (
                   <button
                     onClick={handleDelete}
-                    className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -678,7 +750,7 @@ function QuoteSeaRegisterPageContent() {
                 <button
                   onClick={handleSave}
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -721,7 +793,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.quoteNo || '자동생성'}
                     disabled
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                   />
                 </div>
                 <div>
@@ -730,7 +802,7 @@ function QuoteSeaRegisterPageContent() {
                     type="date"
                     value={basicInfo.registrationDate}
                     onChange={(e) => setBasicInfo({ ...basicInfo, registrationDate: e.target.value })}
-                    className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${
+                    className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${
                       errors.registrationDate ? 'border-red-500' : 'border-[var(--border)]'
                     }`}
                   />
@@ -741,7 +813,7 @@ function QuoteSeaRegisterPageContent() {
                   <select
                     value={basicInfo.exportImport}
                     onChange={(e) => setBasicInfo({ ...basicInfo, exportImport: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="export">수출</option>
                     <option value="import">수입</option>
@@ -752,7 +824,7 @@ function QuoteSeaRegisterPageContent() {
                   <select
                     value={basicInfo.businessType}
                     onChange={(e) => setBasicInfo({ ...basicInfo, businessType: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="LOCAL">LOCAL</option>
                     <option value="CROSS">CROSS</option>
@@ -766,7 +838,7 @@ function QuoteSeaRegisterPageContent() {
                   <select
                     value={basicInfo.tradeTerms}
                     onChange={(e) => setBasicInfo({ ...basicInfo, tradeTerms: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="CFR">CFR</option>
                     <option value="CIF">CIF</option>
@@ -783,7 +855,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.customerName}
                       onChange={(e) => setBasicInfo({ ...basicInfo, customerName: e.target.value })}
-                      className={`flex-1 px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${
+                      className={`flex-1 h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${
                         errors.customerName ? 'border-red-500' : 'border-[var(--border)]'
                       }`}
                       placeholder="거래처명"
@@ -804,7 +876,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.customerManager}
                       onChange={(e) => setBasicInfo({ ...basicInfo, customerManager: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="담당자명"
                     />
                     <button
@@ -821,7 +893,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.customerPhone}
                     onChange={(e) => setBasicInfo({ ...basicInfo, customerPhone: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -834,7 +906,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.origin}
                       onChange={(e) => setBasicInfo({ ...basicInfo, origin: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="KRPUS"
                     />
                     <button
@@ -852,7 +924,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.toBy1}
                       onChange={(e) => setBasicInfo({ ...basicInfo, toBy1: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="경유지1"
                     />
                     <button
@@ -870,7 +942,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.toBy2}
                       onChange={(e) => setBasicInfo({ ...basicInfo, toBy2: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="경유지2"
                     />
                     <button
@@ -888,7 +960,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.destination}
                       onChange={(e) => setBasicInfo({ ...basicInfo, destination: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="USLAX"
                     />
                     <button
@@ -908,7 +980,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.carrierName}
                       onChange={(e) => setBasicInfo({ ...basicInfo, carrierName: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="선사명"
                     />
                     <button
@@ -925,7 +997,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.carrierManager}
                     onChange={(e) => setBasicInfo({ ...basicInfo, carrierManager: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="담당자명"
                   />
                 </div>
@@ -935,7 +1007,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.carrierTel}
                     onChange={(e) => setBasicInfo({ ...basicInfo, carrierTel: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -945,7 +1017,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.carrierFax}
                     onChange={(e) => setBasicInfo({ ...basicInfo, carrierFax: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -958,7 +1030,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={basicInfo.cyCfsName}
                       onChange={(e) => setBasicInfo({ ...basicInfo, cyCfsName: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="CY/CFS명"
                     />
                     <button
@@ -975,7 +1047,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.cyCfsManager}
                     onChange={(e) => setBasicInfo({ ...basicInfo, cyCfsManager: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="담당자명"
                   />
                 </div>
@@ -985,7 +1057,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.cyCfsTel}
                     onChange={(e) => setBasicInfo({ ...basicInfo, cyCfsTel: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -995,7 +1067,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.cyCfsFax}
                     onChange={(e) => setBasicInfo({ ...basicInfo, cyCfsFax: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="000-0000-0000"
                   />
                 </div>
@@ -1008,14 +1080,14 @@ function QuoteSeaRegisterPageContent() {
                       type="date"
                       value={basicInfo.validFrom}
                       onChange={(e) => setBasicInfo({ ...basicInfo, validFrom: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                     <span>~</span>
                     <input
                       type="date"
                       value={basicInfo.validTo}
                       onChange={(e) => setBasicInfo({ ...basicInfo, validTo: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                 </div>
@@ -1025,7 +1097,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={basicInfo.inputEmployee}
                     disabled
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                   />
                 </div>
               </div>
@@ -1047,7 +1119,7 @@ function QuoteSeaRegisterPageContent() {
                   <select
                     value={cargoInfo.cargoType}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, cargoType: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="container">컨테이너</option>
                     <option value="lcl">LCL</option>
@@ -1059,7 +1131,7 @@ function QuoteSeaRegisterPageContent() {
                   <select
                     value={cargoInfo.vehicleType}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, vehicleType: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="">선택</option>
                     <option value="5ton">5톤</option>
@@ -1073,7 +1145,7 @@ function QuoteSeaRegisterPageContent() {
                     type="number"
                     value={cargoInfo.vehicleCount}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, vehicleCount: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -1082,7 +1154,7 @@ function QuoteSeaRegisterPageContent() {
                     type="number"
                     value={cargoInfo.weight}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, weight: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -1091,7 +1163,7 @@ function QuoteSeaRegisterPageContent() {
                     type="number"
                     value={cargoInfo.volume}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, volume: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -1100,7 +1172,7 @@ function QuoteSeaRegisterPageContent() {
                     type="text"
                     value={cargoInfo.commodity}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, commodity: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="품명"
                   />
                 </div>
@@ -1110,7 +1182,7 @@ function QuoteSeaRegisterPageContent() {
                     type="number"
                     value={cargoInfo.packageCount}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, packageCount: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
@@ -1120,7 +1192,7 @@ function QuoteSeaRegisterPageContent() {
                       type="text"
                       value={cargoInfo.region}
                       onChange={(e) => setCargoInfo({ ...cargoInfo, region: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="지역"
                     />
                     <button
@@ -1137,7 +1209,7 @@ function QuoteSeaRegisterPageContent() {
                     type="number"
                     value={cargoInfo.tonnage}
                     onChange={(e) => setCargoInfo({ ...cargoInfo, tonnage: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div className="flex items-end">
@@ -1176,10 +1248,10 @@ function QuoteSeaRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th rowSpan={2} className="w-10 p-2 text-center border-r border-[var(--border)]"><input type="checkbox" /></th>
-                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임<br/>유형</th>
-                    <th rowSpan={2} className="p-2 text-left border-r border-[var(--border)]">운임<br/>코드</th>
-                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">통화<br/>단위</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">환율</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">운임유형</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">운임코드</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">통화단위</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">환율</th>
                     <th colSpan={3} className="p-2 text-center border-r border-[var(--border)] border-b">Rate Per</th>
                     <th colSpan={2} className="p-2 text-center border-r border-[var(--border)] border-b">Container DRY</th>
                     <th colSpan={2} className="p-2 text-center border-r border-[var(--border)] border-b">Container Type A</th>
@@ -1187,11 +1259,11 @@ function QuoteSeaRegisterPageContent() {
                     <th colSpan={2} className="p-2 text-center border-r border-[var(--border)] border-b">Container Type C</th>
                     <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">Bulk</th>
                     <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">VAT</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">단가</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT<br/>(외화)</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">AMOUNT<br/>(원화)</th>
-                    <th rowSpan={2} className="p-2 text-right border-r border-[var(--border)]">VAT</th>
-                    <th rowSpan={2} className="p-2 text-right">합계<br/>금액</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">단가</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">AMOUNT(외화)</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">AMOUNT(원화)</th>
+                    <th rowSpan={2} className="p-2 text-center border-r border-[var(--border)]">VAT</th>
+                    <th rowSpan={2} className="p-2 text-center">합계금액</th>
                   </tr>
                   <tr className="bg-[var(--surface-100)]">
                     <th className="p-1 text-center text-xs border-r border-[var(--border)]">Min</th>
@@ -1291,40 +1363,40 @@ function QuoteSeaRegisterPageContent() {
               <div>
                 <label className="block text-sm font-medium mb-1">운송사</label>
                 <div className="flex gap-2">
-                  <input type="text" className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="운송사명" />
+                  <input type="text" className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="운송사명" />
                   <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">찾기</button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 담당자</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 Tel</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">운송사 Fax</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고</label>
                 <div className="flex gap-2">
-                  <input type="text" className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="창고명" />
+                  <input type="text" className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="창고명" />
                   <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">찾기</button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 담당자</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 Tel</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">창고 Fax</label>
-                <input type="text" className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
+                <input type="text" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -1332,24 +1404,24 @@ function QuoteSeaRegisterPageContent() {
                 <thead className="bg-[var(--surface-100)]">
                   <tr>
                     <th className="w-10 p-2 text-center"><input type="checkbox" /></th>
-                    <th className="p-2 text-left">운임코드</th>
-                    <th className="p-2 text-left">출발지</th>
-                    <th className="p-2 text-left">출발지명</th>
-                    <th className="p-2 text-left">도착지</th>
-                    <th className="p-2 text-left">도착지명</th>
-                    <th className="p-2 text-right">LCL</th>
-                    <th className="p-2 text-right">20'</th>
-                    <th className="p-2 text-right">40'</th>
-                    <th className="p-2 text-right">E.TC</th>
-                    <th className="p-2 text-left">담당자</th>
-                    <th className="p-2 text-left">전화번호</th>
-                    <th className="p-2 text-left">팩스번호</th>
-                    <th className="p-2 text-left">E-mail</th>
+                    <th className="p-2 text-center">운임코드</th>
+                    <th className="p-2 text-center">출발지</th>
+                    <th className="p-2 text-center">출발지명</th>
+                    <th className="p-2 text-center">도착지</th>
+                    <th className="p-2 text-center">도착지명</th>
+                    <th className="p-2 text-center">LCL</th>
+                    <th className="p-2 text-center">20'</th>
+                    <th className="p-2 text-center">40'</th>
+                    <th className="p-2 text-center">E.TC</th>
+                    <th className="p-2 text-center">담당자</th>
+                    <th className="p-2 text-center">전화번호</th>
+                    <th className="p-2 text-center">팩스번호</th>
+                    <th className="p-2 text-center">E-mail</th>
                     <th className="p-2 text-center">VAT</th>
-                    <th className="p-2 text-right">단가</th>
-                    <th className="p-2 text-right">AMOUNT</th>
-                    <th className="p-2 text-right">VAT</th>
-                    <th className="p-2 text-right">합계금액</th>
+                    <th className="p-2 text-center">단가</th>
+                    <th className="p-2 text-center">AMOUNT</th>
+                    <th className="p-2 text-center">VAT</th>
+                    <th className="p-2 text-center">합계금액</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1392,8 +1464,6 @@ function QuoteSeaRegisterPageContent() {
           </div>
 
         </main>
-      </div>
-
       {/* 스케줄조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}

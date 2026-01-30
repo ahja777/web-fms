@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
@@ -174,23 +173,20 @@ export default function ScheduleDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="스케줄 상세조회 (해상)" subtitle="Logis > 스케줄관리 > 스케줄 상세조회 (해상)" />
+        <PageLayout title="스케줄 상세조회 (해상)" subtitle="Logis > 스케줄관리 > 스케줄 상세조회 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={() => router.push('/logis/schedule/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
+              <button onClick={() => router.push('/logis/schedule/sea')} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
               {isEditing ? (
                 <>
-                  <button onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">취소</button>
-                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+                  <button onClick={handleCancel} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">취소</button>
+                  <button onClick={handleSave} className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]">저장</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+                  <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
                 </>
               )}
             </div>
@@ -200,46 +196,46 @@ export default function ScheduleDetailPage() {
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">스케줄 번호</label><input type="text" value={displayData.scheduleNo} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">스케줄 번호</label><input type="text" value={displayData.scheduleNo} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   {isEditing ? (
-                    <select value={displayData.status} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
+                    <select value={displayData.status} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
                       <option value="OPEN">부킹가능</option><option value="LIMITED">잔여공간</option><option value="FULL">만석</option><option value="CLOSED">마감</option>
                     </select>
                   ) : (
                     <div className="flex items-center gap-2 px-3 py-2"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[displayData.status].color}`}>{statusConfig[displayData.status].label}</span></div>
                   )}
                 </div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label><input type="text" value={displayData.carrier} disabled={!isEditing} onChange={e => handleChange('carrier', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">서비스 타입</label><input type="text" value={displayData.serviceType} disabled={!isEditing} onChange={e => handleChange('serviceType', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명</label><input type="text" value={displayData.vessel} disabled={!isEditing} onChange={e => handleChange('vessel', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항차</label><input type="text" value={displayData.voyage} disabled={!isEditing} onChange={e => handleChange('voyage', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">호출부호</label><input type="text" value={displayData.callSign} disabled={!isEditing} onChange={e => handleChange('callSign', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label><input type="text" value={displayData.carrier} disabled={!isEditing} onChange={e => handleChange('carrier', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">서비스 타입</label><input type="text" value={displayData.serviceType} disabled={!isEditing} onChange={e => handleChange('serviceType', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선명</label><input type="text" value={displayData.vessel} disabled={!isEditing} onChange={e => handleChange('vessel', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항차</label><input type="text" value={displayData.voyage} disabled={!isEditing} onChange={e => handleChange('voyage', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">호출부호</label><input type="text" value={displayData.callSign} disabled={!isEditing} onChange={e => handleChange('callSign', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항 (POL)</label><input type="text" value={displayData.pol} disabled={!isEditing} onChange={e => handleChange('pol', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적터미널</label><input type="text" value={displayData.polTerminal} disabled={!isEditing} onChange={e => handleChange('polTerminal', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항 (POD)</label><input type="text" value={displayData.pod} disabled={!isEditing} onChange={e => handleChange('pod', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하터미널</label><input type="text" value={displayData.podTerminal} disabled={!isEditing} onChange={e => handleChange('podTerminal', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD</label><input type="date" value={displayData.etd} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label><input type="date" value={displayData.eta} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD (실제출항)</label><input type="date" value={displayData.atd} disabled={!isEditing} onChange={e => handleChange('atd', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA (실제도착)</label><input type="date" value={displayData.ata} disabled={!isEditing} onChange={e => handleChange('ata', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항 (POL)</label><input type="text" value={displayData.pol} disabled={!isEditing} onChange={e => handleChange('pol', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적터미널</label><input type="text" value={displayData.polTerminal} disabled={!isEditing} onChange={e => handleChange('polTerminal', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항 (POD)</label><input type="text" value={displayData.pod} disabled={!isEditing} onChange={e => handleChange('pod', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하터미널</label><input type="text" value={displayData.podTerminal} disabled={!isEditing} onChange={e => handleChange('podTerminal', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD</label><input type="date" value={displayData.etd} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label><input type="date" value={displayData.eta} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATD (실제출항)</label><input type="date" value={displayData.atd} disabled={!isEditing} onChange={e => handleChange('atd', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATA (실제도착)</label><input type="date" value={displayData.ata} disabled={!isEditing} onChange={e => handleChange('ata', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Cut-Off 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cargo Cut-Off 일자</label><input type="date" value={displayData.cutOffDate} disabled={!isEditing} onChange={e => handleChange('cutOffDate', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cargo Cut-Off 시간</label><input type="time" value={displayData.cutOffTime} disabled={!isEditing} onChange={e => handleChange('cutOffTime', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Doc Cut-Off 일자</label><input type="date" value={displayData.docCutOffDate} disabled={!isEditing} onChange={e => handleChange('docCutOffDate', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Doc Cut-Off 시간</label><input type="time" value={displayData.docCutOffTime} disabled={!isEditing} onChange={e => handleChange('docCutOffTime', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">VGM Cut-Off</label><input type="date" value={displayData.vgmCutOff} disabled={!isEditing} onChange={e => handleChange('vgmCutOff', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cargo Cut-Off 일자</label><input type="date" value={displayData.cutOffDate} disabled={!isEditing} onChange={e => handleChange('cutOffDate', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cargo Cut-Off 시간</label><input type="time" value={displayData.cutOffTime} disabled={!isEditing} onChange={e => handleChange('cutOffTime', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Doc Cut-Off 일자</label><input type="date" value={displayData.docCutOffDate} disabled={!isEditing} onChange={e => handleChange('docCutOffDate', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Doc Cut-Off 시간</label><input type="time" value={displayData.docCutOffTime} disabled={!isEditing} onChange={e => handleChange('docCutOffTime', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">VGM Cut-Off</label><input type="date" value={displayData.vgmCutOff} disabled={!isEditing} onChange={e => handleChange('vgmCutOff', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
@@ -268,23 +264,23 @@ export default function ScheduleDetailPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">비고</label>
-                <input type="text" value={displayData.remarks} disabled={!isEditing} onChange={e => handleChange('remarks', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">비고</label>
+                <input type="text" value={displayData.remarks} disabled={!isEditing} onChange={e => handleChange('remarks', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
               </div>
             </div>
           </div>
 
           <div className="card p-6">
             <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">연결된 부킹 목록</h3>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">컨테이너 타입</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">수량</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">등록일</th>
+                  <th>부킹번호</th>
+                  <th>화주</th>
+                  <th>컨테이너 타입</th>
+                  <th>수량</th>
+                  <th>상태</th>
+                  <th>등록일</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -307,14 +303,12 @@ export default function ScheduleDetailPage() {
             <span className="ml-4">수정일: {data.updatedAt}</span>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
@@ -167,23 +166,20 @@ export default function AirScheduleDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="스케줄 상세조회 (항공)" subtitle="Logis > 스케줄관리 > 스케줄 상세조회 (항공)" />
+        <PageLayout title="스케줄 상세조회 (항공)" subtitle="Logis > 스케줄관리 > 스케줄 상세조회 (항공)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={() => router.push('/logis/schedule/air')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
+              <button onClick={() => router.push('/logis/schedule/air')} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
               {isEditing ? (
                 <>
-                  <button onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">취소</button>
-                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+                  <button onClick={handleCancel} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">취소</button>
+                  <button onClick={handleSave} className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]">저장</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+                  <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
                 </>
               )}
             </div>
@@ -193,34 +189,34 @@ export default function AirScheduleDetailPage() {
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">스케줄 번호</label><input type="text" value={displayData.scheduleNo} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">스케줄 번호</label><input type="text" value={displayData.scheduleNo} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   {isEditing ? (
-                    <select value={displayData.status} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
+                    <select value={displayData.status} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
                       <option value="OPEN">부킹가능</option><option value="LIMITED">잔여공간</option><option value="FULL">만석</option><option value="CLOSED">마감</option>
                     </select>
                   ) : (
                     <div className="flex items-center gap-2 px-3 py-2"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[displayData.status].color}`}>{statusConfig[displayData.status].label}</span></div>
                   )}
                 </div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사</label><input type="text" value={displayData.airline === 'KE' ? '대한항공 (KE)' : displayData.airline} disabled={!isEditing} onChange={e => handleChange('airline', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label><input type="text" value={displayData.flightNo} disabled={!isEditing} onChange={e => handleChange('flightNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">기종</label><input type="text" value={displayData.aircraftType} disabled={!isEditing} onChange={e => handleChange('aircraftType', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">운항주기</label><input type="text" value={displayData.frequency} disabled={!isEditing} onChange={e => handleChange('frequency', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사</label><input type="text" value={displayData.airline === 'KE' ? '대한항공 (KE)' : displayData.airline} disabled={!isEditing} onChange={e => handleChange('airline', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">편명</label><input type="text" value={displayData.flightNo} disabled={!isEditing} onChange={e => handleChange('flightNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">기종</label><input type="text" value={displayData.aircraftType} disabled={!isEditing} onChange={e => handleChange('aircraftType', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운항주기</label><input type="text" value={displayData.frequency} disabled={!isEditing} onChange={e => handleChange('frequency', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발지</label><input type="text" value={displayData.origin} disabled={!isEditing} onChange={e => handleChange('origin', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착지</label><input type="text" value={displayData.destination} disabled={!isEditing} onChange={e => handleChange('destination', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 일자</label><input type="date" value={displayData.etd} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 시간</label><input type="time" value={displayData.etdTime} disabled={!isEditing} onChange={e => handleChange('etdTime', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 일자</label><input type="date" value={displayData.eta} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 시간</label><input type="time" value={displayData.etaTime} disabled={!isEditing} onChange={e => handleChange('etaTime', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATD (실제출발)</label><input type="date" value={displayData.atd} disabled={!isEditing} onChange={e => handleChange('atd', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA (실제도착)</label><input type="date" value={displayData.ata} disabled={!isEditing} onChange={e => handleChange('ata', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발지</label><input type="text" value={displayData.origin} disabled={!isEditing} onChange={e => handleChange('origin', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착지</label><input type="text" value={displayData.destination} disabled={!isEditing} onChange={e => handleChange('destination', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 일자</label><input type="date" value={displayData.etd} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 시간</label><input type="time" value={displayData.etdTime} disabled={!isEditing} onChange={e => handleChange('etdTime', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 일자</label><input type="date" value={displayData.eta} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 시간</label><input type="time" value={displayData.etaTime} disabled={!isEditing} onChange={e => handleChange('etaTime', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATD (실제출발)</label><input type="date" value={displayData.atd} disabled={!isEditing} onChange={e => handleChange('atd', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ATA (실제도착)</label><input type="date" value={displayData.ata} disabled={!isEditing} onChange={e => handleChange('ata', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
@@ -245,8 +241,8 @@ export default function AirScheduleDetailPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cut-Off 일자</label><input type="date" value={displayData.cutOffDate} disabled={!isEditing} onChange={e => handleChange('cutOffDate', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cut-Off 시간</label><input type="time" value={displayData.cutOffTime} disabled={!isEditing} onChange={e => handleChange('cutOffTime', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cut-Off 일자</label><input type="date" value={displayData.cutOffDate} disabled={!isEditing} onChange={e => handleChange('cutOffDate', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cut-Off 시간</label><input type="time" value={displayData.cutOffTime} disabled={!isEditing} onChange={e => handleChange('cutOffTime', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
@@ -260,23 +256,23 @@ export default function AirScheduleDetailPage() {
                 <div className="text-center p-3 bg-[var(--surface-50)] rounded-lg"><div className="text-sm text-[var(--muted)]">+300KG</div><div className="text-lg font-bold">${displayData.rate300}</div></div>
                 <div className="text-center p-3 bg-[var(--surface-50)] rounded-lg"><div className="text-sm text-[var(--muted)]">+500KG</div><div className="text-lg font-bold">${displayData.rate500}</div></div>
               </div>
-              <div className="mt-4"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">비고</label><input type="text" value={displayData.remarks} disabled={!isEditing} onChange={e => handleChange('remarks', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+              <div className="mt-4"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">비고</label><input type="text" value={displayData.remarks} disabled={!isEditing} onChange={e => handleChange('remarks', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
             </div>
           </div>
 
           <div className="card p-6">
             <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">연결된 부킹 목록</h3>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹번호</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">화주</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">품명</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">PCS</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">G/W (KG)</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">C/W (KG)</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">상태</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">등록일</th>
+                  <th>부킹번호</th>
+                  <th>화주</th>
+                  <th>품명</th>
+                  <th>PCS</th>
+                  <th>G/W (KG)</th>
+                  <th>C/W (KG)</th>
+                  <th>상태</th>
+                  <th>등록일</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -301,14 +297,12 @@ export default function AirScheduleDetailPage() {
             <span className="ml-4">수정일: {data.updatedAt}</span>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

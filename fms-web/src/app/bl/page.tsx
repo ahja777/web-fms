@@ -5,8 +5,7 @@ import { HouseBL, MasterBL } from '@/types/bl';
 import Modal from '@/components/Modal';
 import HBLForm from '@/components/bl/HBLForm';
 import MBLForm from '@/components/bl/MBLForm';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 
 type TabType = 'hbl' | 'mbl';
 
@@ -124,13 +123,9 @@ export default function BLPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="B/L Management" subtitle="선하증권 (Bill of Lading) 관리" />
-
-        <main className="p-8">
-          <div className="animate-fade-in">
+    <PageLayout title="B/L Management" subtitle="선하증권 (Bill of Lading) 관리" showCloseButton={false}>
+        <main className="p-6">
+          <div>
             {/* Page Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -152,36 +147,32 @@ export default function BLPage() {
             </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-1 border-b border-[var(--border)] mb-6">
         <button
           onClick={() => setActiveTab('hbl')}
-          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
             activeTab === 'hbl'
-              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-lg shadow-amber-500/25'
-              : 'bg-navy-800/50 text-slate-400 hover:text-white hover:bg-navy-700/50'
+              ? 'bg-[#2563EB] text-white'
+              : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            House B/L
-          </div>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          House B/L
         </button>
         <button
           onClick={() => setActiveTab('mbl')}
-          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
             activeTab === 'mbl'
-              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-lg shadow-amber-500/25'
-              : 'bg-navy-800/50 text-slate-400 hover:text-white hover:bg-navy-700/50'
+              ? 'bg-[#2563EB] text-white'
+              : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            Master B/L
-          </div>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          Master B/L
         </button>
       </div>
 
@@ -242,7 +233,7 @@ export default function BLPage() {
                   </tr>
                 ) : (
                   hblList.map((hbl, index) => (
-                    <tr key={hbl.hbl_id} style={{ animationDelay: `${index * 30}ms` }} className="animate-fade-in">
+                    <tr key={hbl.hbl_id}>
                       <td className="font-mono font-semibold text-amber-400">{hbl.hbl_no}</td>
                       <td className="font-mono text-slate-400">{hbl.mbl_no || '-'}</td>
                       <td>{hbl.customer_name || '-'}</td>
@@ -328,7 +319,7 @@ export default function BLPage() {
                   </tr>
                 ) : (
                   mblList.map((mbl, index) => (
-                    <tr key={mbl.mbl_id} style={{ animationDelay: `${index * 30}ms` }} className="animate-fade-in">
+                    <tr key={mbl.mbl_id}>
                       <td className="font-mono font-semibold text-amber-400">{mbl.mbl_no}</td>
                       <td>{mbl.carrier_name || '-'}</td>
                       <td>
@@ -424,7 +415,6 @@ export default function BLPage() {
             />
           )}
         </Modal>
-      </div>
-    </div>
+    </PageLayout>
   );
 }

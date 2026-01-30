@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { LIST_PATHS } from '@/constants/paths';
+import { getToday } from '@/components/DateRangeButtons';
 import SeaBookingDetailPanel, { SeaBookingDetail } from '@/components/booking/SeaBookingDetailPanel';
 import { ReportPrintModal } from '@/components/reports';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import EmailModal from '@/components/EmailModal';
-import { ActionButton } from '@/components/buttons';
 
 // 화면설계서 기준 검색조건 인터페이스
 interface SearchFilters {
@@ -36,8 +35,6 @@ interface SeaBooking {
   commodity: string;           // Commodity
   grossWeight: number;         // G.Weight
   measurement: number;         // Measure
-  totalCntrQty: number;        // 컨테이너 수량
-  volume: number;              // Volume(CBM)
   specialHandlingCode: string; // Special Handing Code
   // 전송정보
   transmitDate?: string;       // 전송일시
@@ -63,16 +60,17 @@ const getStatusConfig = (status: string) => {
 
 // 샘플 데이터 - 화면설계서 기준
 const initialSampleData: SeaBooking[] = [
-  { id: '1', bookingStatus: 'CONFIRM', bookingNo: 'AN-0107120001', bookingRequestDate: '2026-01-15', pol: 'KRPUS', pod: 'USLGB', vesselVoyage: 'HANJIN SHIP / 031E', customerName: '삼성전자', commodity: '전자제품', grossWeight: 15000, measurement: 65, totalCntrQty: 2, volume: 65, specialHandlingCode: '', transmitDate: '2026-01-15 10:30', receiveDate: '2026-01-15 10:35', requestCustomer: '삼성물류', confirmCustomer: 'MAERSK' },
-  { id: '2', bookingStatus: 'REQUEST', bookingNo: 'AN-0107120002', bookingRequestDate: '2026-01-14', pol: 'KRPUS', pod: 'DEHAM', vesselVoyage: 'MSC GULSUN / W002', customerName: 'LG전자', commodity: '가전제품', grossWeight: 24000, measurement: 80, totalCntrQty: 3, volume: 80, specialHandlingCode: 'DG', transmitDate: '2026-01-14 09:00', requestCustomer: 'LG물류' },
-  { id: '3', bookingStatus: 'DRAFT', bookingNo: 'AN-0107120003', bookingRequestDate: '2026-01-13', pol: 'KRINC', pod: 'USNYC', vesselVoyage: 'HMM ALGECIRAS / 003S', customerName: '현대자동차', commodity: '자동차 부품', grossWeight: 45000, measurement: 120, totalCntrQty: 4, volume: 120, specialHandlingCode: '' },
-  { id: '4', bookingStatus: 'CANCEL', bookingNo: 'AN-0107120004', bookingRequestDate: '2026-01-12', pol: 'KRPUS', pod: 'USLGB', vesselVoyage: 'EVER GIVEN / 004E', customerName: 'SK하이닉스', commodity: '반도체 장비', grossWeight: 32000, measurement: 90, totalCntrQty: 2, volume: 90, specialHandlingCode: 'REEFER', transmitDate: '2026-01-12 14:00', receiveDate: '2026-01-12 14:30', requestCustomer: 'SK물류', confirmCustomer: 'EVERGREEN' },
-  { id: '5', bookingStatus: 'CONFIRM', bookingNo: 'AN-0107120005', bookingRequestDate: '2026-01-11', pol: 'KRPUS', pod: 'JPTYO', vesselVoyage: 'ONE APUS / 005N', customerName: '포스코', commodity: '철강 제품', grossWeight: 180000, measurement: 200, totalCntrQty: 8, volume: 200, specialHandlingCode: '', transmitDate: '2026-01-11 08:00', receiveDate: '2026-01-11 08:30', requestCustomer: '포스코물류', confirmCustomer: 'ONE' },
+  { id: '1', bookingStatus: 'CONFIRM', bookingNo: 'AN-0107120001', bookingRequestDate: '2026-01-15', pol: 'KRPUS', pod: 'USLGB', vesselVoyage: 'HANJIN SHIP / 031E', customerName: '삼성전자', commodity: '전자제품', grossWeight: 15000, measurement: 65, specialHandlingCode: '', transmitDate: '2026-01-15 10:30', receiveDate: '2026-01-15 10:35', requestCustomer: '삼성물류', confirmCustomer: 'MAERSK' },
+  { id: '2', bookingStatus: 'REQUEST', bookingNo: 'AN-0107120002', bookingRequestDate: '2026-01-14', pol: 'KRPUS', pod: 'DEHAM', vesselVoyage: 'MSC GULSUN / W002', customerName: 'LG전자', commodity: '가전제품', grossWeight: 24000, measurement: 80, specialHandlingCode: 'DG', transmitDate: '2026-01-14 09:00', requestCustomer: 'LG물류' },
+  { id: '3', bookingStatus: 'DRAFT', bookingNo: 'AN-0107120003', bookingRequestDate: '2026-01-13', pol: 'KRINC', pod: 'USNYC', vesselVoyage: 'HMM ALGECIRAS / 003S', customerName: '현대자동차', commodity: '자동차 부품', grossWeight: 45000, measurement: 120, specialHandlingCode: '' },
+  { id: '4', bookingStatus: 'CANCEL', bookingNo: 'AN-0107120004', bookingRequestDate: '2026-01-12', pol: 'KRPUS', pod: 'USLGB', vesselVoyage: 'EVER GIVEN / 004E', customerName: 'SK하이닉스', commodity: '반도체 장비', grossWeight: 32000, measurement: 90, specialHandlingCode: 'REEFER', transmitDate: '2026-01-12 14:00', receiveDate: '2026-01-12 14:30', requestCustomer: 'SK물류', confirmCustomer: 'EVERGREEN' },
+  { id: '5', bookingStatus: 'CONFIRM', bookingNo: 'AN-0107120005', bookingRequestDate: '2026-01-11', pol: 'KRPUS', pod: 'JPTYO', vesselVoyage: 'ONE APUS / 005N', customerName: '포스코', commodity: '철강 제품', grossWeight: 180000, measurement: 200, specialHandlingCode: '', transmitDate: '2026-01-11 08:00', receiveDate: '2026-01-11 08:30', requestCustomer: '포스코물류', confirmCustomer: 'ONE' },
 ];
 
+const today = getToday();
 const initialFilters: SearchFilters = {
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: today,
   bookingStatus: '',
   carrierBookingNo: '',
   pol: '',
@@ -91,9 +89,25 @@ interface SortConfig {
 const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof SeaBooking; sortConfig: SortConfig }) => {
   const isActive = sortConfig.key === columnKey;
   return (
-    <span className="inline-flex flex-col ml-1 text-[10px] leading-none">
-      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
-      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
     </span>
   );
 };
@@ -111,39 +125,6 @@ export default function BookingSeaPage() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showSelectionAlert, setShowSelectionAlert] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
-
-  // API에서 데이터 조회
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/api/booking/sea');
-        if (!res.ok) return;
-        const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0) {
-          const mapped: SeaBooking[] = rows.map((r: Record<string, unknown>) => ({
-            id: String(r.id),
-            bookingStatus: (r.status as string) || 'DRAFT',
-            bookingNo: (r.bookingNo as string) || '',
-            bookingRequestDate: (r.etd as string) || '',
-            pol: (r.pol as string) || '',
-            pod: (r.pod as string) || '',
-            vesselVoyage: ((r.vesselName || '') + ' / ' + (r.voyageNo || '')) as string,
-            customerName: (r.carrierName as string) || '',
-            commodity: (r.commodityDesc as string) || '',
-            grossWeight: Number(r.grossWeight) || 0,
-            measurement: Number(r.volume) || 0,
-            totalCntrQty: Number(r.totalCntrQty) || 0,
-            volume: Number(r.volume) || 0,
-            specialHandlingCode: '',
-          }));
-          setAllData(mapped);
-        }
-      } catch (e) {
-        console.error('부킹 목록 조회 오류:', e);
-      }
-    };
-    fetchData();
-  }, []);
 
   // 화면닫기 핸들러
   const handleConfirmClose = () => {
@@ -197,8 +178,8 @@ export default function BookingSeaPage() {
   };
 
   // 정렬 가능한 헤더 컴포넌트
-  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof SeaBooking; label: React.ReactNode; className?: string }) => (
-    <th className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none whitespace-nowrap ${className}`} onClick={() => handleSort(columnKey)}>
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof SeaBooking; label: string; className?: string }) => (
+    <th className={`cursor-pointer select-none ${className}`} onClick={() => handleSort(columnKey)}>
       <span className="inline-flex items-center">{label}<SortIcon columnKey={columnKey} sortConfig={sortConfig} /></span>
     </th>
   );
@@ -351,68 +332,49 @@ export default function BookingSeaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="선적부킹관리 조회 (해상)"
-          subtitle="HOME > 견적/부킹의뢰 > 견적/부킹관리(수출) > 선적부킹관리(해상)"
-         
-        />
+    <PageLayout
+      title="선적부킹관리 조회 (해상)"
+      subtitle="HOME > 견적/부킹의뢰 > 견적/부킹관리(수출) > 선적부킹관리(해상)"
+      showCloseButton={false}
+    >
         <main className="p-6">
-          {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              {selectedIds.size > 0 && (
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
-                  {selectedIds.size}건 선택
-                </span>
-              )}
-            </div>
+          {/* 상단 버튼 영역 - 화면설계서 기준 */}
+          <div className="flex justify-end items-center mb-4">
             <div className="flex gap-2">
-              <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
-              <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
-              <ActionButton variant="danger" icon="delete" onClick={handleDelete}>삭제</ActionButton>
-              <ActionButton variant="primary" icon="print" onClick={handlePrint}>출력</ActionButton>
-              <ActionButton variant="primary" icon="email" onClick={handleEmail}>E-mail</ActionButton>
-              <ActionButton variant="default" icon="download" onClick={handleExcel}>Excel</ActionButton>
-              <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
+              <button onClick={handleNew} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium">
+                신규
+              </button>
+              <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                수정
+              </button>
+              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] text-red-400">
+                삭제
+              </button>
+              <button onClick={handlePrint} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                출력
+              </button>
+              <button onClick={handleEmail} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                E-mail
+              </button>
+              <button onClick={handleExcel} className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                Excel
+              </button>
             </div>
           </div>
 
           {/* 검색조건 - 화면설계서 기준 */}
           <div className="card mb-6">
             <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <h3 className="font-bold">검색조건</h3>
             </div>
             <div className="p-4">
-              <div className="grid grid-cols-6 gap-4 mb-4">
-                {/* 업무구분 (고정값) */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">업무구분</label>
-                  <input
-                    type="text"
-                    value="해상"
-                    readOnly
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                  />
-                </div>
-                {/* 수출입구분 (고정값) */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수출입구분</label>
-                  <input
-                    type="text"
-                    value="수출(OUT)"
-                    readOnly
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                  />
-                </div>
+              <div className="grid grid-cols-6 gap-4">
                 {/* 일자 */}
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                     일자 <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center gap-2">
@@ -420,24 +382,24 @@ export default function BookingSeaPage() {
                       type="date"
                       value={filters.startDate}
                       onChange={e => handleFilterChange('startDate', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     />
                     <span className="text-[var(--muted)]">~</span>
                     <input
                       type="date"
                       value={filters.endDate}
                       onChange={e => handleFilterChange('endDate', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     />
                   </div>
                 </div>
                 {/* Booking 상태 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Booking 상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Booking 상태</label>
                   <select
                     value={filters.bookingStatus}
                     onChange={e => handleFilterChange('bookingStatus', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   >
                     <option value="">전체</option>
                     <option value="DRAFT">작성중</option>
@@ -448,34 +410,34 @@ export default function BookingSeaPage() {
                 </div>
                 {/* 선사부킹번호 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사부킹번호</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사부킹번호</label>
                   <input
                     type="text"
                     value={filters.carrierBookingNo}
                     onChange={e => handleFilterChange('carrierBookingNo', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="선사부킹번호"
                   />
                 </div>
                 {/* 선적지 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적지</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적지</label>
                   <input
                     type="text"
                     value={filters.pol}
                     onChange={e => handleFilterChange('pol', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="KRPUS"
                   />
                 </div>
                 {/* 양하항 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항</label>
                   <input
                     type="text"
                     value={filters.pod}
                     onChange={e => handleFilterChange('pod', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="USLAX"
                   />
                 </div>
@@ -497,22 +459,6 @@ export default function BookingSeaPage() {
             </div>
           </div>
 
-          {/* 부킹확정/부킹요청 버튼 영역 */}
-          <div className="flex justify-end gap-2 mb-4">
-            <button
-              onClick={handleBookingConfirm}
-              className="px-4 py-2 bg-[#059669] text-white rounded-lg hover:bg-[#047857] font-medium"
-            >
-              부킹확정/취소
-            </button>
-            <button
-              onClick={handleBookingRequest}
-              className="px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium"
-            >
-              부킹요청
-            </button>
-          </div>
-
           {/* 목록 테이블 - 화면설계서 기준 */}
           <div className="card mb-6">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
@@ -522,17 +468,31 @@ export default function BookingSeaPage() {
                   {filteredList.length}건
                 </span>
               </div>
-              {selectedIds.size > 0 && (
-                <button onClick={() => setSelectedIds(new Set())} className="text-sm text-[var(--muted)] hover:text-white">
-                  선택 해제 ({selectedIds.size}건)
+              <div className="flex items-center gap-2">
+                {selectedIds.size > 0 && (
+                  <button onClick={() => setSelectedIds(new Set())} className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
+                    선택 해제 ({selectedIds.size}건)
+                  </button>
+                )}
+                <button
+                  onClick={handleBookingConfirm}
+                  className="px-3 py-1.5 bg-[#059669] text-white rounded-lg hover:bg-[#047857] text-sm font-medium"
+                >
+                  부킹확정/취소
                 </button>
-              )}
+                <button
+                  onClick={handleBookingRequest}
+                  className="px-3 py-1.5 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] text-sm font-medium"
+                >
+                  부킹요청
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-12 p-3">
+                    <th className="w-12 text-center">
                       <input
                         type="checkbox"
                         checked={sortedList.length > 0 && selectedIds.size === sortedList.length}
@@ -542,23 +502,22 @@ export default function BookingSeaPage() {
                     </th>
                     <th className="p-3 text-center text-sm font-semibold">No</th>
                     <SortableHeader columnKey="bookingStatus" label="Booking 상태" className="text-center font-semibold" />
-                    <SortableHeader columnKey="bookingNo" label="Booking No." className="text-left font-semibold" />
+                    <SortableHeader columnKey="bookingNo" label="Booking No." className="text-center font-semibold" />
                     <SortableHeader columnKey="bookingRequestDate" label="부킹요청일자" className="text-center font-semibold" />
                     <SortableHeader columnKey="pol" label="선적항" className="text-center font-semibold" />
                     <SortableHeader columnKey="pod" label="양하항" className="text-center font-semibold" />
-                    <SortableHeader columnKey="vesselVoyage" label="선명/항차" className="text-left font-semibold" />
-                    <SortableHeader columnKey="customerName" label="거래처명" className="text-left font-semibold" />
-                    <SortableHeader columnKey="commodity" label="Commodity" className="text-left font-semibold" />
-                    <SortableHeader columnKey="totalCntrQty" label="컨테이너" className="text-right font-semibold" />
-                    <SortableHeader columnKey="grossWeight" label="G.Weight" className="text-right font-semibold" />
-                    <SortableHeader columnKey="volume" label="Volume(CBM)" className="text-right font-semibold" />
+                    <SortableHeader columnKey="vesselVoyage" label="선명/항차" className="text-center font-semibold" />
+                    <SortableHeader columnKey="customerName" label="거래처명" className="text-center font-semibold" />
+                    <SortableHeader columnKey="commodity" label="Commodity" className="text-center font-semibold" />
+                    <SortableHeader columnKey="grossWeight" label="G.Weight" className="text-center font-semibold" />
+                    <SortableHeader columnKey="measurement" label="Measure" className="text-center font-semibold" />
                     <SortableHeader columnKey="specialHandlingCode" label="Special Handing" className="text-center font-semibold" />
                   </tr>
                 </thead>
                 <tbody>
                   {sortedList.length === 0 ? (
                     <tr>
-                      <td colSpan={14} className="p-12 text-center">
+                      <td colSpan={13} className="p-12 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <svg className="w-12 h-12 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -591,18 +550,17 @@ export default function BookingSeaPage() {
                           {getStatusConfig(row.bookingStatus).label}
                         </span>
                       </td>
-                      <td className="p-3">
+                      <td className="p-3 text-center">
                         <span className="text-[#E8A838] font-medium hover:underline">{row.bookingNo}</span>
                       </td>
                       <td className="p-3 text-center text-sm text-[var(--muted)]">{row.bookingRequestDate}</td>
                       <td className="p-3 text-center text-sm font-medium">{portNames[row.pol] || row.pol}</td>
                       <td className="p-3 text-center text-sm font-medium">{portNames[row.pod] || row.pod}</td>
-                      <td className="p-3 text-sm">{row.vesselVoyage}</td>
-                      <td className="p-3 text-sm font-medium">{row.customerName}</td>
-                      <td className="p-3 text-sm">{row.commodity}</td>
-                      <td className="p-3 text-right text-sm">{row.totalCntrQty || 0}</td>
-                      <td className="p-3 text-right text-sm">{row.grossWeight ? row.grossWeight.toLocaleString() : '0'}</td>
-                      <td className="p-3 text-right text-sm">{row.volume ? Number(row.volume).toLocaleString() : '0'}</td>
+                      <td className="p-3 text-center text-sm">{row.vesselVoyage}</td>
+                      <td className="p-3 text-center text-sm font-medium">{row.customerName}</td>
+                      <td className="p-3 text-center text-sm">{row.commodity}</td>
+                      <td className="p-3 text-center text-sm">{row.grossWeight.toLocaleString()}</td>
+                      <td className="p-3 text-center text-sm">{row.measurement}</td>
                       <td className="p-3 text-center text-sm">
                         {row.specialHandlingCode && (
                           <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">{row.specialHandlingCode}</span>
@@ -622,13 +580,13 @@ export default function BookingSeaPage() {
                 <h3 className="font-bold">전송정보</h3>
               </div>
               <div className="p-4">
-                <table className="w-full">
-                  <thead className="bg-[var(--surface-100)]">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th className="p-3 text-center text-sm font-semibold whitespace-nowrap">전송일시</th>
-                      <th className="p-3 text-center text-sm font-semibold whitespace-nowrap">수신일시</th>
-                      <th className="p-3 text-center text-sm font-semibold whitespace-nowrap">부킹요청거래처</th>
-                      <th className="p-3 text-center text-sm font-semibold whitespace-nowrap">부킹확정거래처</th>
+                      <th className="text-center">전송일시</th>
+                      <th className="text-center">수신일시</th>
+                      <th className="text-center">부킹요청거래처</th>
+                      <th className="text-center">부킹확정거래처</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -644,7 +602,6 @@ export default function BookingSeaPage() {
             </div>
           )}
         </main>
-      </div>
 
       <CloseConfirmModal
         isOpen={showCloseModal}
@@ -677,6 +634,6 @@ export default function BookingSeaPage() {
         documentType="booking"
         documentNo={selectedRow?.bookingNo || ''}
       />
-    </div>
+    </PageLayout>
   );
 }

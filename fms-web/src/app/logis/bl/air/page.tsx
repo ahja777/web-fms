@@ -2,8 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { LIST_PATHS } from '@/constants/paths';
@@ -11,8 +10,14 @@ import AWBPrintModal, { AWBData } from '@/components/AWBPrintModal';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import EmailModal from '@/components/EmailModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
-import { ActionButton } from '@/components/buttons';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import SearchFilterPanel, {
+  SearchFilterGrid,
+  SearchFilterField,
+  DateRangeField,
+  SearchInputField,
+  SelectField,
+  TextField,
+} from '@/components/search/SearchFilterPanel';
 
 // 화면설계서 UI-G-01-07-05 기준 검색조건 인터페이스
 interface SearchFilters {
@@ -116,7 +121,6 @@ export default function BLAirPage() {
   const [showSelectionAlert, setShowSelectionAlert] = useState(false);
 
   // 검색 팝업 상태
-  const { sortConfig, handleSort, sortData } = useSorting<AirAWB>();
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
   const [searchModalType, setSearchModalType] = useState<CodeType>('customer');
   const [searchTargetField, setSearchTargetField] = useState<keyof SearchFilters>('shipperCode');
@@ -152,7 +156,7 @@ export default function BLAirPage() {
   }, []);
 
   const filteredList = useMemo(() => {
-    const filtered = allData.filter(item => {
+    return allData.filter(item => {
       if (appliedFilters.ioType && item.ioType !== appliedFilters.ioType) return false;
       if (appliedFilters.obDateFrom && item.obDate < appliedFilters.obDateFrom) return false;
       if (appliedFilters.obDateTo && item.obDate > appliedFilters.obDateTo) return false;
@@ -164,8 +168,7 @@ export default function BLAirPage() {
       if (appliedFilters.flightNo && !item.flightNo?.toLowerCase().includes(appliedFilters.flightNo.toLowerCase())) return false;
       return true;
     });
-    return sortData(filtered);
-  }, [allData, appliedFilters, sortData]);
+  }, [allData, appliedFilters]);
 
   // 핸들러
   const handleSearch = useCallback(() => {
@@ -323,233 +326,137 @@ export default function BLAirPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="AWB 조회 (항공)"
-          subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 조회"
-         
-        />
+    <PageLayout
+      title="AWB 조회 (항공)"
+      subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 조회"
+      showCloseButton={false}
+    >
         <main className="p-6">
-          {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              {selectedIds.size > 0 && (
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
-                  {selectedIds.size}건 선택
-                </span>
-              )}
-            </div>
+          {/* 상단 버튼 영역 */}
+          <div className="flex justify-end items-center mb-4">
             <div className="flex gap-2">
-              <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
-              <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
-              <ActionButton variant="danger" icon="delete" onClick={handleDelete}>삭제</ActionButton>
-              <ActionButton variant="primary" icon="print" onClick={handlePrint}>출력</ActionButton>
-              <ActionButton variant="primary" icon="email" onClick={handleEmail}>E-mail</ActionButton>
-              <ActionButton variant="default" icon="download" onClick={handleExcel}>Excel</ActionButton>
-              <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
+              <button onClick={handleNew} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium">
+                신규
+              </button>
+              <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                수정
+              </button>
+              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                삭제
+              </button>
+              <button onClick={handlePrint} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                출력
+              </button>
+              <button onClick={handleEmail} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                E-mail
+              </button>
+              <button onClick={handleExcel} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                Excel
+              </button>
             </div>
           </div>
 
-          {/* 검색조건 - 화면설계서 UI-G-01-07-05 기준 */}
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <h3 className="font-bold">검색조건</h3>
-            </div>
-            <div className="p-4">
-              <div className="grid grid-cols-6 gap-4 mb-4">
-                {/* 업무구분 (고정값) */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">업무구분</label>
-                  <input
-                    type="text"
-                    value="항공"
-                    readOnly
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                  />
-                </div>
-                {/* 수출입구분 */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수출입구분</label>
-                  <select
-                    value={filters.ioType}
-                    onChange={e => handleFilterChange('ioType', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                  >
-                    <option value="">전체</option>
-                    <option value="OUT">수출(OUT)</option>
-                    <option value="IN">수입(IN)</option>
-                  </select>
-                </div>
-                {/* O/B.Date */}
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">O/B.Date</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={filters.obDateFrom}
-                      onChange={e => handleFilterChange('obDateFrom', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                    <span className="text-[var(--muted)]">~</span>
-                    <input
-                      type="date"
-                      value={filters.obDateTo}
-                      onChange={e => handleFilterChange('obDateTo', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                  </div>
-                </div>
-                {/* A/R.Date */}
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">A/R.Date</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={filters.arDateFrom}
-                      onChange={e => handleFilterChange('arDateFrom', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                    <span className="text-[var(--muted)]">~</span>
-                    <input
-                      type="date"
-                      value={filters.arDateTo}
-                      onChange={e => handleFilterChange('arDateTo', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-6 gap-4 mb-4">
-                {/* Shipper */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Shipper</label>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={filters.shipperCode}
-                      onChange={e => handleFilterChange('shipperCode', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                      placeholder="Shipper"
-                    />
-                    <button
-                      onClick={() => openCodeSearchModal('customer', 'shipperCode')}
-                      className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                {/* Consignee */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Consignee</label>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={filters.consigneeCode}
-                      onChange={e => handleFilterChange('consigneeCode', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                      placeholder="Consignee"
-                    />
-                    <button
-                      onClick={() => openCodeSearchModal('customer', 'consigneeCode')}
-                      className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                {/* Destination */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Destination</label>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={filters.destination}
-                      onChange={e => handleFilterChange('destination', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                      placeholder="Airport Code"
-                    />
-                    <button
-                      onClick={() => openCodeSearchModal('airport', 'destination')}
-                      className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                {/* Flight No. */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Flight No.</label>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={filters.flightNo}
-                      onChange={e => handleFilterChange('flightNo', e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                      placeholder="Flight No."
-                    />
-                    <button
-                      onClick={() => openCodeSearchModal('airline', 'flightNo')}
-                      className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                {/* 입력사원 */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">입력사원</label>
-                  <input
-                    type="text"
-                    value={filters.inputEmployee}
-                    onChange={e => handleFilterChange('inputEmployee', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    placeholder="입력사원"
-                  />
-                </div>
-                {/* 본지사 */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">본지사</label>
-                  <select
-                    value={filters.branchType}
-                    onChange={e => handleFilterChange('branchType', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                  >
-                    <option value="">전체</option>
-                    <option value="HEAD">본사</option>
-                    <option value="BRANCH">지사</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
-              <button
-                onClick={handleSearch}
-                className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium"
-              >
-                조회
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
-              >
-                초기화
-              </button>
-            </div>
-          </div>
+          {/* 검색조건 - 통일된 SearchFilterPanel 컴포넌트 사용 */}
+          <SearchFilterPanel
+            title="검색조건"
+            onSearch={handleSearch}
+            onReset={handleReset}
+            className="mb-6"
+          >
+            {/* 첫 번째 행: 업무구분, 수출입구분, O/B.Date, A/R.Date */}
+            <SearchFilterGrid columns={6} className="mb-4">
+              <SearchFilterField label="업무구분">
+                <TextField value="항공" onChange={() => {}} readOnly />
+              </SearchFilterField>
+
+              <SearchFilterField label="수출입구분">
+                <SelectField
+                  value={filters.ioType}
+                  onChange={(v) => handleFilterChange('ioType', v)}
+                  options={[
+                    { value: 'OUT', label: '수출(OUT)' },
+                    { value: 'IN', label: '수입(IN)' },
+                  ]}
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="O/B.Date" colSpan={2}>
+                <DateRangeField
+                  startValue={filters.obDateFrom}
+                  endValue={filters.obDateTo}
+                  onStartChange={(v) => handleFilterChange('obDateFrom', v)}
+                  onEndChange={(v) => handleFilterChange('obDateTo', v)}
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="A/R.Date" colSpan={2}>
+                <DateRangeField
+                  startValue={filters.arDateFrom}
+                  endValue={filters.arDateTo}
+                  onStartChange={(v) => handleFilterChange('arDateFrom', v)}
+                  onEndChange={(v) => handleFilterChange('arDateTo', v)}
+                />
+              </SearchFilterField>
+            </SearchFilterGrid>
+
+            {/* 두 번째 행: Shipper, Consignee, Destination, Flight No., 입력사원, 본지사 */}
+            <SearchFilterGrid columns={6}>
+              <SearchFilterField label="Shipper">
+                <SearchInputField
+                  value={filters.shipperCode}
+                  onChange={(v) => handleFilterChange('shipperCode', v)}
+                  onSearchClick={() => openCodeSearchModal('customer', 'shipperCode')}
+                  placeholder="Shipper"
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="Consignee">
+                <SearchInputField
+                  value={filters.consigneeCode}
+                  onChange={(v) => handleFilterChange('consigneeCode', v)}
+                  onSearchClick={() => openCodeSearchModal('customer', 'consigneeCode')}
+                  placeholder="Consignee"
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="Destination">
+                <SearchInputField
+                  value={filters.destination}
+                  onChange={(v) => handleFilterChange('destination', v)}
+                  onSearchClick={() => openCodeSearchModal('airport', 'destination')}
+                  placeholder="Airport Code"
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="Flight No.">
+                <SearchInputField
+                  value={filters.flightNo}
+                  onChange={(v) => handleFilterChange('flightNo', v)}
+                  onSearchClick={() => openCodeSearchModal('airline', 'flightNo')}
+                  placeholder="Flight No."
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="입력사원">
+                <TextField
+                  value={filters.inputEmployee}
+                  onChange={(v) => handleFilterChange('inputEmployee', v)}
+                  placeholder="입력사원"
+                />
+              </SearchFilterField>
+
+              <SearchFilterField label="본지사">
+                <SelectField
+                  value={filters.branchType}
+                  onChange={(v) => handleFilterChange('branchType', v)}
+                  options={[
+                    { value: 'HEAD', label: '본사' },
+                    { value: 'BRANCH', label: '지사' },
+                  ]}
+                />
+              </SearchFilterField>
+            </SearchFilterGrid>
+          </SearchFilterPanel>
 
           {/* 목록 테이블 - 화면설계서 UI-G-01-07-05 기준 */}
           <div className="card mb-6">
@@ -567,10 +474,10 @@ export default function BLAirPage() {
               )}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-12 p-3">
+                    <th className="w-12">
                       <input
                         type="checkbox"
                         checked={filteredList.length > 0 && selectedIds.size === filteredList.length}
@@ -579,18 +486,18 @@ export default function BLAirPage() {
                       />
                     </th>
                     <th className="p-3 text-center text-sm font-semibold">No</th>
-                    <SortableHeader<AirAWB> columnKey="obDate" label="O/B.Date" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="arDate" label="A/R.Date" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="jobNo" label="JOB.NO." sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AirAWB> columnKey="mawbNo" label="MAWB NO." sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AirAWB> columnKey="hawbNo" label="HAWB NO." sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AirAWB> columnKey="lcNo" label="L/C NO." sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AirAWB> columnKey="poNo" label="P/O NO." sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AirAWB> columnKey="type" label="TYPE" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="dc" label="D/C" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="ln" label="L/N" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="pc" label="PC" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AirAWB> columnKey="inco" label="INCO" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th className="p-3 text-center text-sm font-semibold">O/B.Date</th>
+                    <th className="p-3 text-center text-sm font-semibold">A/R.Date</th>
+                    <th className="p-3 text-center text-sm font-semibold">JOB.NO.</th>
+                    <th className="p-3 text-center text-sm font-semibold">MAWB NO.</th>
+                    <th className="p-3 text-center text-sm font-semibold">HAWB NO.</th>
+                    <th className="p-3 text-center text-sm font-semibold">L/C NO.</th>
+                    <th className="p-3 text-center text-sm font-semibold">P/O NO.</th>
+                    <th className="p-3 text-center text-sm font-semibold">TYPE</th>
+                    <th className="p-3 text-center text-sm font-semibold">D/C</th>
+                    <th className="p-3 text-center text-sm font-semibold">L/N</th>
+                    <th className="p-3 text-center text-sm font-semibold">PC</th>
+                    <th className="p-3 text-center text-sm font-semibold">INCO</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -623,13 +530,13 @@ export default function BLAirPage() {
                       <td className="p-3 text-center text-sm">{index + 1}</td>
                       <td className="p-3 text-center text-sm text-[var(--muted)]">{row.obDate}</td>
                       <td className="p-3 text-center text-sm text-[var(--muted)]">{row.arDate}</td>
-                      <td className="p-3">
+                      <td className="p-3 text-center">
                         <span className="text-[#E8A838] font-medium hover:underline">{row.jobNo}</span>
                       </td>
-                      <td className="p-3 text-sm font-medium">{row.mawbNo}</td>
-                      <td className="p-3 text-sm font-medium">{row.hawbNo}</td>
-                      <td className="p-3 text-sm">{row.lcNo || '-'}</td>
-                      <td className="p-3 text-sm">{row.poNo || '-'}</td>
+                      <td className="p-3 text-sm text-center font-medium">{row.mawbNo}</td>
+                      <td className="p-3 text-sm text-center font-medium">{row.hawbNo}</td>
+                      <td className="p-3 text-sm text-center">{row.lcNo || '-'}</td>
+                      <td className="p-3 text-sm text-center">{row.poNo || '-'}</td>
                       <td className="p-3 text-center">
                         <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-medium">
                           {row.type}
@@ -698,8 +605,6 @@ export default function BLAirPage() {
             </div>
           )}
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
@@ -737,6 +642,6 @@ export default function BLAirPage() {
         onSelect={handleCodeSelect}
         codeType={searchModalType}
       />
-    </div>
+    </PageLayout>
   );
 }

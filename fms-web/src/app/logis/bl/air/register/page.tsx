@@ -2,10 +2,9 @@
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
-import { useScreenClose } from '@/hooks/useScreenClose';
+import CloseConfirmModal from '@/components/CloseConfirmModal';
+import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import DimensionsCalcModal from '@/components/popup/DimensionsCalcModal';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
 
@@ -190,11 +189,11 @@ function AWBRegisterContent() {
   const [mainData, setMainData] = useState<MainData>(initialMainData);
   const [cargoData, setCargoData] = useState<CargoData>(initialCargoData);
   const [otherData, setOtherData] = useState<OtherData>(initialOtherData);
+  const [showCloseModal, setShowCloseModal] = useState(false);
   const [showDimensionsModal, setShowDimensionsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [mawbError, setMawbError] = useState('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 검색 팝업 상태
   const [showCodeSearchModal, setShowCodeSearchModal] = useState(false);
@@ -216,15 +215,16 @@ function AWBRegisterContent() {
     setShowCodeSearchModal(false);
   };
 
-  // 화면닫기 통합 훅
-  const {
+  // 화면닫기 핸들러
+  const handleConfirmClose = () => {
+    setShowCloseModal(false);
+    router.push('/logis/bl/air');
+  };
+
+  useCloseConfirm({
     showModal: showCloseModal,
-    handleCloseClick,
-    handleModalClose,
-    handleDiscard: handleDiscardChanges,
-  } = useScreenClose({
-    hasChanges: hasUnsavedChanges,
-    listPath: '/logis/bl/air',
+    setShowModal: setShowCloseModal,
+    onConfirmClose: handleConfirmClose,
   });
 
   // 수정 모드일 경우 데이터 로드
@@ -305,7 +305,6 @@ function AWBRegisterContent() {
 
   // 핸들러
   const handleMainChange = (field: keyof MainData, value: string | boolean) => {
-    setHasUnsavedChanges(true);
     setMainData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -481,7 +480,7 @@ function AWBRegisterContent() {
       {/* Main Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <h3 className="font-bold">Main Information</h3>
@@ -490,13 +489,13 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* 수출입구분 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                 수출입구분 <span className="text-red-500">*</span>
               </label>
               <select
                 value={mainData.ioType}
                 onChange={e => handleMainChange('ioType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="OUT">수출(OUT)</option>
                 <option value="IN">수입(IN)</option>
@@ -504,24 +503,24 @@ function AWBRegisterContent() {
             </div>
             {/* JOB NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">JOB NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">JOB NO</label>
               <input
                 type="text"
                 value={mainData.jobNo}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
             {/* BOOKING NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">BOOKING NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">BOOKING NO</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.bookingNo}
                   onChange={e => handleMainChange('bookingNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button className="px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] text-sm">
                   부킹조회
@@ -530,11 +529,11 @@ function AWBRegisterContent() {
             </div>
             {/* 통화종류 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">통화종류</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">통화종류</label>
               <select
                 value={mainData.currencyCode}
                 onChange={e => handleMainChange('currencyCode', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               >
                 <option value="USD">USD</option>
                 <option value="KRW">KRW</option>
@@ -544,7 +543,7 @@ function AWBRegisterContent() {
             </div>
             {/* WT/VAL */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">WT/VAL</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">WT/VAL</label>
               <div className="flex gap-4 pt-2">
                 <label className="flex items-center gap-2">
                   <input
@@ -572,7 +571,7 @@ function AWBRegisterContent() {
             </div>
             {/* OTHER */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">OTHER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">OTHER</label>
               <div className="flex gap-4 pt-2">
                 <label className="flex items-center gap-2">
                   <input
@@ -603,7 +602,7 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-6 gap-4 mb-4">
             {/* MAWB NO */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                 MAWB NO
               </label>
               <div className="flex gap-1">
@@ -611,7 +610,7 @@ function AWBRegisterContent() {
                   type="text"
                   value={mainData.mawbNo}
                   onChange={e => handleMawbChange(e.target.value)}
-                  className={`flex-1 px-3 py-2 bg-[var(--surface-50)] border rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm ${mawbError ? 'border-red-500' : 'border-[var(--border)]'}`}
+                  className={`flex-1 h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm ${mawbError ? 'border-red-500' : 'border-[var(--border)]'}`}
                   placeholder="000-00000000"
                   maxLength={12}
                 />
@@ -625,7 +624,7 @@ function AWBRegisterContent() {
             </div>
             {/* HAWB NO */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
                 HAWB NO <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-1">
@@ -633,7 +632,7 @@ function AWBRegisterContent() {
                   type="text"
                   value={mainData.hawbNo}
                   onChange={e => handleMainChange('hawbNo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="HAWB NO"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
@@ -645,8 +644,8 @@ function AWBRegisterContent() {
             </div>
             {/* Account Information 표시 */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ACCOUNT INFORMATION</label>
-              <div className="px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm">
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ACCOUNT INFORMATION</label>
+              <div className="h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm">
                 {mainData.wtVal === 'P' ? 'Freight Prepaid' : 'Freight Collect'}
               </div>
             </div>
@@ -656,20 +655,20 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-3 gap-4">
             {/* SHIPPER */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">SHIPPER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">SHIPPER</label>
               <div className="flex gap-1 mb-2">
                 <input
                   type="text"
                   value={mainData.shipperCode}
                   onChange={e => handleMainChange('shipperCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={mainData.shipperName}
                   onChange={e => handleMainChange('shipperName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Shipper Name"
                 />
                 <button
@@ -687,15 +686,15 @@ function AWBRegisterContent() {
                 value={mainData.shipperAddress}
                 onChange={e => handleMainChange('shipperAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
               />
             </div>
             {/* CONSIGNEE */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-[var(--muted)]">CONSIGNEE</label>
-                <label className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                <label className="block text-sm font-medium text-[var(--foreground)]">CONSIGNEE</label>
+                <label className="flex items-center gap-1 text-xs text-[var(--foreground)]">
                   <input
                     type="checkbox"
                     checked={mainData.consigneeCopy}
@@ -710,14 +709,14 @@ function AWBRegisterContent() {
                   type="text"
                   value={mainData.consigneeCode}
                   onChange={e => handleMainChange('consigneeCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={mainData.consigneeName}
                   onChange={e => handleMainChange('consigneeName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Consignee Name"
                 />
                 <button
@@ -735,15 +734,15 @@ function AWBRegisterContent() {
                 value={mainData.consigneeAddress}
                 onChange={e => handleMainChange('consigneeAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
               />
             </div>
             {/* NOTIFY */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-[var(--muted)]">NOTIFY PARTY</label>
-                <label className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                <label className="block text-sm font-medium text-[var(--foreground)]">NOTIFY PARTY</label>
+                <label className="flex items-center gap-1 text-xs text-[var(--foreground)]">
                   <input
                     type="checkbox"
                     checked={mainData.notifySameAs}
@@ -758,7 +757,7 @@ function AWBRegisterContent() {
                   type="text"
                   value={mainData.notifyCode}
                   onChange={e => handleMainChange('notifyCode', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                   disabled={mainData.notifySameAs}
                 />
@@ -766,7 +765,7 @@ function AWBRegisterContent() {
                   type="text"
                   value={mainData.notifyName}
                   onChange={e => handleMainChange('notifyName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="Notify Name"
                   disabled={mainData.notifySameAs}
                 />
@@ -786,7 +785,7 @@ function AWBRegisterContent() {
                 value={mainData.notifyAddress}
                 onChange={e => handleMainChange('notifyAddress', e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Address"
                 disabled={mainData.notifySameAs}
               />
@@ -798,7 +797,7 @@ function AWBRegisterContent() {
       {/* Flight Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
           <h3 className="font-bold">Flight Information</h3>
@@ -807,13 +806,13 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-6 gap-4">
             {/* 출발지 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발지</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발지</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.departure}
                   onChange={e => handleMainChange('departure', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="ICN"
                 />
                 <button
@@ -830,13 +829,13 @@ function AWBRegisterContent() {
             </div>
             {/* 도착지 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착지</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착지</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.arrival}
                   onChange={e => handleMainChange('arrival', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="LAX"
                 />
                 <button
@@ -853,34 +852,34 @@ function AWBRegisterContent() {
             </div>
             {/* Flight No. */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Flight No.</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Flight No.</label>
               <input
                 type="text"
                 value={mainData.flightNo}
                 onChange={e => handleMainChange('flightNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 placeholder="KE001"
               />
             </div>
             {/* Flight Date */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Flight Date</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Flight Date</label>
               <input
                 type="date"
                 value={mainData.flightDate}
                 onChange={e => handleMainChange('flightDate', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* HANDLING INFORMATION */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">HANDLING INFORMATION</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">HANDLING INFORMATION</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={mainData.handlingInfo}
                   onChange={e => handleMainChange('handlingInfo', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -902,7 +901,7 @@ function AWBRegisterContent() {
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
             <h3 className="font-bold">Cargo Information</h3>
@@ -915,18 +914,18 @@ function AWBRegisterContent() {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="p-2 text-center text-xs font-semibold w-12"></th>
-                <th className="p-2 text-center text-xs font-semibold">No. of pieces RCP</th>
-                <th className="p-2 text-center text-xs font-semibold">GrossWeight</th>
-                <th className="p-2 text-center text-xs font-semibold">Kg/lb</th>
-                <th className="p-2 text-center text-xs font-semibold">Rate Class</th>
-                <th className="p-2 text-center text-xs font-semibold">Chargeable Weight</th>
-                <th className="p-2 text-center text-xs font-semibold">Rate/Charge</th>
-                <th className="p-2 text-center text-xs font-semibold">Total</th>
-                <th className="p-2 text-center text-xs font-semibold">As Arranged</th>
+                <th className="text-center w-12"></th>
+                <th className="text-center">No. of pieces RCP</th>
+                <th className="text-center">GrossWeight</th>
+                <th className="text-center">Kg/lb</th>
+                <th className="text-center">Rate Class</th>
+                <th className="text-center">Chargeable Weight</th>
+                <th className="text-center">Rate/Charge</th>
+                <th className="text-center">Total</th>
+                <th className="text-center">As Arranged</th>
               </tr>
             </thead>
             <tbody>
@@ -963,7 +962,6 @@ function AWBRegisterContent() {
                   <td className="p-2">
                     <input
                       type="number"
-                      step="0.01"
                       value={item.grossWeight}
                       onChange={e => {
                         const updated = [...cargoData.cargoItems];
@@ -1002,7 +1000,6 @@ function AWBRegisterContent() {
                   <td className="p-2">
                     <input
                       type="number"
-                      step="0.01"
                       value={item.chargeableWeight}
                       onChange={e => {
                         const updated = [...cargoData.cargoItems];
@@ -1064,16 +1061,16 @@ function AWBRegisterContent() {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="p-2 text-center text-xs font-semibold w-12"></th>
-                <th className="p-2 text-left text-xs font-semibold">Codes</th>
-                <th className="p-2 text-center text-xs font-semibold">CUR</th>
-                <th className="p-2 text-right text-xs font-semibold">Rate</th>
-                <th className="p-2 text-right text-xs font-semibold">Amount</th>
-                <th className="p-2 text-center text-xs font-semibold">P/C</th>
-                <th className="p-2 text-center text-xs font-semibold">A/C</th>
+                <th className="text-center w-12"></th>
+                <th>Codes</th>
+                <th className="text-center">CUR</th>
+                <th className="text-center">Rate</th>
+                <th className="text-center">Amount</th>
+                <th className="text-center">P/C</th>
+                <th className="text-center">A/C</th>
               </tr>
             </thead>
             <tbody>
@@ -1195,19 +1192,19 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             {/* Nature and Quantity of Goods */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Nature and Quantity of Goods</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Nature and Quantity of Goods</label>
               <textarea
                 value={cargoData.natureOfGoods}
                 onChange={e => handleCargoChange('natureOfGoods', e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm resize-none"
                 placeholder="Description of Goods"
               />
             </div>
             {/* Dimensions */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-[var(--muted)]">Dimensions</label>
+                <label className="block text-sm font-medium text-[var(--foreground)]">Dimensions</label>
                 <button
                   onClick={() => setShowDimensionsModal(true)}
                   className="px-3 py-1 text-sm bg-[#2563EB] text-white rounded hover:bg-[#1d4ed8]"
@@ -1238,23 +1235,23 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-4 gap-4">
             {/* Weight Charge */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Weight Charge</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Weight Charge</label>
               <input
                 type="number"
                 value={cargoData.weightCharge}
                 onChange={e => handleCargoChange('weightCharge', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm text-right"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm text-right"
               />
             </div>
             {/* At(Place) */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">At(Place)</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">At(Place)</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={cargoData.atPlace}
                   onChange={e => handleCargoChange('atPlace', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button className="px-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1265,12 +1262,12 @@ function AWBRegisterContent() {
             </div>
             {/* Signature of Issuing Carrier */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Signature of Issuing Carrier</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Signature of Issuing Carrier</label>
               <input
                 type="text"
                 value={cargoData.signatureCarrier}
                 onChange={e => handleCargoChange('signatureCarrier', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1284,7 +1281,7 @@ function AWBRegisterContent() {
     <div className="space-y-6">
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Other Information</h3>
@@ -1293,20 +1290,20 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-4 gap-4 mb-4">
             {/* Agent */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Agent</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Agent</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.agentCode}
                   onChange={e => handleOtherChange('agentCode', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.agentName}
                   onChange={e => handleOtherChange('agentName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1322,20 +1319,20 @@ function AWBRegisterContent() {
             </div>
             {/* Sub Agent */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Sub Agent</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Sub Agent</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.subAgentCode}
                   onChange={e => handleOtherChange('subAgentCode', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.subAgentName}
                   onChange={e => handleOtherChange('subAgentName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1351,20 +1348,20 @@ function AWBRegisterContent() {
             </div>
             {/* Partner */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Partner</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Partner</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.partnerCode}
                   onChange={e => handleOtherChange('partnerCode', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.partnerName}
                   onChange={e => handleOtherChange('partnerName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('customer', (item) => {
@@ -1380,20 +1377,20 @@ function AWBRegisterContent() {
             </div>
             {/* 항공사 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.airlineCode}
                   onChange={e => handleOtherChange('airlineCode', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   placeholder="코드"
                 />
                 <input
                   type="text"
                   value={otherData.airlineName}
                   onChange={e => handleOtherChange('airlineName', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('airline', (item) => {
@@ -1412,13 +1409,13 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-4 gap-4 mb-4">
             {/* 지역 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">지역</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">지역</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.regionCode}
                   onChange={e => handleOtherChange('regionCode', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('region', (item) => {
@@ -1434,13 +1431,13 @@ function AWBRegisterContent() {
             </div>
             {/* 국가 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">국가</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">국가</label>
               <div className="flex gap-1">
                 <input
                   type="text"
                   value={otherData.countryCode}
                   onChange={e => handleOtherChange('countryCode', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                 />
                 <button
                   onClick={() => openCodeSearchModal('country', (item) => {
@@ -1456,22 +1453,22 @@ function AWBRegisterContent() {
             </div>
             {/* MRN NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MRN NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MRN NO</label>
               <input
                 type="text"
                 value={otherData.mrnNo}
                 onChange={e => handleOtherChange('mrnNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* MSN */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MSN</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MSN</label>
               <input
                 type="text"
                 value={otherData.msn}
                 onChange={e => handleOtherChange('msn', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
           </div>
@@ -1479,43 +1476,43 @@ function AWBRegisterContent() {
           <div className="grid grid-cols-4 gap-4">
             {/* L/C NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">L/C NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">L/C NO</label>
               <input
                 type="text"
                 value={otherData.lcNo}
                 onChange={e => handleOtherChange('lcNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* P/O NO */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">P/O NO</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">P/O NO</label>
               <input
                 type="text"
                 value={otherData.poNo}
                 onChange={e => handleOtherChange('poNo', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
               />
             </div>
             {/* 최초등록일 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">최초등록일</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">최초등록일</label>
               <input
                 type="text"
                 value={otherData.createdAt}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
             {/* 최종수정일 */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">최종수정일</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">최종수정일</label>
               <input
                 type="text"
                 value={otherData.updatedAt}
                 readOnly
-                className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 placeholder="자동생성"
               />
             </div>
@@ -1527,14 +1524,12 @@ function AWBRegisterContent() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title={editId ? "AWB 수정 (항공)" : "AWB 등록 (항공)"}
-          subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 등록"
-          onClose={handleCloseClick}
-        />
-        <main className="p-6">
+      <Header
+        title={editId ? "AWB 수정 (항공)" : "AWB 등록 (항공)"}
+        subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 등록"
+        showCloseButton={false}
+      />
+      <main className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
@@ -1549,7 +1544,7 @@ function AWBRegisterContent() {
               <button
                 onClick={handleHouseNew}
                 disabled={!isSaved}
-                className={`px-4 py-2 rounded-lg font-medium ${isSaved ? 'bg-[#2563EB] text-white hover:bg-[#1d4ed8]' : 'bg-[var(--surface-200)] text-[var(--muted)] cursor-not-allowed'}`}
+                className={`px-4 py-2 rounded-lg font-medium ${isSaved ? 'bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]' : 'bg-[var(--surface-200)] text-[var(--muted)] cursor-not-allowed'}`}
               >
                 House 신규
               </button>
@@ -1563,7 +1558,7 @@ function AWBRegisterContent() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium disabled:opacity-50"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium disabled:opacity-50"
               >
                 {isLoading ? '저장중...' : '저장'}
               </button>
@@ -1571,15 +1566,15 @@ function AWBRegisterContent() {
           </div>
 
           {/* TAB 영역 */}
-          <div className="flex gap-1 mb-4">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             {(['MAIN', 'CARGO', 'OTHER'] as TabType[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 rounded-t-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                   activeTab === tab
-                    ? 'bg-[#E8A838] text-white'
-                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                    ? 'bg-[#2563EB] text-white'
+                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
                 }`}
               >
                 {tab}
@@ -1590,13 +1585,10 @@ function AWBRegisterContent() {
           {/* TAB 컨텐츠 */}
           {renderTabContent()}
         </main>
-      </div>
-
-      <UnsavedChangesModal
+      <CloseConfirmModal
         isOpen={showCloseModal}
-        onClose={handleModalClose}
-        onDiscard={handleDiscardChanges}
-        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
+        onClose={() => setShowCloseModal(false)}
+        onConfirm={handleConfirmClose}
       />
 
       <DimensionsCalcModal

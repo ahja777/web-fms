@@ -2,9 +2,98 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import WorldMapGlobe from '@/components/WorldMapGlobe';
+import StatusDistributionChart from '@/components/StatusDistributionChart';
+import AlertsExceptionsPanel from '@/components/AlertsExceptionsPanel';
+
+// ============================================================
+// Global Shipment Tracking 전체화면 모달 컴포넌트
+// ============================================================
+function FullscreenMapModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  // ESC 키로 닫기
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* 배경 오버레이 */}
+      <div
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
+
+      {/* 모달 컨텐츠 */}
+      <div className="relative w-[95vw] h-[90vh] bg-[var(--card)] rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+        {/* 헤더 */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4 bg-gradient-to-b from-black/60 to-transparent">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)' }}>
+              <svg className="w-5 h-5 text-[#0C1222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+                Global Shipment Tracking
+              </h2>
+              <p className="text-sm text-white/70">Real-time worldwide logistics monitoring • Press ESC to close</p>
+            </div>
+          </div>
+
+          {/* 닫기 버튼 */}
+          <button
+            onClick={onClose}
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all duration-200"
+          >
+            <span className="text-sm font-medium text-white/90">Close</span>
+            <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        {/* 지도 영역 */}
+        <div className="w-full h-full">
+          <WorldMapGlobe viewMode="full" compactHeight={typeof window !== 'undefined' ? window.innerHeight * 0.9 : 800} />
+        </div>
+      </div>
+
+      {/* 애니메이션 스타일 */}
+      <style jsx>{`
+        @keyframes scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-scale-in {
+          animation: scale-in 0.2s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+}
 
 interface DashboardData {
   stats: {
@@ -52,46 +141,6 @@ function useAnimatedValue(endValue: number, duration: number = 1500) {
   return value;
 }
 
-function DonutChart({ data }: { data: { label: string; value: number; color: string }[] }) {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  let currentAngle = -90;
-  const segments = data.map((d) => {
-    const angle = (d.value / total) * 360;
-    const startAngle = currentAngle;
-    currentAngle += angle;
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = ((startAngle + angle) * Math.PI) / 180;
-    const x1 = 50 + 40 * Math.cos(startRad);
-    const y1 = 50 + 40 * Math.sin(startRad);
-    const x2 = 50 + 40 * Math.cos(endRad);
-    const y2 = 50 + 40 * Math.sin(endRad);
-    const largeArc = angle > 180 ? 1 : 0;
-    return { ...d, path: `M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z` };
-  });
-  return (
-    <div className="relative">
-      <svg viewBox="0 0 100 100" className="w-44 h-44">
-        {segments.map((seg, i) => (<path key={i} d={seg.path} fill={seg.color} className="transition-all duration-500 hover:opacity-80 cursor-pointer" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />))}
-        <circle cx="50" cy="50" r="25" fill="white" />
-        <text x="50" y="47" textAnchor="middle" style={{ fontSize: '12px' }} className="font-bold fill-[var(--foreground)]">{total}</text>
-        <text x="50" y="58" textAnchor="middle" style={{ fontSize: '6px' }} className="fill-[var(--muted)]">Total</text>
-      </svg>
-      <div className="mt-3 space-y-1.5">
-        {data.map((d, i) => (<div key={i} className="flex items-center gap-2 text-xs"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} /><span className="text-[var(--muted)]">{d.label}</span><span className="ml-auto font-semibold text-[var(--foreground)]">{d.value}</span></div>))}
-      </div>
-    </div>
-  );
-}
-
-function MiniBarChart({ data, color }: { data: number[]; color: string }) {
-  const max = Math.max(...data);
-  return (
-    <div className="flex items-end gap-1 h-12">
-      {data.map((v, i) => (<div key={i} className="flex-1 rounded-t transition-all duration-500 hover:opacity-80" style={{ height: `${(v / max) * 100}%`, background: `linear-gradient(180deg, ${color} 0%, ${color}88 100%)`, minHeight: '4px' }} />))}
-    </div>
-  );
-}
-
 function KPIGauge({ value, label, color }: { value: number; label: string; color: string }) {
   const animatedValue = useAnimatedValue(value, 2000);
   const circumference = 2 * Math.PI * 35;
@@ -110,53 +159,10 @@ function KPIGauge({ value, label, color }: { value: number; label: string; color
   );
 }
 
-function WorldMap() {
-  const [animationProgress, setAnimationProgress] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setAnimationProgress((prev) => (prev + 1) % 100), 50);
-    return () => clearInterval(interval);
-  }, []);
-  const ports = [
-    { name: 'LA', x: 85, y: 125, active: true },
-    { name: 'Rotterdam', x: 285, y: 95, active: true },
-    { name: 'Shanghai', x: 420, y: 135, active: true },
-    { name: 'Busan', x: 445, y: 125, active: true },
-    { name: 'Singapore', x: 395, y: 185, active: false },
-    { name: 'Dubai', x: 330, y: 150, active: false },
-  ];
-  const routes = [
-    { from: ports[0], to: ports[2], color: '#E8A838', progress: animationProgress },
-    { from: ports[1], to: ports[3], color: '#14D4CE', progress: (animationProgress + 30) % 100 },
-    { from: ports[2], to: ports[3], color: '#8B5CF6', progress: (animationProgress + 60) % 100 },
-  ];
-  return (
-    <div className="relative w-full h-56 rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #0C1222 0%, #1A2744 100%)' }}>
-      <svg className="absolute inset-0 w-full h-full opacity-20"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E8A838" strokeWidth="0.5" /></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" /></svg>
-      <svg viewBox="0 0 500 250" className="absolute inset-0 w-full h-full">
-        <path d="M60,90 Q120,60 180,80 Q220,70 260,85 Q300,75 320,90 L320,130 Q280,140 240,130 Q200,145 160,135 Q120,145 80,130 Q60,120 60,90" fill="none" stroke="#E8A83840" strokeWidth="1" />
-        <path d="M340,80 Q400,60 450,90 L470,140 Q450,180 400,170 Q360,190 340,160 Q350,120 340,80" fill="none" stroke="#E8A83840" strokeWidth="1" />
-        {routes.map((route, i) => {
-          const midX = (route.from.x + route.to.x) / 2;
-          const midY = Math.min(route.from.y, route.to.y) - 30;
-          const pathD = `M${route.from.x},${route.from.y} Q${midX},${midY} ${route.to.x},${route.to.y}`;
-          const shipX = route.from.x + (route.to.x - route.from.x) * (route.progress / 100);
-          const shipY = route.from.y + (route.to.y - route.from.y) * (route.progress / 100) - 15 * Math.sin((route.progress / 100) * Math.PI);
-          return (<g key={i}><path d={pathD} fill="none" stroke={route.color} strokeWidth="2" strokeDasharray="6 4" opacity="0.4" /><circle cx={shipX} cy={shipY} r="4" fill={route.color} style={{ filter: `drop-shadow(0 0 8px ${route.color})` }} /><circle cx={shipX} cy={shipY} r="8" fill={route.color} opacity="0.3" className="animate-ping" /></g>);
-        })}
-        {ports.map((port, i) => (<g key={i}><circle cx={port.x} cy={port.y} r={port.active ? 6 : 4} fill={port.active ? '#E8A838' : '#64748b'} style={{ filter: port.active ? 'drop-shadow(0 0 6px #E8A838)' : 'none' }} /><text x={port.x} y={port.y - 10} fill={port.active ? '#E8A838' : '#64748b'} fontSize="8" textAnchor="middle" fontWeight="600">{port.name}</text></g>))}
-      </svg>
-      <div className="absolute bottom-3 left-3 flex gap-3">
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)' }}><span className="w-2 h-2 rounded-full bg-[#E8A838]" /><span className="text-[10px] text-white/80">Sea Freight</span></div>
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)' }}><span className="w-2 h-2 rounded-full bg-[#14D4CE]" /><span className="text-[10px] text-white/80">Air Freight</span></div>
-      </div>
-      <div className="absolute top-3 right-3 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)' }}><span className="text-xs text-white/60">Active Routes: </span><span className="text-sm font-bold text-[#E8A838]">12</span></div>
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -179,7 +185,7 @@ export default function DashboardPage() {
     { label: 'Delayed', value: 8, color: '#F06449' },
   ], [data]);
 
-  const stats = [
+  const stats: Array<{ title: string; value: number; suffix: string; prefix?: string; change: string; trend: string; icon: React.ReactNode; gradient: string }> = [
     { title: 'Total Shipments', value: animatedTotal, suffix: '', change: '+12%', trend: 'up', icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>), gradient: 'linear-gradient(135deg, #1A2744 0%, #243B67 100%)' },
     { title: 'In Transit', value: animatedInTransit, suffix: '', change: '+5%', trend: 'up', icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>), gradient: 'linear-gradient(135deg, #0EA5A1 0%, #14D4CE 100%)' },
     { title: 'Pending B/L', value: animatedPending, suffix: '', change: '-8%', trend: 'down', icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>), gradient: 'linear-gradient(135deg, #E8A838 0%, #F5B756 100%)' },
@@ -187,25 +193,21 @@ export default function DashboardPage() {
     { title: 'Avg Lead Time', value: 4.2, suffix: 'd', change: '-12%', trend: 'down', icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>), gradient: 'linear-gradient(135deg, #EC4899 0%, #F472B6 100%)' },
   ];
 
-  const alerts = [
-    { type: 'critical', title: 'Delayed shipment', desc: 'SHP20260002 - 2 days delay', icon: '⚠️' },
-    { type: 'warning', title: 'Document pending', desc: '3 B/L awaiting approval', icon: '📄' },
-    { type: 'info', title: 'Vessel arrival', desc: 'EVER GIVEN arriving Rotterdam', icon: '🚢' },
-    { type: 'success', title: 'Customs cleared', desc: 'SHP20260008 cleared customs', icon: '✅' },
+  const alerts: Array<{ type: 'critical' | 'warning' | 'info' | 'success'; title: string; desc: string; time?: string }> = [
+    { type: 'critical', title: 'Delayed Shipment', desc: 'SHP20260002 - 2 days delay at Shanghai port', time: '2 min ago' },
+    { type: 'warning', title: 'Document Pending', desc: '3 B/L documents awaiting approval', time: '15 min ago' },
+    { type: 'info', title: 'Vessel Arrival', desc: 'EVER GIVEN arriving Rotterdam terminal', time: '1 hour ago' },
+    { type: 'success', title: 'Customs Cleared', desc: 'SHP20260008 cleared customs successfully', time: '2 hours ago' },
   ];
 
-  const alertStyles: Record<string, { bg: string; border: string }> = {
-    critical: { bg: 'rgba(240, 100, 73, 0.08)', border: 'rgba(240, 100, 73, 0.3)' },
-    warning: { bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.3)' },
-    info: { bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.3)' },
-    success: { bg: 'rgba(34, 197, 94, 0.08)', border: 'rgba(34, 197, 94, 0.3)' },
-  };
-
   return (
-    <div className="min-h-screen bg-[var(--background)] pattern-dots">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="Dashboard" subtitle="Maritime Command Center" showCloseButton={false} />
+    <PageLayout title="Dashboard" subtitle="Maritime Command Center" showCloseButton={false}>
+        {/* 전체화면 지도 모달 */}
+        <FullscreenMapModal
+          isOpen={isMapFullscreen}
+          onClose={() => setIsMapFullscreen(false)}
+        />
+
         <main className="p-6">
           <div className="grid grid-cols-5 gap-4 mb-6">
             {stats.map((stat, index) => (
@@ -218,7 +220,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-[var(--foreground)] mb-0.5 number-display" style={{ fontFamily: 'var(--font-display)' }}>
-                  {isLoading ? <span className="inline-block w-16 h-7 skeleton" /> : <>{(stat as any).prefix || ''}{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}{stat.suffix || ''}</>}
+                  {isLoading ? <span className="inline-block w-16 h-7 skeleton" /> : <>{stat.prefix || ''}{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}{stat.suffix || ''}</>}
                 </p>
                 <p className="text-xs text-[var(--muted)]">{stat.title}</p>
               </div>
@@ -234,6 +236,24 @@ export default function DashboardPage() {
                   <h2 className="text-sm font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Global Shipment Tracking</h2>
                   <p className="text-[10px] text-[var(--muted)] mt-0.5">Korea Centered - Real-time Shipment Monitoring</p>
                 </div>
+                {/* 확대보기 버튼 */}
+                <button
+                  onClick={() => setIsMapFullscreen(true)}
+                  className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[var(--surface-100)] to-[var(--surface-50)] hover:from-[#E8A838]/10 hover:to-[#E8A838]/5 border border-[var(--border)] hover:border-[#E8A838]/30 transition-all duration-300 shadow-sm hover:shadow-md"
+                  title="전체화면으로 보기"
+                >
+                  <svg
+                    className="w-4 h-4 text-[var(--muted)] group-hover:text-[#E8A838] transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                  <span className="text-[11px] font-medium text-[var(--muted)] group-hover:text-[#E8A838] transition-colors">
+                    확대
+                  </span>
+                </button>
               </div>
               <div className="px-3 pb-3">
                 <WorldMapGlobe viewMode="compact" compactHeight={527} />
@@ -313,28 +333,45 @@ export default function DashboardPage() {
           <>
               <div className="grid grid-cols-12 gap-5">
                 {/* Performance KPIs */}
-                <div className="col-span-4 card opacity-0 animate-slide-up" style={{ animationDelay: '0.55s', animationFillMode: 'forwards' }}>
-                  <div className="card-header pb-2"><h2 className="text-base font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Performance KPIs</h2></div>
-                  <div className="card-body pt-2"><div className="flex justify-around"><KPIGauge value={94} label="On-Time Rate" color="#22C55E" /><KPIGauge value={87} label="Customer Sat." color="#3B82F6" /><KPIGauge value={78} label="Efficiency" color="#E8A838" /></div></div>
+                <div className="col-span-4 card opacity-0 animate-slide-up flex flex-col" style={{ animationDelay: '0.55s', animationFillMode: 'forwards', height: '300px' }}>
+                  <div className="card-header pb-1 flex-shrink-0"><h2 className="text-base font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Performance KPIs</h2></div>
+                  <div className="card-body py-4 flex-1 flex items-center justify-center">
+                    <div className="flex justify-around items-center w-full px-4">
+                      <KPIGauge value={94} label="On-Time Rate" color="#22C55E" />
+                      <KPIGauge value={87} label="Customer Sat." color="#3B82F6" />
+                      <KPIGauge value={78} label="Efficiency" color="#E8A838" />
+                    </div>
+                  </div>
                 </div>
                 {/* Status Distribution */}
-                <div className="col-span-4 card opacity-0 animate-slide-up" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-                  <div className="card-header pb-2"><h2 className="text-base font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Status Distribution</h2></div>
-                  <div className="card-body flex justify-center pt-2"><DonutChart data={donutData} /></div>
+                <div className="col-span-4 card opacity-0 animate-slide-up flex flex-col" style={{ animationDelay: '0.6s', animationFillMode: 'forwards', height: '300px' }}>
+                  <div className="card-header pb-1 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Status Distribution</h2>
+                      <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">Live</span>
+                    </div>
+                  </div>
+                  <div className="card-body py-2 flex-1 flex items-center justify-center">
+                    <StatusDistributionChart data={donutData} />
+                  </div>
                 </div>
                 {/* Alerts & Exceptions */}
-                <div className="col-span-4 card opacity-0 animate-slide-up" style={{ animationDelay: '0.65s', animationFillMode: 'forwards' }}>
+                <div className="col-span-4 card opacity-0 animate-slide-up flex flex-col" style={{ animationDelay: '0.65s', animationFillMode: 'forwards', height: '300px' }}>
                   <div className="card-header flex items-center justify-between pb-2">
                     <h2 className="text-base font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Alerts & Exceptions</h2>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #F06449 0%, #FF7B5F 100%)' }}>4 NEW</span>
+                    <span
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold"
+                      style={{
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        color: '#DC2626',
+                        border: '1px solid rgba(220, 38, 38, 0.2)'
+                      }}
+                    >
+                      {alerts.length} NEW
+                    </span>
                   </div>
-                  <div className="card-body space-y-2">
-                    {alerts.map((alert, i) => (
-                      <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl border transition-all hover:scale-[1.02] cursor-pointer" style={{ background: alertStyles[alert.type].bg, borderColor: alertStyles[alert.type].border }}>
-                        <span className="text-sm">{alert.icon}</span>
-                        <div className="flex-1 min-w-0"><p className="text-xs font-medium text-[var(--foreground)] truncate">{alert.title}</p><p className="text-[10px] text-[var(--muted)] truncate">{alert.desc}</p></div>
-                      </div>
-                    ))}
+                  <div className="card-body flex-1 overflow-hidden">
+                    <AlertsExceptionsPanel alerts={alerts} />
                   </div>
                 </div>
               </div>
@@ -354,7 +391,6 @@ export default function DashboardPage() {
               </div>
           </>
         </main>
-      </div>
-    </div>
+    </PageLayout>
   );
 }

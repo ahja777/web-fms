@@ -3,11 +3,10 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import { getToday } from '@/components/DateRangeButtons';
 
 interface CargoStatus {
   id: string;
@@ -51,9 +50,10 @@ const sampleData: CargoStatus[] = [
   { id: '6', blNo: 'HBL2026010006', containerNo: 'CMAU6789012', sealNo: 'SL67890', customerName: '삼성전자', commodity: '디스플레이', weight: 8500, volume: 42.0, location: '인천항 CFS', warehouseZone: 'B-08-03', inDate: '2026-01-11', status: 'pending_release', customsStatus: '통관완료' },
 ];
 
+const today = getToday();
 const initialFilters: SearchFilters = {
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: today,
   blNo: '',
   containerNo: '',
   customerName: '',
@@ -82,7 +82,6 @@ export default function CargoStatusPage() {
     onConfirmClose: handleConfirmClose,
   });
 
-  const { sortConfig, handleSort, sortData } = useSorting<CargoStatus>();
   const [allData] = useState<CargoStatus[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -189,12 +188,9 @@ export default function CargoStatusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="화물재고현황 조회" subtitle="화물재고현황  화물재고현황 조회" />
+        <PageLayout title="화물재고현황 조회" subtitle="화물재고현황  화물재고현황 조회" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <button
               onClick={handleExcelDownload}
               className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] transition-colors"
@@ -209,6 +205,109 @@ export default function CargoStatusPage() {
               {searchMessage}
             </div>
           )}
+
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">입고일자</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={filters.startDate}
+                    onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                  />
+                  <span>~</span>
+                  <input
+                    type="date"
+                    value={filters.endDate}
+                    onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호</label>
+                <input
+                  type="text"
+                  value={filters.blNo}
+                  onChange={(e) => handleFilterChange('blNo', e.target.value)}
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                  placeholder="B/L No"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">컨테이너 번호</label>
+                <input
+                  type="text"
+                  value={filters.containerNo}
+                  onChange={(e) => handleFilterChange('containerNo', e.target.value)}
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                  placeholder="Container No"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">고객사</label>
+                <input
+                  type="text"
+                  value={filters.customerName}
+                  onChange={(e) => handleFilterChange('customerName', e.target.value)}
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                  placeholder="고객사명"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">보관장소</label>
+                <select
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange('location', e.target.value)}
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                >
+                  <option value="">전체</option>
+                  <option value="busan">부산 신항 CY</option>
+                  <option value="incheon">인천항 CFS</option>
+                  <option value="airport">인천공항 창고</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
+                >
+                  <option value="">전체</option>
+                  <option value="in_storage">보관중</option>
+                  <option value="pending_release">출고대기</option>
+                  <option value="released">출고완료</option>
+                  <option value="customs_hold">통관보류</option>
+                </select>
+              </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button
+                onClick={handleSearch}
+                className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium"
+              >
+                조회
+              </button>
+              <button
+                onClick={handleReset}
+                className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+              >
+                초기화
+              </button>
+            </div>
+          </div>
 
           {/* 현황 카드 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
@@ -234,101 +333,6 @@ export default function CargoStatusPage() {
             </div>
           </div>
 
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">입고일자</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={filters.startDate}
-                    onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span>~</span>
-                  <input
-                    type="date"
-                    value={filters.endDate}
-                    onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">B/L 번호</label>
-                <input
-                  type="text"
-                  value={filters.blNo}
-                  onChange={(e) => handleFilterChange('blNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="B/L No"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">컨테이너 번호</label>
-                <input
-                  type="text"
-                  value={filters.containerNo}
-                  onChange={(e) => handleFilterChange('containerNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Container No"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">고객사</label>
-                <input
-                  type="text"
-                  value={filters.customerName}
-                  onChange={(e) => handleFilterChange('customerName', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="고객사명"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">보관장소</label>
-                <select
-                  value={filters.location}
-                  onChange={(e) => handleFilterChange('location', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">전체</option>
-                  <option value="busan">부산 신항 CY</option>
-                  <option value="incheon">인천항 CFS</option>
-                  <option value="airport">인천공항 창고</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">전체</option>
-                  <option value="in_storage">보관중</option>
-                  <option value="pending_release">출고대기</option>
-                  <option value="released">출고완료</option>
-                  <option value="customs_hold">통관보류</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button
-                onClick={handleSearch}
-                className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754] transition-colors"
-              >
-                조회
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] transition-colors"
-              >
-                초기화
-              </button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
               <h3 className="font-bold">화물재고 목록 ({filteredList.length}건)</h3>
@@ -337,10 +341,10 @@ export default function CargoStatusPage() {
               )}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3">
+                    <th className="w-10 text-center">
                       <input
                         type="checkbox"
                         checked={filteredList.length > 0 && selectedIds.size === filteredList.length}
@@ -348,17 +352,17 @@ export default function CargoStatusPage() {
                         className="rounded"
                       />
                     </th>
-                    <SortableHeader columnKey="blNo" label="B/L No" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="containerNo" label="컨테이너 No" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="customerName" label="고객사" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="commodity" label="품명" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="weight" label={<>중량<br/>(kg)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader columnKey="volume" label={<>용적<br/>(CBM)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader columnKey="location" label={<>보관<br/>장소</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="warehouseZone" label="위치" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="inDate" label="입고일" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="customsStatus" label={<>통관<br/>상태</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th>B/L No</th>
+                    <th>컨테이너 No</th>
+                    <th>고객사</th>
+                    <th>품명</th>
+                    <th className="text-center">중량(kg)</th>
+                    <th className="text-center">용적(CBM)</th>
+                    <th>보관장소</th>
+                    <th>위치</th>
+                    <th className="text-center">입고일</th>
+                    <th className="text-center">통관상태</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -369,7 +373,7 @@ export default function CargoStatusPage() {
                       </td>
                     </tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
+                    filteredList.map((row) => (
                       <tr
                         key={row.id}
                         className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`}
@@ -387,8 +391,8 @@ export default function CargoStatusPage() {
                         <td className="p-3 text-sm">{row.containerNo}</td>
                         <td className="p-3 text-sm">{row.customerName}</td>
                         <td className="p-3 text-sm">{row.commodity}</td>
-                        <td className="p-3 text-sm text-right">{row.weight.toLocaleString()}</td>
-                        <td className="p-3 text-sm text-right">{row.volume}</td>
+                        <td className="p-3 text-sm text-center">{row.weight.toLocaleString()}</td>
+                        <td className="p-3 text-sm text-center">{row.volume}</td>
                         <td className="p-3 text-sm">{row.location}</td>
                         <td className="p-3 text-sm font-mono">{row.warehouseZone}</td>
                         <td className="p-3 text-sm text-center">{row.inDate}</td>
@@ -404,14 +408,12 @@ export default function CargoStatusPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

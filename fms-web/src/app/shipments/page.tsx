@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import Modal from '@/components/Modal';
 import ShipmentForm from '@/components/ShipmentForm';
 import type { Shipment, ShipmentFormData } from '@/types/shipment';
@@ -67,12 +66,8 @@ export default function ShipmentsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="Shipments" subtitle="Manage and track all shipments" />
-
-        <main className="p-8">
+    <PageLayout title="Shipments" subtitle="Manage and track all shipments" showCloseButton={false}>
+        <main className="p-6">
           {/* Page Header with Stats */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-6">
@@ -115,7 +110,7 @@ export default function ShipmentsPage() {
           </div>
 
           {/* Filters & Table Card */}
-          <div className="card animate-slide-up">
+          <div className="card">
             {/* Filters Bar */}
             <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -215,15 +210,18 @@ export default function ShipmentsPage() {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Shipment</th>
-                        <th>Mode</th>
-                        <th>Type</th>
-                        <th>Customer</th>
-                        <th>Route</th>
-                        <th>ETD</th>
-                        <th>ETA</th>
-                        <th>Status</th>
-                        <th className="text-right">Actions</th>
+                        <th className="w-12 text-center">
+                          <input type="checkbox" className="rounded" />
+                        </th>
+                        <th className="text-left">Shipment</th>
+                        <th className="text-center">Mode</th>
+                        <th className="text-center">Type</th>
+                        <th className="text-center">Customer</th>
+                        <th className="text-center">Route</th>
+                        <th className="text-center">ETD</th>
+                        <th className="text-center">ETA</th>
+                        <th className="text-center">Status</th>
+                        <th className="text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -258,7 +256,7 @@ export default function ShipmentsPage() {
                       ) : (
                         filteredShipments.map((shipment, idx) => (
                           <tr key={shipment.shipment_id} className="group">
-                            <td>
+                            <td className="text-left">
                               <div className="flex items-center gap-3">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                   shipment.transport_mode === 'SEA'
@@ -283,7 +281,7 @@ export default function ShipmentsPage() {
                                 </div>
                               </div>
                             </td>
-                            <td>
+                            <td className="text-center">
                               <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${
                                 shipment.transport_mode === 'SEA'
                                   ? 'bg-[rgba(26,39,68,0.1)] text-[#1A2744]'
@@ -292,10 +290,10 @@ export default function ShipmentsPage() {
                                 {shipment.transport_mode}
                               </span>
                             </td>
-                            <td className="text-[var(--muted)]">{shipment.trade_type}</td>
-                            <td className="font-medium">{shipment.customer_name || '-'}</td>
-                            <td>
-                              <div className="flex items-center gap-2">
+                            <td className="text-center text-[var(--muted)]">{shipment.trade_type}</td>
+                            <td className="text-center font-medium">{shipment.customer_name || '-'}</td>
+                            <td className="text-center">
+                              <div className="flex items-center justify-center gap-2">
                                 <span className="font-medium text-[var(--foreground)]">{shipment.origin_port}</span>
                                 <svg className="w-4 h-4 text-[var(--amber-500)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -303,13 +301,13 @@ export default function ShipmentsPage() {
                                 <span className="font-medium text-[var(--foreground)]">{shipment.dest_port}</span>
                               </div>
                             </td>
-                            <td>
+                            <td className="text-center">
                               <span className="font-mono text-sm">{shipment.etd || '-'}</span>
                             </td>
-                            <td>
+                            <td className="text-center">
                               <span className="font-mono text-sm">{shipment.eta || '-'}</span>
                             </td>
-                            <td>
+                            <td className="text-center">
                               <span
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
                                 style={{
@@ -324,8 +322,8 @@ export default function ShipmentsPage() {
                                 {shipment.status}
                               </span>
                             </td>
-                            <td>
-                              <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <td className="text-center">
+                              <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button className="p-2 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-100)] transition-all"
                                   title="View"
                                 >
@@ -386,11 +384,9 @@ export default function ShipmentsPage() {
             )}
           </div>
         </main>
-      </div>
-
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Shipment" size="lg">
         <ShipmentForm onSubmit={handleSubmit} onCancel={() => setIsModalOpen(false)} />
       </Modal>
-    </div>
+    </PageLayout>
   );
 }

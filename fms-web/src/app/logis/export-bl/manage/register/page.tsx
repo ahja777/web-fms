@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -202,7 +201,6 @@ export default function ExportBLRegisterPage() {
   // 지역 검색 모달
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationModalTarget, setLocationModalTarget] = useState<string>('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // 화면 닫기 처리
   const { showModal, setShowModal, handleCloseClick, handleModalClose, handleDiscard } = useScreenClose({
@@ -213,7 +211,6 @@ export default function ExportBLRegisterPage() {
   // 폼 데이터 변경 핸들러
   const handleChange = (field: keyof BLFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
     setIsModified(true);
   };
 
@@ -390,16 +387,13 @@ export default function ExportBLRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="수출 B/L 등록"
-          subtitle="수출 B/L관리 > B/L관리 > 등록"
-          showCloseButton
-          onClose={handleCloseClick}
-        />
+      <Header
+        title="수출 B/L 등록"
+        subtitle="수출 B/L관리 > B/L관리 > 등록"
+        showCloseButton={false}
+      />
 
-        <main ref={formRef} className="p-6">
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
@@ -414,7 +408,7 @@ export default function ExportBLRegisterPage() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-6 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 flex items-center gap-2"
               >
                 {isSaving ? (
                   <>
@@ -454,24 +448,19 @@ export default function ExportBLRegisterPage() {
           )}
 
           {/* 탭 영역 */}
-          <div className="flex gap-1 mb-6 border-b border-[var(--border)]">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 text-sm font-medium transition-colors relative ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                   activeTab === tab.id
-                    ? 'text-[#E8A838]'
-                    : 'text-[var(--muted)] hover:text-[var(--foreground)]'
+                    ? 'bg-[#2563EB] text-white'
+                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
                 }`}
               >
-                <span className="flex items-center gap-2">
-                  <span>{tab.icon}</span>
-                  {tab.label}
-                </span>
-                {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8A838]" />
-                )}
+                <span>{tab.icon}</span>
+                {tab.label}
               </button>
             ))}
           </div>
@@ -496,7 +485,7 @@ export default function ExportBLRegisterPage() {
                       type="text"
                       value={formData.hblNo}
                       onChange={(e) => handleChange('hblNo', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="HBL 번호"
                     />
                   </div>
@@ -506,7 +495,7 @@ export default function ExportBLRegisterPage() {
                       type="text"
                       value={formData.mblNo}
                       onChange={(e) => handleChange('mblNo', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="MBL 번호"
                     />
                   </div>
@@ -515,7 +504,7 @@ export default function ExportBLRegisterPage() {
                     <select
                       value={formData.businessType}
                       onChange={(e) => handleChange('businessType', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)]"
                     >
                       <option value="CONSOL">CONSOL</option>
                       <option value="CO-LOAD">CO-LOAD</option>
@@ -527,7 +516,7 @@ export default function ExportBLRegisterPage() {
                     <select
                       value={formData.freightTerm}
                       onChange={(e) => handleChange('freightTerm', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)]"
                     >
                       <option value="PREPAID">PREPAID</option>
                       <option value="COLLECT">COLLECT</option>
@@ -553,14 +542,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.shipperCode}
                         onChange={(e) => handleChange('shipperCode', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.shipperName}
                         onChange={(e) => handleChange('shipperName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="송화인명"
                       />
                       <button
@@ -576,7 +565,7 @@ export default function ExportBLRegisterPage() {
                       value={formData.shipperAddress}
                       onChange={(e) => handleChange('shipperAddress', e.target.value)}
                       rows={3}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                       placeholder="주소"
                     />
                   </div>
@@ -589,14 +578,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.consigneeCode}
                         onChange={(e) => handleChange('consigneeCode', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.consigneeName}
                         onChange={(e) => handleChange('consigneeName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="수화인명"
                       />
                       <button
@@ -612,7 +601,7 @@ export default function ExportBLRegisterPage() {
                       value={formData.consigneeAddress}
                       onChange={(e) => handleChange('consigneeAddress', e.target.value)}
                       rows={3}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                       placeholder="주소"
                     />
                   </div>
@@ -625,14 +614,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.notifyCode}
                         onChange={(e) => handleChange('notifyCode', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.notifyName}
                         onChange={(e) => handleChange('notifyName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="통지처명"
                       />
                       <button
@@ -648,7 +637,7 @@ export default function ExportBLRegisterPage() {
                       value={formData.notifyAddress}
                       onChange={(e) => handleChange('notifyAddress', e.target.value)}
                       rows={3}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                       placeholder="주소"
                     />
                   </div>
@@ -673,14 +662,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.portOfLoading}
                         onChange={(e) => handleChange('portOfLoading', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.portOfLoadingName}
                         onChange={(e) => handleChange('portOfLoadingName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="항구명"
                       />
                       <button
@@ -702,14 +691,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.portOfDischarge}
                         onChange={(e) => handleChange('portOfDischarge', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.portOfDischargeName}
                         onChange={(e) => handleChange('portOfDischargeName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="항구명"
                       />
                       <button
@@ -729,14 +718,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.carrierCode}
                         onChange={(e) => handleChange('carrierCode', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="코드"
                       />
                       <input
                         type="text"
                         value={formData.carrierName}
                         onChange={(e) => handleChange('carrierName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="선사명"
                       />
                       <button
@@ -756,14 +745,14 @@ export default function ExportBLRegisterPage() {
                         type="text"
                         value={formData.vesselName}
                         onChange={(e) => handleChange('vesselName', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="선명"
                       />
                       <input
                         type="text"
                         value={formData.voyageNo}
                         onChange={(e) => handleChange('voyageNo', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="항차"
                       />
                     </div>
@@ -774,7 +763,7 @@ export default function ExportBLRegisterPage() {
                       type="date"
                       value={formData.etd}
                       onChange={(e) => handleChange('etd', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                   <div>
@@ -783,7 +772,7 @@ export default function ExportBLRegisterPage() {
                       type="date"
                       value={formData.eta}
                       onChange={(e) => handleChange('eta', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                   <div>
@@ -791,7 +780,7 @@ export default function ExportBLRegisterPage() {
                     <select
                       value={formData.serviceTerm}
                       onChange={(e) => handleChange('serviceTerm', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     >
                       {serviceTermOptions.map(term => (
                         <option key={term} value={term}>{term}</option>
@@ -804,7 +793,7 @@ export default function ExportBLRegisterPage() {
                       type="date"
                       value={formData.blIssueDate}
                       onChange={(e) => handleChange('blIssueDate', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                 </div>
@@ -829,7 +818,7 @@ export default function ExportBLRegisterPage() {
                     <select
                       value={formData.containerType}
                       onChange={(e) => handleChange('containerType', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     >
                       <option value="FCL">FCL</option>
                       <option value="LCL">LCL</option>
@@ -843,12 +832,12 @@ export default function ExportBLRegisterPage() {
                         type="number"
                         value={formData.packageQty}
                         onChange={(e) => handleChange('packageQty', Number(e.target.value))}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       />
                       <select
                         value={formData.packageUnit}
                         onChange={(e) => handleChange('packageUnit', e.target.value)}
-                        className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       >
                         {packageUnitOptions.map(opt => (
                           <option key={opt.code} value={opt.code}>{opt.code}</option>
@@ -862,7 +851,7 @@ export default function ExportBLRegisterPage() {
                       type="number"
                       value={formData.grossWeight}
                       onChange={(e) => handleChange('grossWeight', Number(e.target.value))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                   <div>
@@ -871,7 +860,7 @@ export default function ExportBLRegisterPage() {
                       type="number"
                       value={formData.measurement}
                       onChange={(e) => handleChange('measurement', Number(e.target.value))}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     />
                   </div>
                 </div>
@@ -889,7 +878,7 @@ export default function ExportBLRegisterPage() {
                       value={formData.cargoDescription}
                       onChange={(e) => handleChange('cargoDescription', e.target.value)}
                       rows={5}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                       placeholder="화물 설명을 입력하세요"
                     />
                   </div>
@@ -899,7 +888,7 @@ export default function ExportBLRegisterPage() {
                       value={formData.marksAndNumbers}
                       onChange={(e) => handleChange('marksAndNumbers', e.target.value)}
                       rows={5}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                       placeholder="Marks & Numbers"
                     />
                   </div>
@@ -921,17 +910,17 @@ export default function ExportBLRegisterPage() {
                   </button>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[var(--surface-100)]">
+                  <table className="table">
+                    <thead>
                       <tr>
-                        <th className="p-3 text-left text-sm">Container No</th>
-                        <th className="p-3 text-left text-sm">Seal No</th>
-                        <th className="p-3 text-center text-sm">Type</th>
-                        <th className="p-3 text-center text-sm">Size</th>
-                        <th className="p-3 text-center text-sm">수량</th>
-                        <th className="p-3 text-center text-sm">중량<br/>(KG)</th>
-                        <th className="p-3 text-center text-sm">용적<br/>(CBM)</th>
-                        <th className="p-3 text-center text-sm">삭제</th>
+                        <th>Container No</th>
+                        <th>Seal No</th>
+                        <th className="text-center">Type</th>
+                        <th className="text-center">Size</th>
+                        <th className="text-center">수량</th>
+                        <th className="text-center">중량(KG)</th>
+                        <th className="text-center">용적(CBM)</th>
+                        <th className="text-center">삭제</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1028,7 +1017,7 @@ export default function ExportBLRegisterPage() {
                     value={formData.remarks}
                     onChange={(e) => handleChange('remarks', e.target.value)}
                     rows={10}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                     placeholder="추가 메모 및 비고사항을 입력하세요"
                   />
                 </div>
@@ -1036,8 +1025,6 @@ export default function ExportBLRegisterPage() {
             </div>
           )}
         </main>
-      </div>
-
       {/* 저장하지 않은 변경사항 모달 */}
       <UnsavedChangesModal
         isOpen={showModal}

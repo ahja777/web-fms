@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import BLPrintModal, { BLData as PrintBLData } from '@/components/BLPrintModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -154,25 +153,23 @@ export default function ImportBLSeaDetailPage() {
 
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">수입 B/L을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/import-bl/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
+  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
+  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">수입 B/L을 찾을 수 없습니다.</div>;
 
   const statusInfo = statusConfig[data.status_cd] || { label: data.status_cd, color: 'bg-gray-500' };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" />
+        <PageLayout title="수입 B/L 상세조회 (해상)" subtitle="Logis > 수입 B/L > 수입 B/L 상세조회 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={() => router.push('/logis/import-bl/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
-              <button onClick={() => router.push(`/logis/import-bl/sea/register?hbl_id=${data.hbl_id}`)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+              <button onClick={() => router.push('/logis/import-bl/sea')} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
+              <button onClick={() => router.push(`/logis/import-bl/sea/register?hbl_id=${data.hbl_id}`)} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
             </div>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -186,13 +183,13 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">H B/L No</label><input type="text" value={data.hbl_no || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">M B/L No</label><input type="text" value={data.mbl_no || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">H B/L No</label><input type="text" value={data.hbl_no || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">M B/L No</label><input type="text" value={data.mbl_no || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   <div className="flex items-center gap-2 px-3 py-2"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusInfo.color}`}>{statusInfo.label}</span></div>
                 </div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">고객사</label><input type="text" value={data.customer_name || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">고객사</label><input type="text" value={data.customer_name || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
               </div>
             </div>
 
@@ -200,10 +197,10 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">운송 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label><input type="text" value={data.carrier_name || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명</label><input type="text" value={data.vessel_nm || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항차</label><input type="text" value={data.voyage_no || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">운임조건</label><input type="text" value={data.freight_term_cd || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label><input type="text" value={data.carrier_name || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선명</label><input type="text" value={data.vessel_nm || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항차</label><input type="text" value={data.voyage_no || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운임조건</label><input type="text" value={data.freight_term_cd || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
               </div>
             </div>
 
@@ -211,12 +208,12 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항 (POL)</label><input type="text" value={`${data.pol_port_cd || ''} ${data.pol_port_name ? `- ${data.pol_port_name}` : ''}`} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항 (POD)</label><input type="text" value={`${data.pod_port_cd || ''} ${data.pod_port_name ? `- ${data.pod_port_name}` : ''}`} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD</label><input type="text" value={data.etd_dt || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label><input type="text" value={data.eta_dt || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Place of Receipt</label><input type="text" value={data.place_of_receipt || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Place of Delivery</label><input type="text" value={data.place_of_delivery || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항 (POL)</label><input type="text" value={`${data.pol_port_cd || ''} ${data.pol_port_name ? `- ${data.pol_port_name}` : ''}`} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항 (POD)</label><input type="text" value={`${data.pod_port_cd || ''} ${data.pod_port_name ? `- ${data.pod_port_name}` : ''}`} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD</label><input type="text" value={data.etd_dt || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label><input type="text" value={data.eta_dt || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Place of Receipt</label><input type="text" value={data.place_of_receipt || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Place of Delivery</label><input type="text" value={data.place_of_delivery || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
               </div>
             </div>
 
@@ -224,9 +221,9 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">발급 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">발급일</label><input type="text" value={data.issue_dt || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">발급장소</label><input type="text" value={data.issue_place || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 타입</label><input type="text" value={data.bl_type_cd || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발급일</label><input type="text" value={data.issue_dt || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발급장소</label><input type="text" value={data.issue_place || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 타입</label><input type="text" value={data.bl_type_cd || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
               </div>
             </div>
           </div>
@@ -236,21 +233,21 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Shipper</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">이름</label><input type="text" value={data.shipper_nm || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">주소</label><textarea value={data.shipper_addr || ''} disabled rows={2} className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">이름</label><input type="text" value={data.shipper_nm || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">주소</label><textarea value={data.shipper_addr || ''} disabled rows={2} className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
               </div>
             </div>
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Consignee</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">이름</label><input type="text" value={data.consignee_nm || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">주소</label><textarea value={data.consignee_addr || ''} disabled rows={2} className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">이름</label><input type="text" value={data.consignee_nm || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">주소</label><textarea value={data.consignee_addr || ''} disabled rows={2} className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
               </div>
             </div>
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Notify Party</h3>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Notify</label><textarea value={data.notify_party || ''} disabled rows={4} className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Notify</label><textarea value={data.notify_party || ''} disabled rows={4} className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
               </div>
             </div>
           </div>
@@ -259,17 +256,16 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
           <div className="card p-6 mb-6">
             <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물 정보</h3>
             <div className="grid grid-cols-5 gap-4">
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장 수량</label><input type="text" value={`${data.total_pkg_qty || 0} ${data.pkg_type_cd || ''}`} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label><input type="text" value={(data.gross_weight_kg || 0).toLocaleString()} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label><input type="text" value={Number(data.volume_cbm || 0).toFixed(2)} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-              <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">품목</label><input type="text" value={data.commodity_desc || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장 수량</label><input type="text" value={`${data.total_pkg_qty || 0} ${data.pkg_type_cd || ''}`} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">총중량 (KG)</label><input type="text" value={(data.gross_weight_kg || 0).toLocaleString()} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+              <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">용적 (CBM)</label><input type="text" value={Number(data.volume_cbm || 0).toFixed(2)} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+              <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품목</label><input type="text" value={data.commodity_desc || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
             </div>
-            <div className="mt-4"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Marks & Numbers</label><textarea value={data.marks_nos || ''} disabled rows={2} className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
+            <div className="mt-4"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Marks & Numbers</label><textarea value={data.marks_nos || ''} disabled rows={2} className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)] resize-none" /></div>
           </div>
 
           <div className="text-sm text-[var(--muted)]"><span>등록일: {data.created_dtm}</span></div>
         </main>
-      </div>
       <CloseConfirmModal isOpen={showCloseModal} onClose={() => setShowCloseModal(false)} onConfirm={handleConfirmClose} />
 
       {/* B/L 출력 모달 */}
@@ -278,6 +274,6 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
         onClose={() => setShowPrintModal(false)}
         blData={blPrintData}
       />
-    </div>
+    </PageLayout>
   );
 }

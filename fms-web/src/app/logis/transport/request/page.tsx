@@ -2,12 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { OrderInfoModal, type OrderItem } from '@/components/popup';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import { getToday } from '@/components/DateRangeButtons';
 
 interface TransportRequest {
   id: string;
@@ -49,9 +48,10 @@ const sampleData: TransportRequest[] = [
   { id: '5', requestNo: 'TR-2026-0005', requestDate: '2026-01-13', customerName: '포스코', blNo: 'HBL2026010005', origin: '광양 포스코', destination: '서울 물류센터', pickupDate: '2026-01-14', deliveryDate: '2026-01-14', vehicleType: '25톤 트레일러', weight: 28000, status: 'cancelled' },
 ];
 
+const today = getToday();
 const initialFilters: SearchFilters = {
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: today,
   requestNo: '',
   blNo: '',
   customerName: '',
@@ -79,7 +79,6 @@ export default function TransportRequestPage() {
     onConfirmClose: handleConfirmClose,
   });
 
-  const { sortConfig, handleSort, sortData } = useSorting<TransportRequest>();
   const [allData] = useState<TransportRequest[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -146,14 +145,11 @@ export default function TransportRequestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="운송요청관리" subtitle="운송의뢰관리  운송요청관리" />
+        <PageLayout title="운송요청관리" subtitle="운송의뢰관리  운송요청관리" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">운송요청 등록</button>
+              <button className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]">운송요청 등록</button>
               <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
             </div>
           </div>
@@ -161,6 +157,56 @@ export default function TransportRequestPage() {
           {searchMessage && (
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
+
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">요청일자 <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">요청번호</label>
+                  <input type="text" value={filters.requestNo} onChange={(e) => handleFilterChange('requestNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="TR-YYYY-XXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호</label>
+                  <input type="text" value={filters.blNo} onChange={(e) => handleFilterChange('blNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="B/L No" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">고객사</label>
+                  <input type="text" value={filters.customerName} onChange={(e) => handleFilterChange('customerName', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="고객사명" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="requested">요청</option>
+                    <option value="assigned">배차완료</option>
+                    <option value="in_progress">운송중</option>
+                    <option value="completed">완료</option>
+                    <option value="cancelled">취소</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+              <button onClick={() => setShowOrderModal(true)} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">주문정보</button>
+            </div>
+          </div>
 
           {/* 현황 카드 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
@@ -186,88 +232,46 @@ export default function TransportRequestPage() {
             </div>
           </div>
 
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">요청일자</label>
-                <div className="flex items-center gap-2">
-                  <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                  <span>~</span>
-                  <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">요청번호</label>
-                <input type="text" value={filters.requestNo} onChange={(e) => handleFilterChange('requestNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="TR-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={(e) => handleFilterChange('blNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="B/L No" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">고객사</label>
-                <input type="text" value={filters.customerName} onChange={(e) => handleFilterChange('customerName', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="고객사명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="requested">요청</option>
-                  <option value="assigned">배차완료</option>
-                  <option value="in_progress">운송중</option>
-                  <option value="completed">완료</option>
-                  <option value="cancelled">취소</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
-              <button onClick={() => setShowOrderModal(true)} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">주문정보</button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
               <h3 className="font-bold">운송요청 목록 ({filteredList.length}건)</h3>
               {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader columnKey="requestNo" label={<>요청<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="requestDate" label={<>요청<br/>일자</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="customerName" label="고객사" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="blNo" label="B/L No" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="origin" label="출발지" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="destination" label="도착지" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="pickupDate" label="픽업일" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="deliveryDate" label="배송일" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="vehicleType" label="차량" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="weight" label={<>중량<br/>(kg)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th className="w-10 text-center"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
+                    <th className="text-center">요청번호</th>
+                    <th className="text-center">요청일자</th>
+                    <th className="text-center">고객사</th>
+                    <th className="text-center">B/L No</th>
+                    <th className="text-center">출발지</th>
+                    <th className="text-center">도착지</th>
+                    <th className="text-center">픽업일</th>
+                    <th className="text-center">배송일</th>
+                    <th className="text-center">차량</th>
+                    <th className="text-center">중량(kg)</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={12} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
+                    filteredList.map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
-                        <td className="p-3 text-[#2563EB] font-medium">{row.requestNo}</td>
-                        <td className="p-3 text-sm">{row.requestDate}</td>
-                        <td className="p-3 text-sm">{row.customerName}</td>
-                        <td className="p-3 text-sm">{row.blNo}</td>
-                        <td className="p-3 text-sm">{row.origin}</td>
-                        <td className="p-3 text-sm">{row.destination}</td>
-                        <td className="p-3 text-sm text-center">{row.pickupDate}</td>
-                        <td className="p-3 text-sm text-center">{row.deliveryDate}</td>
-                        <td className="p-3 text-sm">{row.vehicleType}</td>
-                        <td className="p-3 text-sm text-right">{row.weight.toLocaleString()}</td>
+                        <td className="p-3 text-center text-[#2563EB] font-medium">{row.requestNo}</td>
+                        <td className="p-3 text-center text-sm">{row.requestDate}</td>
+                        <td className="p-3 text-center text-sm">{row.customerName}</td>
+                        <td className="p-3 text-center text-sm">{row.blNo}</td>
+                        <td className="p-3 text-center text-sm">{row.origin}</td>
+                        <td className="p-3 text-center text-sm">{row.destination}</td>
+                        <td className="p-3 text-center text-sm">{row.pickupDate}</td>
+                        <td className="p-3 text-center text-sm">{row.deliveryDate}</td>
+                        <td className="p-3 text-center text-sm">{row.vehicleType}</td>
+                        <td className="p-3 text-center text-sm">{row.weight.toLocaleString()}</td>
                         <td className="p-3 text-center">
                           <span className="px-2 py-1 rounded-full text-xs" style={{ color: statusConfig[row.status].color, backgroundColor: statusConfig[row.status].bgColor }}>{statusConfig[row.status].label}</span>
                         </td>
@@ -279,8 +283,6 @@ export default function TransportRequestPage() {
             </div>
           </div>
         </main>
-      </div>
-
       <OrderInfoModal
         isOpen={showOrderModal}
         onClose={() => setShowOrderModal(false)}
@@ -293,6 +295,6 @@ export default function TransportRequestPage() {
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,11 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
-import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import {
   CodeSearchModal,
@@ -92,7 +90,6 @@ export default function ManifestRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // useScreenClose 훅
   const {
@@ -101,7 +98,7 @@ export default function ManifestRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: hasUnsavedChanges,
+    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
     listPath: LIST_PATHS.MANIFEST_SEA,
   });
 
@@ -118,7 +115,6 @@ export default function ManifestRegisterPage() {
 
   const handleChange = (field: keyof ManifestFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
   };
 
   
@@ -184,6 +180,40 @@ export default function ManifestRegisterPage() {
     router.push('/logis/manifest/sea');
   };
 
+  const handleFillTestData = () => {
+    setFormData({
+      ...initialFormData,
+      mfType: '수출',
+      blNo: 'HDMU1234567',
+      shipper: '삼성전자 주식회사',
+      shipperAddr: '경기도 수원시 영통구 삼성로 129',
+      consignee: 'Samsung America Inc.',
+      consigneeAddr: '85 Challenger Rd, Ridgefield Park, NJ 07660, USA',
+      notifyParty: 'Same as Consignee',
+      carrier: 'HMM',
+      vessel: 'HMM GDANSK',
+      voyage: '001E',
+      callSign: 'H9HM',
+      pol: 'KRPUS',
+      pod: 'USLAX',
+      finalDest: 'Los Angeles, CA, USA',
+      etd: '2026-01-22',
+      eta: '2026-02-08',
+      containerType: '40HC',
+      containerQty: 2,
+      containerNo: 'HDMU1234567, HDMU1234568',
+      sealNo: 'SL001, SL002',
+      packageType: 'CARTON',
+      packageQty: 500,
+      commodity: 'ELECTRONIC PRODUCTS (TV, MONITOR)',
+      hsCode: '8528.72',
+      grossWeight: 18500,
+      measurement: 68,
+      freightTerms: 'PREPAID',
+      remarks: 'HANDLE WITH CARE - ELECTRONIC EQUIPMENT',
+    });
+  };
+
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -196,20 +226,19 @@ export default function ManifestRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="적하목록 등록" subtitle="Logis > 적하목록 > 적하목록 등록 (해상)" onClose={handleCloseClick} />
-        <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+      <Header title="적하목록 등록" subtitle="Logis > 적하목록 > 적하목록 등록 (해상)" showCloseButton={false} />
+      <main ref={formRef} className="p-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
+              <button onClick={handleFillTestData} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}
-                className={`px-4 py-2 rounded-lg ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                className={`px-4 py-2 rounded-lg ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]'}`}
               >신규</button>
               <button onClick={handleReset} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              <button onClick={handleSendEDI} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">EDI전송</button>
-              <button onClick={handleSubmit} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+              <button onClick={handleSendEDI} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">EDI전송</button>
+              <button onClick={handleSubmit} className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">저장</button>
             </div>
           </div>
 
@@ -217,66 +246,64 @@ export default function ManifestRegisterPage() {
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">적하목록 번호</label><input type="text" value={formData.mfNo} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">적하목록 일자</label><input type="date" value={formData.mfDate} onChange={e => handleChange('mfDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">구분</label><select value={formData.mfType} onChange={e => handleChange('mfType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="수출">수출</option><option value="수입">수입</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 번호 *</label><div className="flex gap-2"><input type="text" value={formData.blNo} onChange={e => handleChange('blNo', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" /><button type="button" onClick={() => setShowBLModal(true)} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">적하목록 번호</label><input type="text" value={formData.mfNo} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">적하목록 일자</label><input type="date" value={formData.mfDate} onChange={e => handleChange('mfDate', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">구분</label><select value={formData.mfType} onChange={e => handleChange('mfType', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="수출">수출</option><option value="수입">수입</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호 *</label><div className="flex gap-2"><input type="text" value={formData.blNo} onChange={e => handleChange('blNo', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" /><button type="button" onClick={() => setShowBLModal(true)} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">운송 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label><select value={formData.carrier} onChange={e => handleChange('carrier', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="">선택</option><option value="MAERSK">MAERSK</option><option value="MSC">MSC</option><option value="HMM">HMM</option><option value="EVERGREEN">EVERGREEN</option><option value="ONE">ONE</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명 *</label><input type="text" value={formData.vessel} onChange={e => handleChange('vessel', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="선박명" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항차</label><input type="text" value={formData.voyage} onChange={e => handleChange('voyage', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="001E" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">호출부호</label><input type="text" value={formData.callSign} onChange={e => handleChange('callSign', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="H9HM" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label><select value={formData.carrier} onChange={e => handleChange('carrier', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="">선택</option><option value="MAERSK">MAERSK</option><option value="MSC">MSC</option><option value="HMM">HMM</option><option value="EVERGREEN">EVERGREEN</option><option value="ONE">ONE</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선명 *</label><input type="text" value={formData.vessel} onChange={e => handleChange('vessel', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="선박명" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항차</label><input type="text" value={formData.voyage} onChange={e => handleChange('voyage', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="001E" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">호출부호</label><input type="text" value={formData.callSign} onChange={e => handleChange('callSign', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="H9HM" /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화주/수하인 정보</h3>
               <div className="grid grid-cols-1 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">화주 (Shipper) *</label><div className="flex gap-2"><input type="text" value={formData.shipper} onChange={e => handleChange('shipper', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주명" /><button type="button" onClick={() => handleCodeSearch('shipper', 'customer')} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">화주 주소</label><input type="text" value={formData.shipperAddr} onChange={e => handleChange('shipperAddr', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주 주소" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 (Consignee)</label><div className="flex gap-2"><input type="text" value={formData.consignee} onChange={e => handleChange('consignee', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="수하인명" /><button type="button" onClick={() => handleCodeSearch('consignee', 'customer')} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인 주소</label><input type="text" value={formData.consigneeAddr} onChange={e => handleChange('consigneeAddr', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="수하인 주소" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Notify Party</label><input type="text" value={formData.notifyParty} onChange={e => handleChange('notifyParty', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="통지처" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">화주 (Shipper) *</label><div className="flex gap-2"><input type="text" value={formData.shipper} onChange={e => handleChange('shipper', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주명" /><button type="button" onClick={() => handleCodeSearch('shipper', 'customer')} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">화주 주소</label><input type="text" value={formData.shipperAddr} onChange={e => handleChange('shipperAddr', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화주 주소" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 (Consignee)</label><div className="flex gap-2"><input type="text" value={formData.consignee} onChange={e => handleChange('consignee', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="수하인명" /><button type="button" onClick={() => handleCodeSearch('consignee', 'customer')} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인 주소</label><input type="text" value={formData.consigneeAddr} onChange={e => handleChange('consigneeAddr', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="수하인 주소" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Notify Party</label><input type="text" value={formData.notifyParty} onChange={e => handleChange('notifyParty', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="통지처" /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항 (POL)</label><div className="flex gap-2"><input type="text" value={formData.pol} onChange={e => handleChange('pol', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS" /><button type="button" onClick={() => handleLocationSearch('pol')} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항 (POD)</label><div className="flex gap-2"><input type="text" value={formData.pod} onChange={e => handleChange('pod', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX" /><button type="button" onClick={() => handleLocationSearch('pod')} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD</label><input type="date" value={formData.etd} onChange={e => handleChange('etd', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label><input type="date" value={formData.eta} onChange={e => handleChange('eta', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">최종목적지</label><input type="text" value={formData.finalDest} onChange={e => handleChange('finalDest', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="최종 목적지" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항 (POL)</label><div className="flex gap-2"><input type="text" value={formData.pol} onChange={e => handleChange('pol', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS" /><button type="button" onClick={() => handleLocationSearch('pol')} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항 (POD)</label><div className="flex gap-2"><input type="text" value={formData.pod} onChange={e => handleChange('pod', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX" /><button type="button" onClick={() => handleLocationSearch('pod')} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD</label><input type="date" value={formData.etd} onChange={e => handleChange('etd', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label><input type="date" value={formData.eta} onChange={e => handleChange('eta', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">최종목적지</label><input type="text" value={formData.finalDest} onChange={e => handleChange('finalDest', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="최종 목적지" /></div>
               </div>
             </div>
 
             <div className="card p-6 col-span-2">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">컨테이너/화물 정보</h3>
               <div className="grid grid-cols-4 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">컨테이너 타입</label><select value={formData.containerType} onChange={e => handleChange('containerType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="20GP">20GP</option><option value="40GP">40GP</option><option value="40HC">40HC</option><option value="45HC">45HC</option><option value="20RF">20RF</option><option value="40RF">40RF</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">수량</label><input type="number" value={formData.containerQty} onChange={e => handleChange('containerQty', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장단위</label><select value={formData.packageType} onChange={e => handleChange('packageType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="CARTON">CARTON</option><option value="PALLET">PALLET</option><option value="DRUM">DRUM</option><option value="BAG">BAG</option><option value="CASE">CASE</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장수량</label><input type="number" value={formData.packageQty} onChange={e => handleChange('packageQty', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">컨테이너 번호</label><input type="text" value={formData.containerNo} onChange={e => handleChange('containerNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567, HDMU1234568" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">씰 번호</label><input type="text" value={formData.sealNo} onChange={e => handleChange('sealNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="SL001, SL002" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">품명</label><input type="text" value={formData.commodity} onChange={e => handleChange('commodity', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화물 품명 (영문)" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">HS Code</label><div className="flex gap-2"><input type="text" value={formData.hsCode} onChange={e => handleChange('hsCode', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="8528.72" /><button type="button" onClick={() => setShowHSCodeModal(true)} className="px-3 py-2 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">운임조건</label><select value={formData.freightTerms} onChange={e => handleChange('freightTerms', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="PREPAID">PREPAID</option><option value="COLLECT">COLLECT</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label><input type="number" value={formData.grossWeight} onChange={e => handleChange('grossWeight', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label><input type="number" value={formData.measurement} onChange={e => handleChange('measurement', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">비고</label><input type="text" value={formData.remarks} onChange={e => handleChange('remarks', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="특이사항" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">컨테이너 타입</label><select value={formData.containerType} onChange={e => handleChange('containerType', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="20GP">20GP</option><option value="40GP">40GP</option><option value="40HC">40HC</option><option value="45HC">45HC</option><option value="20RF">20RF</option><option value="40RF">40RF</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수량</label><input type="number" value={formData.containerQty} onChange={e => handleChange('containerQty', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장단위</label><select value={formData.packageType} onChange={e => handleChange('packageType', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="CARTON">CARTON</option><option value="PALLET">PALLET</option><option value="DRUM">DRUM</option><option value="BAG">BAG</option><option value="CASE">CASE</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장수량</label><input type="number" value={formData.packageQty} onChange={e => handleChange('packageQty', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">컨테이너 번호</label><input type="text" value={formData.containerNo} onChange={e => handleChange('containerNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567, HDMU1234568" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">씰 번호</label><input type="text" value={formData.sealNo} onChange={e => handleChange('sealNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="SL001, SL002" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품명</label><input type="text" value={formData.commodity} onChange={e => handleChange('commodity', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="화물 품명 (영문)" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">HS Code</label><div className="flex gap-2"><input type="text" value={formData.hsCode} onChange={e => handleChange('hsCode', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="8528.72" /><button type="button" onClick={() => setShowHSCodeModal(true)} className="h-[38px] px-3 bg-[#1A2744] text-white text-sm rounded-lg hover:bg-[#243354]">찾기</button></div></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운임조건</label><select value={formData.freightTerms} onChange={e => handleChange('freightTerms', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="PREPAID">PREPAID</option><option value="COLLECT">COLLECT</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">총중량 (KG)</label><input type="number" value={formData.grossWeight} onChange={e => handleChange('grossWeight', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">용적 (CBM)</label><input type="number" value={formData.measurement} onChange={e => handleChange('measurement', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">비고</label><input type="text" value={formData.remarks} onChange={e => handleChange('remarks', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="특이사항" /></div>
               </div>
             </div>
           </div>
         </main>
-      </div>
-
       {/* 코드 검색 모달 */}
       <CodeSearchModal
         isOpen={showCodeModal}
@@ -306,13 +333,6 @@ export default function ManifestRegisterPage() {
         isOpen={showHSCodeModal}
         onClose={() => setShowHSCodeModal(false)}
         onSelect={handleHSCodeSelect}
-      />      {/* 저장 확인 모달 */}
-      <UnsavedChangesModal
-        isOpen={showCloseModal}
-        onClose={handleModalClose}
-        onDiscard={handleDiscardChanges}
-        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
-      />
-    </div>
+      />    </div>
   );
 }

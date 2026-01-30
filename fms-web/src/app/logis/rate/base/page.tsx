@@ -5,12 +5,10 @@ import { LIST_PATHS } from '@/constants/paths';
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface BaseRateData {
   id: number;
@@ -59,7 +57,6 @@ export default function BaseRatePage() {
   const router = useRouter();
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(filters);
-  const { sortConfig, handleSort, sortData } = useSorting<BaseRateData>();
   const [data] = useState<BaseRateData[]>(mockData);
 
   const handleSearch = () => setAppliedFilters(filters);
@@ -102,56 +99,62 @@ export default function BaseRatePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="운임기초정보 관리" subtitle="Logis > 운임관리 > 운임기초정보 관리" />
+        <PageLayout title="운임기초정보 관리" subtitle="Logis > 운임관리 > 운임기초정보 관리" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <Link href="/logis/rate/base/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+          <div className="flex justify-end items-center mb-6">
+            <Link href="/logis/rate/base/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
               신규 등록
             </Link>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-5 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">운송모드</label>
-                <select value={filters.transportMode} onChange={e => setFilters(prev => ({ ...prev, transportMode: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="SEA">해상</option>
-                  <option value="AIR">항공</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사/항공사</label>
-                <input type="text" value={filters.carrier} onChange={e => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HMM, KE 등" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발지</label>
-                <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS, ICN" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착지</label>
-                <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX, LAX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="ACTIVE">유효</option>
-                  <option value="EXPIRED">만료</option>
-                  <option value="PENDING">대기</option>
-                </select>
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-5 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운송모드</label>
+                  <select value={filters.transportMode} onChange={e => setFilters(prev => ({ ...prev, transportMode: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="SEA">해상</option>
+                    <option value="AIR">항공</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사/항공사</label>
+                  <input type="text" value={filters.carrier} onChange={e => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="HMM, KE 등" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발지</label>
+                  <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="KRPUS, ICN" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착지</label>
+                  <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="USLAX, LAX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="ACTIVE">유효</option>
+                    <option value="EXPIRED">만료</option>
+                    <option value="PENDING">대기</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.sea}</div><div className="text-sm text-[var(--muted)]">해상</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-purple-500">{summaryStats.air}</div><div className="text-sm text-[var(--muted)]">항공</div></div>
@@ -159,48 +162,46 @@ export default function BaseRatePage() {
           </div>
 
           <div className="card overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <SortableHeader columnKey="rateCode" label={<>운임<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="transportMode" label="모드" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="carrier" label={<>선사<br/>/항공사</>} sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="pol" label="구간" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="containerType" label="타입" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="validFrom" label={<>유효<br/>기간</>} sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="oceanFreight" label="O/F" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader columnKey="baf" label="BAF" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader columnKey="totalRate" label="Total" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
+                  <th className="text-center">운임코드</th>
+                  <th className="text-center">모드</th>
+                  <th className="text-center">선사/항공사</th>
+                  <th className="text-center">구간</th>
+                  <th className="text-center">타입</th>
+                  <th className="text-center">유효기간</th>
+                  <th className="text-center">O/F</th>
+                  <th className="text-center">BAF</th>
+                  <th className="text-center">Total</th>
+                  <th className="text-center">상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {sortData(filteredData).map(item => (
+                {filteredData.map(item => (
                   <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                    <td className="px-4 py-3"><Link href={`/logis/rate/base/${item.id}`} className="text-blue-400 hover:underline">{item.rateCode}</Link></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full ${item.transportMode === 'SEA' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>{item.transportMode}</span></td>
-                    <td className="px-4 py-3">{item.carrier}</td>
-                    <td className="px-4 py-3 text-sm">{item.pol} → {item.pod}</td>
-                    <td className="px-4 py-3 text-sm">{item.containerType}</td>
-                    <td className="px-4 py-3 text-sm">{item.validFrom} ~ {item.validTo}</td>
-                    <td className="px-4 py-3 text-sm text-right">{item.currency} {item.oceanFreight.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm text-right">{item.baf > 0 ? `${item.currency} ${item.baf.toLocaleString()}` : '-'}</td>
-                    <td className="px-4 py-3 text-sm text-right font-medium">{item.currency} {item.totalRate.toLocaleString()}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
+                    <td className="px-4 py-3 text-center"><Link href={`/logis/rate/base/${item.id}`} className="text-blue-400 hover:underline">{item.rateCode}</Link></td>
+                    <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full ${item.transportMode === 'SEA' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>{item.transportMode}</span></td>
+                    <td className="px-4 py-3 text-center">{item.carrier}</td>
+                    <td className="px-4 py-3 text-center text-sm">{item.pol} → {item.pod}</td>
+                    <td className="px-4 py-3 text-center text-sm">{item.containerType}</td>
+                    <td className="px-4 py-3 text-center text-sm">{item.validFrom} ~ {item.validTo}</td>
+                    <td className="px-4 py-3 text-center text-sm">{item.currency} {item.oceanFreight.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-center text-sm">{item.baf > 0 ? `${item.currency} ${item.baf.toLocaleString()}` : '-'}</td>
+                    <td className="px-4 py-3 text-center text-sm font-medium">{item.currency} {item.totalRate.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

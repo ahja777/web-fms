@@ -2,11 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface TransportStatus {
   id: string;
@@ -73,7 +71,6 @@ export default function TransportStatusPage() {
     onConfirmClose: handleConfirmClose,
   });
 
-  const { sortConfig, handleSort, sortData } = useSorting<TransportStatus>();
   const [allData] = useState<TransportStatus[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -115,18 +112,56 @@ export default function TransportStatusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="운송상태 정보조회" subtitle="운송의뢰관리  운송상태 정보조회" />
+        <PageLayout title="운송상태 정보조회" subtitle="운송의뢰관리  운송상태 정보조회" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">새로고침</button>
           </div>
 
           {searchMessage && (
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
+
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운송번호</label>
+                  <input type="text" value={filters.transportNo} onChange={(e) => handleFilterChange('transportNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="TM-YYYY-XXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">차량번호</label>
+                  <input type="text" value={filters.vehicleNo} onChange={(e) => handleFilterChange('vehicleNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="00가 0000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">기사명</label>
+                  <input type="text" value={filters.driverName} onChange={(e) => handleFilterChange('driverName', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="기사명" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="waiting">대기중</option>
+                    <option value="loading">상차중</option>
+                    <option value="in_transit">운송중</option>
+                    <option value="unloading">하차중</option>
+                    <option value="completed">완료</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
 
           {/* 실시간 현황 카드 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
@@ -152,63 +187,29 @@ export default function TransportStatusPage() {
             </div>
           </div>
 
-          {/* 검색조건 */}
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">운송번호</label>
-                <input type="text" value={filters.transportNo} onChange={(e) => handleFilterChange('transportNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="TM-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">차량번호</label>
-                <input type="text" value={filters.vehicleNo} onChange={(e) => handleFilterChange('vehicleNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="00가 0000" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">기사명</label>
-                <input type="text" value={filters.driverName} onChange={(e) => handleFilterChange('driverName', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="기사명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="waiting">대기중</option>
-                  <option value="loading">상차중</option>
-                  <option value="in_transit">운송중</option>
-                  <option value="unloading">하차중</option>
-                  <option value="completed">완료</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">운송현황 ({filteredList.length}건)</h3></div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <SortableHeader columnKey="transportNo" label={<>운송<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="vehicleNo" label={<>차량<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="driverName" label="기사명" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="origin" label="출발지" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="destination" label="도착지" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="currentLocation" label={<>현재<br/>위치</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="progress" label="진행률" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="lastUpdate" label={<>최종<br/>갱신</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th>운송번호</th>
+                    <th>차량번호</th>
+                    <th>기사명</th>
+                    <th>출발지</th>
+                    <th>도착지</th>
+                    <th>현재위치</th>
+                    <th className="text-center">진행률</th>
+                    <th className="text-center">ETA</th>
+                    <th className="text-center">상태</th>
+                    <th className="text-center">최종갱신</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={10} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
+                    filteredList.map((row) => (
                       <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                         <td className="p-3 text-[#2563EB] font-medium">{row.transportNo}</td>
                         <td className="p-3 text-sm">{row.vehicleNo}</td>
@@ -235,14 +236,12 @@ export default function TransportStatusPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

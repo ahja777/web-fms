@@ -4,17 +4,15 @@ import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import AWBPrintModal, { AWBData as AWBPrintData } from '@/components/AWBPrintModal';
+import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { useSorting, SortableHeader, SortStatusBadge } from '@/components/table';
 import SelectionAlertModal from '@/components/SelectionAlertModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
-import { formatWeightWithComma } from '@/utils/format';
-import { ActionButton } from '@/components/buttons';
 
 interface AWBData {
   mawb_id: number;
@@ -52,16 +50,23 @@ const statusConfig: Record<string, { label: string; color: string; bgColor: stri
 
 const getStatusConfig = (status: string) => statusConfig[status] || { label: status || '미정', color: 'bg-gray-500', bgColor: '#F3F4F6' };
 
+// 샘플 데이터
+const sampleData: AWBData[] = [
+  { mawb_id: 1, mawb_no: '180-12345671', airline_code: 'KE', flight_no: 'KE002', etd_dt: '2026-01-20', eta_dt: '2026-01-21', ata_dt: '2026-01-21', origin_airport_cd: 'LAX', dest_airport_cd: 'ICN', shipper_nm: 'ABC Corp', consignee_nm: '삼성전자', pieces: 50, gross_weight_kg: 1250, charge_weight_kg: 1350, commodity_desc: '전자부품', status_cd: 'ARRIVED', hawb_count: 3, remarks: '' },
+  { mawb_id: 2, mawb_no: '180-98765432', airline_code: 'OZ', flight_no: 'OZ202', etd_dt: '2026-01-18', eta_dt: '2026-01-19', ata_dt: '', origin_airport_cd: 'FRA', dest_airport_cd: 'ICN', shipper_nm: 'XYZ GmbH', consignee_nm: 'LG전자', pieces: 30, gross_weight_kg: 850, charge_weight_kg: 900, commodity_desc: '자동차부품', status_cd: 'IN_TRANSIT', hawb_count: 2, remarks: '' },
+  { mawb_id: 3, mawb_no: '618-11223344', airline_code: 'KE', flight_no: 'KE012', etd_dt: '2026-01-22', eta_dt: '2026-01-23', ata_dt: '', origin_airport_cd: 'NRT', dest_airport_cd: 'ICN', shipper_nm: 'DEF Inc', consignee_nm: '현대자동차', pieces: 100, gross_weight_kg: 2500, charge_weight_kg: 2800, commodity_desc: '기계장비', status_cd: 'DEPARTED', hawb_count: 5, remarks: '' },
+  { mawb_id: 4, mawb_no: '988-55667788', airline_code: 'CA', flight_no: 'CA124', etd_dt: '2026-01-15', eta_dt: '2026-01-16', ata_dt: '2026-01-16', origin_airport_cd: 'PVG', dest_airport_cd: 'ICN', shipper_nm: 'GHI Trading', consignee_nm: 'SK하이닉스', pieces: 80, gross_weight_kg: 1800, charge_weight_kg: 2000, commodity_desc: '반도체장비', status_cd: 'CUSTOMS', hawb_count: 4, remarks: '' },
+  { mawb_id: 5, mawb_no: '160-99887766', airline_code: 'SQ', flight_no: 'SQ608', etd_dt: '2026-01-10', eta_dt: '2026-01-11', ata_dt: '2026-01-11', origin_airport_cd: 'SIN', dest_airport_cd: 'ICN', shipper_nm: 'JKL Pte Ltd', consignee_nm: '포스코', pieces: 200, gross_weight_kg: 5000, charge_weight_kg: 5500, commodity_desc: '화학제품', status_cd: 'DELIVERED', hawb_count: 8, remarks: '' },
+];
+
 export default function ImportAWBListPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getToday();
   const [filters, setFilters] = useState({
-    etaDateFrom: today,
-    etaDateTo: today,
-    ataDateFrom: '',
-    ataDateTo: '',
+    startDate: today,
+    endDate: today,
     awbNo: '',
     flightNo: '',
     consignee: '',
@@ -108,11 +113,16 @@ export default function ImportAWBListPage() {
 
       const response = await fetch(`/api/awb/mawb?${params}`);
       const result = await response.json();
-      if (Array.isArray(result)) {
+      if (Array.isArray(result) && result.length > 0) {
         setData(result);
+      } else {
+        // API 결과가 없으면 샘플 데이터 사용
+        setData(sampleData);
       }
     } catch (error) {
       console.error('Error fetching AWB data:', error);
+      // 에러 시 샘플 데이터 사용
+      setData(sampleData);
     } finally {
       setLoading(false);
     }
@@ -122,40 +132,18 @@ export default function ImportAWBListPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleDateRangeSelect = (startDate: string, endDate: string) => {
+    setFilters(prev => ({ ...prev, startDate, endDate }));
+  };
+
   const handleSearch = () => setAppliedFilters(filters);
   const handleReset = () => {
-    const resetFilters = {
-      etaDateFrom: today,
-      etaDateTo: today,
-      ataDateFrom: '',
-      ataDateTo: '',
-      awbNo: '',
-      flightNo: '',
-      consignee: '',
-      status: ''
-    };
+    const resetFilters = { startDate: today, endDate: today, awbNo: '', flightNo: '', consignee: '', status: '' };
     setFilters(resetFilters);
     setAppliedFilters(resetFilters);
     setSelectedIds(new Set());
     setSelectedRow(null);
     resetSort();
-  };
-
-  // 버튼 핸들러
-  const handleNew = () => router.push('/logis/import-bl/air/register');
-  const handleEdit = () => {
-    if (selectedIds.size !== 1) {
-      alert('수정할 항목을 1개 선택해주세요.');
-      return;
-    }
-    const id = Array.from(selectedIds)[0];
-    router.push(`/logis/import-bl/air/${id}`);
-  };
-  const handleExcel = () => {
-    const dataToExport = selectedIds.size > 0
-      ? filteredData.filter(item => selectedIds.has(item.mawb_id))
-      : filteredData;
-    alert(`${dataToExport.length}건의 데이터를 Excel로 다운로드합니다.`);
   };
 
   // 필터링된 데이터
@@ -287,142 +275,113 @@ export default function ImportAWBListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="AWB 관리 (항공수입)" subtitle="Logis > 항공수입 > AWB 관리" />
+        <PageLayout title="AWB 관리 (항공수입)" subtitle="Logis > 항공수입 > AWB 관리" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          {/* 상단 버튼 영역 - 해상수출 B/L과 동일한 스타일 */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              {selectedIds.size > 0 && (
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
-                  {selectedIds.size}건 선택
-                </span>
-              )}
-            </div>
+          {/* 버튼 영역 */}
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
-              <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
-              <ActionButton variant="danger" icon="delete" onClick={handleDeleteClick}>삭제</ActionButton>
-              <ActionButton variant="primary" icon="print" onClick={handlePrint}>출력</ActionButton>
-              <ActionButton variant="default" icon="download" onClick={handleExcel}>Excel</ActionButton>
-              <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
+              <Link href="/logis/import-bl/air/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
+                신규 등록
+              </Link>
+              <button
+                onClick={handlePrint}
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                출력
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                삭제
+              </button>
+              {selectedIds.size > 0 && (
+                <button
+                  onClick={() => { setSelectedIds(new Set()); setSelectedRow(null); }}
+                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                >
+                  선택해제 ({selectedIds.size}건)
+                </button>
+              )}
             </div>
           </div>
 
-          {/* 검색조건 - 해상수출 B/L과 동일한 레이아웃 (grid-cols-6) */}
+          {/* 검색조건 - Booking Sea 스타일 */}
           <div className="card mb-6">
             <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <h3 className="font-bold">검색조건</h3>
             </div>
             <div className="p-4">
-              {/* 첫 번째 줄 */}
-              <div className="grid grid-cols-6 gap-4 mb-4">
-                {/* 업무구분 (고정값) */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">업무구분</label>
-                  <input
-                    type="text"
-                    value="항공"
-                    readOnly
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                  />
-                </div>
-                {/* 수출입구분 (고정값) */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수출입구분</label>
-                  <input
-                    type="text"
-                    value="수입(IN)"
-                    readOnly
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                  />
-                </div>
+              <div className="grid grid-cols-6 gap-4">
                 {/* ETA 기간 */}
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA 기간</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA 기간</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="date"
-                      value={filters.etaDateFrom}
-                      onChange={e => setFilters(prev => ({ ...prev, etaDateFrom: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                      value={filters.startDate}
+                      onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     />
                     <span className="text-[var(--muted)]">~</span>
                     <input
                       type="date"
-                      value={filters.etaDateTo}
-                      onChange={e => setFilters(prev => ({ ...prev, etaDateTo: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                      value={filters.endDate}
+                      onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     />
+                    <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
                   </div>
                 </div>
-                {/* ATA 기간 */}
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ATA 기간</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={filters.ataDateFrom}
-                      onChange={e => setFilters(prev => ({ ...prev, ataDateFrom: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                    <span className="text-[var(--muted)]">~</span>
-                    <input
-                      type="date"
-                      value={filters.ataDateTo}
-                      onChange={e => setFilters(prev => ({ ...prev, ataDateTo: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-              {/* 두 번째 줄 */}
-              <div className="grid grid-cols-6 gap-4">
                 {/* MAWB No. */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">MAWB No.</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MAWB No.</label>
                   <input
                     type="text"
                     value={filters.awbNo}
                     onChange={e => setFilters(prev => ({ ...prev, awbNo: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="180-12345678"
                   />
                 </div>
                 {/* 편명 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">편명</label>
                   <input
                     type="text"
                     value={filters.flightNo}
                     onChange={e => setFilters(prev => ({ ...prev, flightNo: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="KE001"
                   />
                 </div>
                 {/* 수하인 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">수하인</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수하인</label>
                   <input
                     type="text"
                     value={filters.consignee}
                     onChange={e => setFilters(prev => ({ ...prev, consignee: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                     placeholder="수하인명"
                   />
                 </div>
                 {/* 상태 */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   <select
                     value={filters.status}
                     onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838] text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm"
                   >
                     <option value="">전체</option>
                     <option value="DRAFT">초안</option>
@@ -434,12 +393,8 @@ export default function ImportAWBListPage() {
                     <option value="DELIVERED">인도완료</option>
                   </select>
                 </div>
-                {/* 빈 칸 (정렬용) */}
-                <div></div>
-                <div></div>
               </div>
             </div>
-            {/* 검색 버튼 영역 - 하단 별도 영역 */}
             <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
               <button
                 onClick={handleSearch}
@@ -457,7 +412,7 @@ export default function ImportAWBListPage() {
           </div>
 
           {/* 요약 통계 (부킹 제거) */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center">
               <div className="text-2xl font-bold">{summaryStats.total}</div>
               <div className="text-sm text-[var(--muted)]">전체</div>
@@ -471,7 +426,7 @@ export default function ImportAWBListPage() {
               <div className="text-sm text-[var(--muted)]">도착</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-bold text-purple-500">{formatWeightWithComma(summaryStats.totalWeight)}</div>
+              <div className="text-2xl font-bold text-purple-500">{summaryStats.totalWeight.toLocaleString()}</div>
               <div className="text-sm text-[var(--muted)]">총 중량 (KG)</div>
             </div>
           </div>
@@ -483,10 +438,10 @@ export default function ImportAWBListPage() {
               <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">{filteredData.length}건</span>
               <SortStatusBadge statusText={getSortStatusText(columnLabels)} onReset={resetSort} />
             </div>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-center w-12">
+                  <th className="text-center w-12">
                     <input
                       type="checkbox"
                       checked={sortedList.length > 0 && selectedIds.size === sortedList.length}
@@ -501,9 +456,9 @@ export default function ImportAWBListPage() {
                   <SortableHeader columnKey="origin_airport_cd" label="구간" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="consignee_nm" label="수하인" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="commodity_desc" label="품명" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader columnKey="pieces" label="PCS" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader columnKey="gross_weight_kg" label="G/W" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                  <SortableHeader columnKey="hawb_count" label="HAWB" sortConfig={sortConfig} onSort={handleSort} align="right" />
+                  <SortableHeader columnKey="pieces" label="PCS" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                  <SortableHeader columnKey="gross_weight_kg" label="G/W" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                  <SortableHeader columnKey="hawb_count" label="HAWB" sortConfig={sortConfig} onSort={handleSort} align="center" />
                   <SortableHeader columnKey="status_cd" label="상태" sortConfig={sortConfig} onSort={handleSort} />
                 </tr>
               </thead>
@@ -535,25 +490,25 @@ export default function ImportAWBListPage() {
                           className="w-4 h-4 rounded"
                         />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <Link href={`/logis/import-bl/air/${item.mawb_id}`} className="text-blue-400 hover:underline font-medium">
                           {item.mawb_no}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-sm">{item.airline_code}</td>
-                      <td className="px-4 py-3 text-sm">{item.flight_no}</td>
-                      <td className="px-4 py-3 text-sm">{item.eta_dt || item.etd_dt}</td>
-                      <td className="px-4 py-3 text-sm">{item.origin_airport_cd} → {item.dest_airport_cd}</td>
-                      <td className="px-4 py-3 text-sm">{item.consignee_nm}</td>
-                      <td className="px-4 py-3 text-sm">{item.commodity_desc}</td>
-                      <td className="px-4 py-3 text-sm text-right">{item.pieces?.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm text-right">{formatWeightWithComma(item.gross_weight_kg)}</td>
-                      <td className="px-4 py-3 text-sm text-right">
+                      <td className="px-4 py-3 text-sm text-center">{item.airline_code}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.flight_no}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.eta_dt || item.etd_dt}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.origin_airport_cd} → {item.dest_airport_cd}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.consignee_nm}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.commodity_desc}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.pieces?.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.gross_weight_kg?.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-center">
                         <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                           {item.hawb_count || 0}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status_cd).color}`}>
                           {getStatusConfig(item.status_cd).label}
                         </span>
@@ -565,8 +520,6 @@ export default function ImportAWBListPage() {
             </table>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
@@ -594,6 +547,6 @@ export default function ImportAWBListPage() {
         onConfirm={handleDeleteConfirm}
         itemCount={selectedIds.size}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import EmailModal from '@/components/EmailModal';
@@ -58,23 +57,6 @@ interface BookingFormData {
   namedCustomer: string;            // Named Customer*
   specialHandlingCode: string;      // Special Handing Code
   grossWeight: number;              // Gross Weight(KGS)*
-  volumeCbm: number;                // Volume(CBM)
-
-  // Container 수량 정보
-  totalCntrQty: number;             // 총 컨테이너 수량
-  cntr20gpQty: number;
-  cntr40gpQty: number;
-  cntr40hcQty: number;
-  cntr45hcQty: number;
-  cntrReeferQty: number;
-  cntrOtQty: number;
-  cntrFrQty: number;
-
-  // Cut-off 정보
-  cargoCutOffDate: string;
-  cargoCutOffTime: string;
-  closingDate: string;
-  closingTime: string;
 
   // Container Pick up Information (화면설계서 기준)
   pickup: string;                   // Pick up*
@@ -134,23 +116,6 @@ const initialFormData: BookingFormData = {
   namedCustomer: '',
   specialHandlingCode: '',
   grossWeight: 0,
-  volumeCbm: 0,
-
-  // Container 수량
-  totalCntrQty: 0,
-  cntr20gpQty: 0,
-  cntr40gpQty: 0,
-  cntr40hcQty: 0,
-  cntr45hcQty: 0,
-  cntrReeferQty: 0,
-  cntrOtQty: 0,
-  cntrFrQty: 0,
-
-  // Cut-off
-  cargoCutOffDate: '',
-  cargoCutOffTime: '',
-  closingDate: '',
-  closingTime: '',
 
   // Container Pick up Information
   pickup: '',
@@ -242,7 +207,6 @@ export default function BookingSeaRegisterPage() {
 
   const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
   };
 
   const handleScheduleSelect = (schedule: any) => {
@@ -442,6 +406,59 @@ export default function BookingSeaRegisterPage() {
       alert('삭제 중 오류가 발생했습니다.');
     }
   };
+
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    setFormData({
+      // 기본정보
+      jobNo: '',
+      regDate: new Date().toISOString().split('T')[0],
+      inputUser: '홍길동',
+      bookingStatus: 'DRAFT',
+      bookingRequestDate: '',
+      bookingConfirmDate: '',
+      forwarderCode: 'FWD001',
+      carrierCode: 'MAEU',
+      bookingNo: '',
+      // Schedule
+      vesselVoyage: 'MAERSK EINDHOVEN / 001E',
+      partnerVoyage: 'KCS-001E',
+      por: 'KRPUS',
+      pol: 'KRPUS',
+      pod: 'USLAX',
+      pvy: 'USLAX',
+      etd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      eta: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      blType: 'ORIGINAL',
+      // 송수하인 정보
+      customerCode: 'C001',
+      actualCustomerName: '삼성전자',
+      bizNo: '123-45-67890',
+      bookingManager: '김담당',
+      containerManager: '박컨테이너',
+      notify: 'Samsung America',
+      consignee: 'Samsung America Inc.',
+      // Cargo Information
+      contractHolder: '삼성전자',
+      serviceTerm: 'CY-CY',
+      bookingShipper: '삼성전자 물류팀',
+      commodity: '전자제품',
+      serviceContractNo: 'SC-2026-001',
+      bookingOffice: '서울본사',
+      namedCustomer: 'Samsung Electronics',
+      specialHandlingCode: '',
+      grossWeight: 15000,
+      // Container Pick up Information
+      pickup: '부산항 신항',
+      transportManager: '이운송',
+      transportCompany: '한국물류(주)',
+      pickupDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      remark: '테스트 데이터입니다.',
+    });
+    setHasUnsavedChanges(true);
+    alert('테스트 데이터가 입력되었습니다.');
+  };
+
   // 상태별 배지 스타일
   const getStatusBadge = (status: string) => {
     const config: Record<string, { label: string; bgColor: string; textColor: string }> = {
@@ -463,65 +480,69 @@ export default function BookingSeaRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="선적부킹관리 등록 (해상)"
-          subtitle="견적/부킹관리 > 선적부킹관리 (해상) > 등록"
-          onClose={handleCloseClick}
-        />
-        <main ref={formRef} className="p-6">
+      <Header
+        title="선적부킹관리 등록 (해상)"
+        subtitle="견적/부킹관리 > 선적부킹관리 (해상) > 등록"
+        showCloseButton={false}
+      />
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 (화면설계서 기준) */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <span className="text-sm text-[var(--muted)]">화면번호: FMS-BK-002</span>
+              <button
+                onClick={handleFillTestData}
+                className="px-3 py-1.5 text-xs bg-[var(--surface-100)] text-[var(--foreground)] rounded hover:bg-[var(--surface-200)]"
+              >
+                테스트 데이터
+              </button>
             </div>
             <div className="flex gap-2">
               {/* 화면설계서 기준 버튼: 신규, 수정, 삭제, 출력, E-mail, Excel, 부킹확정/취소, 부킹요청 */}
               <button
                 onClick={handleNew}
                 disabled={isNewMode}
-                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-white rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 신규
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-4 py-2 text-sm font-medium bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50"
               >
                 {isSaving ? '저장중...' : '수정'}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={!formData.bookingNo}
-                className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 삭제
               </button>
-              <button className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-white rounded-lg hover:bg-[var(--surface-200)]">
+              <button className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">
                 출력
               </button>
               <button
                 onClick={() => setShowEmailModal(true)}
-                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-white rounded-lg hover:bg-[var(--surface-200)]"
+                className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 E-mail
               </button>
-              <button className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700">
+              <button className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">
                 Excel
               </button>
               {formData.bookingStatus === 'REQUEST' ? (
                 <>
                   <button
                     onClick={handleBookingConfirm}
-                    className="px-4 py-2 text-sm font-medium bg-[#059669] text-white rounded-lg hover:bg-[#047857]"
+                    className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
                   >
                     부킹확정
                   </button>
                   <button
                     onClick={handleBookingCancel}
-                    className="px-4 py-2 text-sm font-medium bg-[#DC2626] text-white rounded-lg hover:bg-[#b91c1c]"
+                    className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
                   >
                     부킹취소
                   </button>
@@ -529,7 +550,7 @@ export default function BookingSeaRegisterPage() {
               ) : formData.bookingStatus === 'DRAFT' ? (
                 <button
                   onClick={handleBookingRequest}
-                  className="px-4 py-2 text-sm font-medium bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f]"
+                  className="px-4 py-2 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
                 >
                   부킹요청
                 </button>
@@ -549,7 +570,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.jobNo || '자동생성'}
                   disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                 />
               </div>
               <div>
@@ -558,7 +579,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.regDate}
                   onChange={(e) => handleInputChange('regDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -567,7 +588,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.inputUser}
                   onChange={(e) => handleInputChange('inputUser', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="사원명"
                 />
               </div>
@@ -583,7 +604,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.bookingRequestDate}
                   disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                 />
               </div>
               <div>
@@ -592,7 +613,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.bookingConfirmDate}
                   disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                 />
               </div>
               <div>
@@ -602,7 +623,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.forwarderCode}
                     onChange={(e) => handleInputChange('forwarderCode', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="포워더코드"
                   />
                   <button
@@ -620,7 +641,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.carrierCode}
                     onChange={(e) => handleInputChange('carrierCode', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="선사코드"
                   />
                   <button
@@ -637,7 +658,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.bookingNo || '자동생성'}
                   disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                 />
               </div>
             </div>
@@ -661,7 +682,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.vesselVoyage}
                   onChange={(e) => handleInputChange('vesselVoyage', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="선박명 / 항차"
                 />
               </div>
@@ -671,7 +692,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.partnerVoyage}
                   onChange={(e) => handleInputChange('partnerVoyage', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="파트너 항차"
                 />
               </div>
@@ -682,7 +703,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.por}
                     onChange={(e) => handleInputChange('por', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="KRPUS"
                   />
                   <button
@@ -700,7 +721,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.pol}
                     onChange={(e) => handleInputChange('pol', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="KRPUS"
                   />
                   <button
@@ -718,7 +739,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.pod}
                     onChange={(e) => handleInputChange('pod', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="USLAX"
                   />
                   <button
@@ -736,7 +757,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.pvy}
                     onChange={(e) => handleInputChange('pvy', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="USLAX"
                   />
                   <button
@@ -753,7 +774,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.etd}
                   onChange={(e) => handleInputChange('etd', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -762,7 +783,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.eta}
                   onChange={(e) => handleInputChange('eta', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -770,7 +791,7 @@ export default function BookingSeaRegisterPage() {
                 <select
                   value={formData.blType}
                   onChange={(e) => handleInputChange('blType', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="ORIGINAL">Original B/L</option>
                   <option value="SEAWAY">Sea Waybill</option>
@@ -793,7 +814,7 @@ export default function BookingSeaRegisterPage() {
                     type="text"
                     value={formData.customerCode}
                     onChange={(e) => handleInputChange('customerCode', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="거래처코드"
                   />
                   <button
@@ -810,7 +831,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.actualCustomerName}
                   onChange={(e) => handleInputChange('actualCustomerName', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="실제 거래처명"
                 />
               </div>
@@ -820,7 +841,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.bizNo}
                   onChange={(e) => handleInputChange('bizNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="000-00-00000"
                 />
               </div>
@@ -830,7 +851,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.bookingManager}
                   onChange={(e) => handleInputChange('bookingManager', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="담당자명"
                 />
               </div>
@@ -840,7 +861,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.containerManager}
                   onChange={(e) => handleInputChange('containerManager', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="반입 담당자"
                 />
               </div>
@@ -850,7 +871,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.notify}
                   onChange={(e) => handleInputChange('notify', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Notify Party"
                 />
               </div>
@@ -860,7 +881,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.consignee}
                   onChange={(e) => handleInputChange('consignee', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Consignee"
                 />
               </div>
@@ -879,7 +900,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.contractHolder}
                   onChange={(e) => handleInputChange('contractHolder', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Contract Holder"
                 />
               </div>
@@ -888,7 +909,7 @@ export default function BookingSeaRegisterPage() {
                 <select
                   value={formData.serviceTerm}
                   onChange={(e) => handleInputChange('serviceTerm', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="CY-CY">CY-CY</option>
                   <option value="CY-DOOR">CY-DOOR</option>
@@ -902,7 +923,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.bookingShipper}
                   onChange={(e) => handleInputChange('bookingShipper', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Booking Shipper"
                 />
               </div>
@@ -912,7 +933,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.serviceContractNo}
                   onChange={(e) => handleInputChange('serviceContractNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="SC-0000-000"
                 />
               </div>
@@ -922,7 +943,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.commodity}
                   onChange={(e) => handleInputChange('commodity', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="품명"
                 />
               </div>
@@ -932,7 +953,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.bookingOffice}
                   onChange={(e) => handleInputChange('bookingOffice', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="부킹 오피스"
                 />
               </div>
@@ -942,7 +963,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.namedCustomer}
                   onChange={(e) => handleInputChange('namedCustomer', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Named Customer"
                 />
               </div>
@@ -952,7 +973,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.specialHandlingCode}
                   onChange={(e) => handleInputChange('specialHandlingCode', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="특수 핸들링 코드"
                 />
               </div>
@@ -962,93 +983,11 @@ export default function BookingSeaRegisterPage() {
                   type="number"
                   value={formData.grossWeight || ''}
                   onChange={(e) => handleInputChange('grossWeight', Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-right"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-center"
                   placeholder="0"
                   min="0"
                   step="0.01"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Volume(CBM)</label>
-                <input
-                  type="number"
-                  value={formData.volumeCbm || ''}
-                  onChange={(e) => handleInputChange('volumeCbm', Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-right"
-                  placeholder="0"
-                  min="0"
-                  step="0.001"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Container Information 섹션 */}
-          <div className="card mb-6">
-            <div className="section-header">
-              <h3 className="font-bold text-white">Container Information</h3>
-            </div>
-            <div className="p-4 grid grid-cols-8 gap-4">
-              {[
-                { label: '20GP', field: 'cntr20gpQty' },
-                { label: '40GP', field: 'cntr40gpQty' },
-                { label: '40HC', field: 'cntr40hcQty' },
-                { label: '45HC', field: 'cntr45hcQty' },
-                { label: 'Reefer', field: 'cntrReeferQty' },
-                { label: 'O/T', field: 'cntrOtQty' },
-                { label: 'F/R', field: 'cntrFrQty' },
-              ].map(({ label, field }) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium mb-1">{label}</label>
-                  <input
-                    type="number"
-                    value={(formData as any)[field] || ''}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      handleInputChange(field as keyof BookingFormData, v);
-                      const fields = ['cntr20gpQty','cntr40gpQty','cntr40hcQty','cntr45hcQty','cntrReeferQty','cntrOtQty','cntrFrQty'];
-                      const total = fields.reduce((s, f) => s + (f === field ? v : ((formData as any)[f] || 0)), 0);
-                      handleInputChange('totalCntrQty', total);
-                    }}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-right"
-                    placeholder="0"
-                    min="0"
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="block text-sm font-medium mb-1 font-bold">합계</label>
-                <input
-                  type="number"
-                  value={formData.totalCntrQty || 0}
-                  disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-right font-bold"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Cut-Off Information 섹션 */}
-          <div className="card mb-6">
-            <div className="section-header">
-              <h3 className="font-bold text-white">Cut-Off Information</h3>
-            </div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">서류마감일 (Doc Cut-Off)</label>
-                <input type="date" value={formData.closingDate} onChange={(e) => handleInputChange('closingDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">서류마감시간</label>
-                <input type="time" value={formData.closingTime} onChange={(e) => handleInputChange('closingTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">화물반입마감일 (Cargo Cut-Off)</label>
-                <input type="date" value={formData.cargoCutOffDate} onChange={(e) => handleInputChange('cargoCutOffDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">화물반입마감시간</label>
-                <input type="time" value={formData.cargoCutOffTime} onChange={(e) => handleInputChange('cargoCutOffTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
               </div>
             </div>
           </div>
@@ -1065,7 +1004,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.pickup}
                   onChange={(e) => handleInputChange('pickup', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="픽업 장소"
                 />
               </div>
@@ -1075,7 +1014,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.transportManager}
                   onChange={(e) => handleInputChange('transportManager', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="운송담당자"
                 />
               </div>
@@ -1085,7 +1024,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.transportCompany}
                   onChange={(e) => handleInputChange('transportCompany', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="운송사"
                 />
               </div>
@@ -1095,7 +1034,7 @@ export default function BookingSeaRegisterPage() {
                   type="date"
                   value={formData.pickupDate}
                   onChange={(e) => handleInputChange('pickupDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -1104,7 +1043,7 @@ export default function BookingSeaRegisterPage() {
                   type="text"
                   value={formData.remark}
                   onChange={(e) => handleInputChange('remark', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="비고"
                 />
               </div>
@@ -1115,29 +1054,27 @@ export default function BookingSeaRegisterPage() {
           <div className="flex justify-center gap-4 mt-8">
             <button
               onClick={handleGoList}
-              className="px-8 py-3 text-sm font-medium bg-[var(--surface-100)] text-white rounded-lg hover:bg-[var(--surface-200)]"
+              className="px-8 py-3 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
             >
               목록
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-8 py-3 text-sm font-medium bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] disabled:opacity-50"
+              className="px-8 py-3 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50"
             >
               {isSaving ? '저장중...' : '저장'}
             </button>
             {formData.bookingStatus === 'DRAFT' && (
               <button
                 onClick={handleBookingRequest}
-                className="px-8 py-3 text-sm font-medium bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f]"
+                className="px-8 py-3 text-sm font-medium bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 부킹요청
               </button>
             )}
           </div>
         </main>
-      </div>
-
       {/* 스케줄 조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}

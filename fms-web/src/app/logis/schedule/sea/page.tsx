@@ -4,8 +4,7 @@ import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 
 import { useState, useRef, useMemo } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -160,12 +159,9 @@ export default function SeaSchedulePage() {
 
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="해상 스케줄 조회" subtitle="Logis > 스케줄관리 > 해상 스케줄 조회" />
+        <PageLayout title="해상 스케줄 조회" subtitle="Logis > 스케줄관리 > 해상 스케줄 조회" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <ExcelButtons
                 data={filteredData}
@@ -175,54 +171,63 @@ export default function SeaSchedulePage() {
             </div>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 기간</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 기간</label>
+                  <div className="flex gap-2 items-center flex-nowrap">
+                    <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <span className="text-[var(--muted)] flex-shrink-0">~</span>
+                    <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label>
+                  <select value={filters.carrier} onChange={e => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="MAERSK">MAERSK</option>
+                    <option value="MSC">MSC</option>
+                    <option value="HMM">HMM</option>
+                    <option value="EVERGREEN">EVERGREEN</option>
+                    <option value="ONE">ONE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항 (POL)</label>
+                  <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="KRPUS" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항 (POD)</label>
+                  <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="USLAX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="OPEN">부킹가능</option>
+                    <option value="LIMITED">잔여공간</option>
+                    <option value="FULL">만석</option>
+                    <option value="CLOSED">마감</option>
+                  </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label>
-                <select value={filters.carrier} onChange={e => setFilters(prev => ({ ...prev, carrier: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="MAERSK">MAERSK</option>
-                  <option value="MSC">MSC</option>
-                  <option value="HMM">HMM</option>
-                  <option value="EVERGREEN">EVERGREEN</option>
-                  <option value="ONE">ONE</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항 (POL)</label>
-                <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항 (POD)</label>
-                <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="OPEN">부킹가능</option>
-                  <option value="LIMITED">잔여공간</option>
-                  <option value="FULL">만석</option>
-                  <option value="CLOSED">마감</option>
-                </select>
-              </div>
-              <div className="col-span-3 flex items-end gap-2">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-green-500">{summaryStats.open}</div><div className="text-sm text-[var(--muted)]">부킹가능</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-yellow-500">{summaryStats.limited}</div><div className="text-sm text-[var(--muted)]">잔여공간</div></div>
@@ -235,8 +240,8 @@ export default function SeaSchedulePage() {
               <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">{filteredData.length}건</span>
               <SortStatusBadge statusText={getSortStatusText(columnLabels)} onReset={resetSort} />
             </div>
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
                   <SortableHeader columnKey="carrier" label="선사" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
@@ -248,25 +253,25 @@ export default function SeaSchedulePage() {
                   <SortableHeader columnKey="space" label="잔여공간" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="cutOff" label="C/T Off" sortConfig={sortConfig} onSort={handleSort} />
                   <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
-                  <th className="px-4 py-3 text-left text-sm font-medium">부킹</th>
+                  <th>부킹</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody>
                 {sortedList.map(item => (
-                  <tr key={item.id} className="hover:bg-[var(--surface-50)]">
-                    <td className="px-4 py-3 text-sm font-medium">{item.carrier}</td>
-                    <td className="px-4 py-3 text-sm">{item.vessel}<br /><span className="text-[var(--muted)]">{item.voyage}</span></td>
-                    <td className="px-4 py-3 text-sm">{item.pol}<br /><span className="text-[var(--muted)]">{item.polTerminal}</span></td>
-                    <td className="px-4 py-3 text-sm">{item.pod}<br /><span className="text-[var(--muted)]">{item.podTerminal}</span></td>
-                    <td className="px-4 py-3 text-sm">{item.etd}</td>
-                    <td className="px-4 py-3 text-sm">{item.eta}</td>
-                    <td className="px-4 py-3 text-sm">{item.transitTime}일</td>
-                    <td className="px-4 py-3 text-sm">{item.space}</td>
-                    <td className="px-4 py-3 text-sm text-xs">{item.cutOff}<br /><span className="text-[var(--muted)]">Doc: {item.docCutOff}</span></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status).color}`}>{getStatusConfig(item.status).label}</span></td>
-                    <td className="px-4 py-3">
+                  <tr key={item.id}>
+                    <td className="text-center font-medium">{item.carrier}</td>
+                    <td className="text-center">{item.vessel}<br /><span className="text-[var(--muted)] text-xs">{item.voyage}</span></td>
+                    <td className="text-center">{item.pol}<br /><span className="text-[var(--muted)] text-xs">{item.polTerminal}</span></td>
+                    <td className="text-center">{item.pod}<br /><span className="text-[var(--muted)] text-xs">{item.podTerminal}</span></td>
+                    <td className="text-center">{item.etd}</td>
+                    <td className="text-center">{item.eta}</td>
+                    <td className="text-center">{item.transitTime}일</td>
+                    <td className="text-center">{item.space}</td>
+                    <td className="text-center text-xs">{item.cutOff}<br /><span className="text-[var(--muted)]">Doc: {item.docCutOff}</span></td>
+                    <td className="text-center"><span className={`px-2 py-1 text-xs rounded-full text-white ${getStatusConfig(item.status).color}`}>{getStatusConfig(item.status).label}</span></td>
+                    <td className="text-center">
                       {item.status !== 'FULL' && item.status !== 'CLOSED' && (
-                        <button className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">부킹요청</button>
+                        <button className="px-3 py-1 text-xs bg-[#6e5fc9] text-white rounded hover:bg-[#584bb0]">부킹요청</button>
                       )}
                     </td>
                   </tr>
@@ -275,14 +280,12 @@ export default function SeaSchedulePage() {
             </table>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -83,44 +82,8 @@ export default function SRSeaPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const [allData, setAllData] = useState<SRData[]>(sampleData);
+  const [allData] = useState<SRData[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
-
-  // API에서 데이터 조회
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('/api/sr/sea');
-        if (!res.ok) return;
-        const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0) {
-          const mapped: SRData[] = rows.map((r: Record<string, unknown>) => ({
-            id: String(r.id),
-            srNo: (r.srNo as string) || '',
-            srDate: (r.createdAt as string)?.substring(0, 10) || '',
-            bookingNo: (r.bookingNo as string) || '',
-            shipper: (r.shipperName as string) || '',
-            consignee: (r.consigneeName as string) || '',
-            carrier: (r.carrierName as string) || '',
-            vessel: (r.vesselName as string) || '',
-            voyage: (r.voyageNo as string) || '',
-            pol: (r.pol as string) || '',
-            pod: (r.pod as string) || '',
-            etd: (r.etd as string) || '',
-            eta: (r.eta as string) || '',
-            containerType: '',
-            containerQty: Number(r.packageQty) || 0,
-            commodity: (r.commodityDesc as string) || '',
-            status: ((r.status as string) || 'draft').toLowerCase() as SRData['status'],
-          }));
-          setAllData(mapped);
-        }
-      } catch (e) {
-        console.error('S/R 목록 조회 오류:', e);
-      }
-    };
-    fetchData();
-  }, []);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchMessage, setSearchMessage] = useState<string>('');
@@ -198,21 +161,18 @@ export default function SRSeaPage() {
 
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="선적요청관리 (S/R)" subtitle="Logis > 선적관리 > 선적요청관리 (해상)" />
+        <PageLayout title="선적요청관리 (S/R)" subtitle="Logis > 선적관리 > 선적요청관리 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               {selectedIds.size > 0 && <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">{selectedIds.size}건 선택</span>}
             </div>
             <div className="flex gap-2">
-              <button onClick={() => router.push('/logis/sr/sea/register')} className="px-4 py-2 font-semibold rounded-lg flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+              <button onClick={() => router.push('/logis/sr/sea/register')} className="px-4 py-2 font-semibold rounded-lg flex items-center gap-2 bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)] transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 S/R 등록
               </button>
-              <button onClick={() => alert('Excel 다운로드')} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2">Excel</button>
+              <button onClick={() => alert('Excel 다운로드')} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2">Excel</button>
             </div>
           </div>
 
@@ -223,45 +183,72 @@ export default function SRSeaPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          {/* 검색조건 - Booking Sea 스타일 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/R 일자</label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <DateRangeButtons onRangeSelect={(start, end) => { handleFilterChange('startDate', start); handleFilterChange('endDate', end); }} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/R 번호</label>
+                  <input type="text" value={filters.srNo} onChange={(e) => handleFilterChange('srNo', e.target.value)} placeholder="SR-YYYY-XXXX" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">부킹번호</label>
+                  <input type="text" value={filters.bookingNo} onChange={(e) => handleFilterChange('bookingNo', e.target.value)} placeholder="SB-YYYY-XXXX" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">화주</label>
+                  <input type="text" value={filters.shipper} onChange={(e) => handleFilterChange('shipper', e.target.value)} placeholder="화주명" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label>
+                  <select value={filters.carrier} onChange={(e) => handleFilterChange('carrier', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="MAERSK">MAERSK</option>
+                    <option value="MSC">MSC</option>
+                    <option value="HMM">HMM</option>
+                    <option value="EVERGREEN">EVERGREEN</option>
+                    <option value="ONE">ONE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항</label>
+                  <input type="text" value={filters.pol} onChange={(e) => handleFilterChange('pol', e.target.value)} placeholder="예: KRPUS" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항</label>
+                  <input type="text" value={filters.pod} onChange={(e) => handleFilterChange('pod', e.target.value)} placeholder="예: USLAX" className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
+
+          {/* 현황 카드 */}
+          <div className="grid grid-cols-5 gap-4 mb-6">
             {summaryCards.map(c => (
               <div key={c.label} onClick={() => { setFilters(p => ({ ...p, status: c.key })); setAppliedFilters(p => ({ ...p, status: c.key })); }} className="card p-5 text-center cursor-pointer hover:scale-[1.02] transition-all duration-200" style={{ background: appliedFilters.status === c.key && c.key !== '' ? `linear-gradient(135deg, ${c.color}15 0%, transparent 100%)` : undefined }}>
                 <p className="text-3xl font-bold" style={{ color: c.color }}>{c.value}</p>
                 <p className="text-sm text-[var(--muted)] mt-1">{c.label}</p>
               </div>
             ))}
-          </div>
-
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <h3 className="font-bold">검색조건</h3>
-            </div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/R 일자</label>
-                <div className="flex items-center gap-2 flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" />
-                  <DateRangeButtons onRangeSelect={(start, end) => { handleFilterChange('startDate', start); handleFilterChange('endDate', end); }} />
-                </div>
-              </div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/R 번호</label><input type="text" value={filters.srNo} onChange={e => handleFilterChange('srNo', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" placeholder="SR-YYYY-XXXX" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">부킹번호</label><input type="text" value={filters.bookingNo} onChange={e => handleFilterChange('bookingNo', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" placeholder="SB-YYYY-XXXX" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">화주</label><input type="text" value={filters.shipper} onChange={e => handleFilterChange('shipper', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" placeholder="화주명" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label><select value={filters.carrier} onChange={e => handleFilterChange('carrier', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]"><option value="">전체</option><option value="MAERSK">MAERSK</option><option value="MSC">MSC</option><option value="HMM">HMM</option><option value="EVERGREEN">EVERGREEN</option><option value="ONE">ONE</option></select></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항</label><input type="text" value={filters.pol} onChange={e => handleFilterChange('pol', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" placeholder="예: KRPUS" /></div>
-              <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항</label><input type="text" value={filters.pod} onChange={e => handleFilterChange('pod', e.target.value)} className="w-full px-3 py-2.5 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[#E8A838]" placeholder="예: USLAX" /></div>
-            </div>
-            <div className="p-4 flex justify-center gap-3 border-t border-[var(--border)]">
-              <button onClick={handleSearch} className="px-8 py-2.5 font-semibold rounded-lg flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #1A2744 0%, #243B67 100%)', color: 'white' }}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>조회
-              </button>
-              <button onClick={handleReset} className="px-8 py-2.5 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>초기화
-              </button>
-            </div>
           </div>
 
           <div className="card">
@@ -273,13 +260,13 @@ export default function SRSeaPage() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-12 p-3"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} className="rounded" /></th>
+                    <th className="w-12"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} className="rounded" /></th>
                     <SortableHeader columnKey="srNo" label="S/R 번호" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="srDate" label="S/R 일자" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="bookingNo" label={<>부킹<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
+                    <SortableHeader columnKey="bookingNo" label="부킹번호" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="shipper" label="화주" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="carrier" label="선사" sortConfig={sortConfig} onSort={handleSort} />
                     <SortableHeader columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
@@ -295,13 +282,13 @@ export default function SRSeaPage() {
                   ) : sortedList.map(row => (
                     <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors ${selectedIds.has(row.id) ? 'bg-blue-500/10' : ''}`}>
                       <td className="p-3 text-center" onClick={e => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} className="rounded" /></td>
-                      <td className="p-3"><span className="text-[#E8A838] font-medium hover:underline">{row.srNo}</span></td>
-                      <td className="p-3 text-sm text-[var(--muted)]">{row.srDate}</td>
-                      <td className="p-3 text-sm">{row.bookingNo}</td>
-                      <td className="p-3 text-sm font-medium">{row.shipper}</td>
-                      <td className="p-3"><span className="px-2 py-1 bg-[var(--surface-100)] rounded text-sm font-medium">{row.carrier}</span></td>
-                      <td className="p-3 text-sm"><span className="text-white">{row.vessel}</span><span className="text-[var(--muted)]"> / {row.voyage}</span></td>
-                      <td className="p-3 text-sm"><span className="font-medium">{portNames[row.pol] || row.pol}</span> → <span className="font-medium">{portNames[row.pod] || row.pod}</span></td>
+                      <td className="p-3 text-center"><span className="text-[#E8A838] font-medium hover:underline">{row.srNo}</span></td>
+                      <td className="p-3 text-sm text-center text-[var(--muted)]">{row.srDate}</td>
+                      <td className="p-3 text-sm text-center">{row.bookingNo}</td>
+                      <td className="p-3 text-sm text-center font-medium">{row.shipper}</td>
+                      <td className="p-3 text-center"><span className="px-2 py-1 bg-[var(--surface-100)] rounded text-sm font-medium">{row.carrier}</span></td>
+                      <td className="p-3 text-sm text-center"><span className="text-white">{row.vessel}</span><span className="text-[var(--muted)]"> / {row.voyage}</span></td>
+                      <td className="p-3 text-sm text-center"><span className="font-medium">{portNames[row.pol] || row.pol}</span> → <span className="font-medium">{portNames[row.pod] || row.pod}</span></td>
                       <td className="p-3 text-sm text-center">{row.etd}</td>
                       <td className="p-3 text-center"><span className="text-sm font-medium">{row.containerQty} x {row.containerType}</span></td>
                       <td className="p-3 text-center"><span className="px-3 py-1 rounded-full text-xs font-medium" style={{ color: getStatusConfig(row.status).color, backgroundColor: getStatusConfig(row.status).bgColor }}>{getStatusConfig(row.status).label}</span></td>
@@ -312,14 +299,12 @@ export default function SRSeaPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

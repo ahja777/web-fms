@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
@@ -126,29 +125,27 @@ export default function SNSeaDetailPage() {
 
   useCloseConfirm({ showModal: showCloseModal, setShowModal: setShowCloseModal, onConfirmClose: handleConfirmClose });
 
-if (loading) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="S/N 상세조회 (해상)" subtitle="Logis > S/N > S/N 상세조회 (해상)" />          <main className="p-6 flex items-center justify-center min-h-[60vh]">            <div className="text-[var(--muted)]">로딩 중...</div>          </main>        </div>      </div>    );  }  if (!data) {    return (      <div className="min-h-screen bg-[var(--background)]">        <Sidebar />        <div className="ml-72">          <Header title="S/N 상세조회 (해상)" subtitle="Logis > S/N > S/N 상세조회 (해상)" />          <main className="p-6 flex flex-col items-center justify-center min-h-[60vh]">            <div className="text-red-400 mb-4">S/N을 찾을 수 없습니다.</div>            <button onClick={() => router.push('/logis/sn/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록으로 이동</button>          </main>        </div>      </div>    );  }
+  if (loading) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">로딩 중...</div>;
+  if (!data) return <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">S/N을 찾을 수 없습니다.</div>;
 
   const displayData = isEditing ? editData! : data;
   const statusInfo = statusConfig[displayData.status] || { label: displayData.status, color: 'bg-gray-500' };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="S/N 상세조회 (해상)" subtitle="Logis > S/N > S/N 상세조회 (해상)" />
+        <PageLayout title="S/N 상세조회 (해상)" subtitle="Logis > S/N > S/N 상세조회 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button onClick={() => router.push('/logis/sn/sea')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
               {isEditing ? (
                 <>
                   <button onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">취소</button>
-                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">저장</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+                  <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
                 </>
               )}
             </div>
@@ -159,21 +156,21 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">S/N 번호</label><input type="text" value={displayData.snNo || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">S/N 번호</label><input type="text" value={displayData.snNo || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   {isEditing ? (
-                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
+                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
                       <option value="DRAFT">작성중</option><option value="SENT">발송완료</option><option value="FAILED">발송실패</option>
                     </select>
                   ) : (
                     <div className="flex items-center gap-2 px-3 py-2"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusInfo.color}`}>{statusInfo.label}</span></div>
                   )}
                 </div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">발송인</label><input type="text" value={displayData.senderName || ''} disabled={!isEditing} onChange={e => handleChange('senderName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">발송일시</label><input type="text" value={displayData.sentAt || '-'} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">수신인</label><input type="text" value={displayData.recipientName || ''} disabled={!isEditing} onChange={e => handleChange('recipientName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">수신 이메일</label><input type="email" value={displayData.recipientEmail || ''} disabled={!isEditing} onChange={e => handleChange('recipientEmail', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발송인</label><input type="text" value={displayData.senderName || ''} disabled={!isEditing} onChange={e => handleChange('senderName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">발송일시</label><input type="text" value={displayData.sentAt || '-'} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수신인</label><input type="text" value={displayData.recipientName || ''} disabled={!isEditing} onChange={e => handleChange('recipientName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">수신 이메일</label><input type="email" value={displayData.recipientEmail || ''} disabled={!isEditing} onChange={e => handleChange('recipientEmail', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
@@ -181,10 +178,10 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">운송 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사</label><input type="text" value={displayData.carrierName || ''} disabled={!isEditing} onChange={e => handleChange('carrierName', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명/편명</label><input type="text" value={displayData.vesselFlight || ''} disabled={!isEditing} onChange={e => handleChange('vesselFlight', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항차</label><input type="text" value={displayData.voyageNo || ''} disabled={!isEditing} onChange={e => handleChange('voyageNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">운송모드</label><input type="text" value={displayData.transportMode || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label><input type="text" value={displayData.carrierName || ''} disabled={!isEditing} onChange={e => handleChange('carrierName', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선명/편명</label><input type="text" value={displayData.vesselFlight || ''} disabled={!isEditing} onChange={e => handleChange('vesselFlight', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항차</label><input type="text" value={displayData.voyageNo || ''} disabled={!isEditing} onChange={e => handleChange('voyageNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운송모드</label><input type="text" value={displayData.transportMode || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
               </div>
             </div>
 
@@ -192,10 +189,10 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발항 (POL)</label><input type="text" value={displayData.pol || ''} disabled={!isEditing} onChange={e => handleChange('pol', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착항 (POD)</label><input type="text" value={displayData.pod || ''} disabled={!isEditing} onChange={e => handleChange('pod', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD</label><input type="date" value={displayData.etd || ''} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label><input type="date" value={displayData.eta || ''} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발항 (POL)</label><input type="text" value={displayData.pol || ''} disabled={!isEditing} onChange={e => handleChange('pol', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착항 (POD)</label><input type="text" value={displayData.pod || ''} disabled={!isEditing} onChange={e => handleChange('pod', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD</label><input type="date" value={displayData.etd || ''} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label><input type="date" value={displayData.eta || ''} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
 
@@ -203,10 +200,10 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">품목</label><input type="text" value={displayData.commodityDesc || ''} disabled={!isEditing} onChange={e => handleChange('commodityDesc', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장 수량</label><input type="number" value={displayData.packageQty || 0} disabled={!isEditing} onChange={e => handleChange('packageQty', parseInt(e.target.value) || 0)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">총중량 (KG)</label><input type="number" step="0.01" value={displayData.grossWeight || 0} disabled={!isEditing} onChange={e => handleChange('grossWeight', parseFloat(e.target.value) || 0)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">용적 (CBM)</label><input type="number" step="0.001" value={displayData.volume || 0} disabled={!isEditing} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품목</label><input type="text" value={displayData.commodityDesc || ''} disabled={!isEditing} onChange={e => handleChange('commodityDesc', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장 수량</label><input type="number" value={displayData.packageQty || 0} disabled={!isEditing} onChange={e => handleChange('packageQty', parseInt(e.target.value) || 0)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">총중량 (KG)</label><input type="number" step="0.01" value={displayData.grossWeight || 0} disabled={!isEditing} onChange={e => handleChange('grossWeight', parseFloat(e.target.value) || 0)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">용적 (CBM)</label><input type="number" step="0.01" value={displayData.volume || 0} disabled={!isEditing} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} /></div>
               </div>
             </div>
           </div>
@@ -214,13 +211,12 @@ if (loading) {    return (      <div className="min-h-screen bg-[var(--backgroun
           {/* 비고 */}
           <div className="card p-6 mb-6">
             <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">비고</h3>
-            <textarea value={displayData.remark || ''} disabled={!isEditing} onChange={e => handleChange('remark', e.target.value)} rows={3} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+            <textarea value={displayData.remark || ''} disabled={!isEditing} onChange={e => handleChange('remark', e.target.value)} rows={3} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
           </div>
 
           <div className="text-sm text-[var(--muted)]"><span>등록일: {data.createdAt}</span></div>
         </main>
-      </div>
       <CloseConfirmModal isOpen={showCloseModal} onClose={() => setShowCloseModal(false)} onConfirm={handleConfirmClose} />
-    </div>
+    </PageLayout>
   );
 }

@@ -105,32 +105,34 @@ interface SortIconProps<T> {
 }
 
 /**
- * 정렬 방향 표시 아이콘
+ * 정렬 방향 표시 아이콘 (CSS 삼각형 스타일)
  */
 export function SortIcon<T>({
   columnKey,
   sortConfig,
-  activeColor = '#E8A838',
-  inactiveColor = '#9CA3AF',
 }: SortIconProps<T>) {
   const isActive = sortConfig.key === columnKey;
 
   return (
-    <span className="inline-flex flex-col ml-1" style={{ fontSize: '10px', lineHeight: '6px' }}>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
       <span
         style={{
-          color: isActive && sortConfig.direction === 'asc' ? activeColor : inactiveColor,
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
         }}
-      >
-        &#9650;
-      </span>
+      />
       <span
         style={{
-          color: isActive && sortConfig.direction === 'desc' ? activeColor : inactiveColor,
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
         }}
-      >
-        &#9660;
-      </span>
+      />
     </span>
   );
 }
@@ -138,7 +140,7 @@ export function SortIcon<T>({
 // 정렬 가능한 헤더 Props
 interface SortableHeaderProps<T> {
   columnKey: keyof T;
-  label: ReactNode;
+  label: string;
   sortConfig: SortConfig<T>;
   onSort: (key: keyof T) => void;
   className?: string;
@@ -155,7 +157,7 @@ export function SortableHeader<T>({
   sortConfig,
   onSort,
   className = '',
-  align = 'left',
+  align = 'center',
   width,
 }: SortableHeaderProps<T>) {
   const alignClass = {

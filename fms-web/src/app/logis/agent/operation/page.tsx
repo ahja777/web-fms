@@ -3,11 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface AgentOperation {
   id: string;
@@ -80,7 +78,6 @@ export default function AgentOperationPage() {
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchMessage, setSearchMessage] = useState<string>('');
-  const { sortConfig, handleSort, sortData } = useSorting<AgentOperation>();
 
   const filteredList = useMemo(() => {
     return allData.filter(item => {
@@ -133,15 +130,12 @@ export default function AgentOperationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="운영관리 조회" subtitle="입력대행관리  운영관리 조회" />
+        <PageLayout title="운영관리 조회" subtitle="입력대행관리  운영관리 조회" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">대리점 등록</button>
-              <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
+              <button className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors">대리점 등록</button>
+              <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
             </div>
           </div>
 
@@ -149,8 +143,55 @@ export default function AgentOperationPage() {
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
 
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">대리점코드</label>
+                  <input type="text" value={filters.agentCode} onChange={(e) => handleFilterChange('agentCode', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="AG-XXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">대리점명</label>
+                  <input type="text" value={filters.agentName} onChange={(e) => handleFilterChange('agentName', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="대리점명" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">국가</label>
+                  <select value={filters.country} onChange={(e) => handleFilterChange('country', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="CN">중국</option>
+                    <option value="SG">싱가포르</option>
+                    <option value="JP">일본</option>
+                    <option value="US">미국</option>
+                    <option value="VN">베트남</option>
+                    <option value="TH">태국</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="active">활성</option>
+                    <option value="inactive">비활성</option>
+                    <option value="pending">승인대기</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
+
           {/* 현황 카드 */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center cursor-pointer hover:shadow-lg" onClick={() => { setFilters(prev => ({ ...prev, status: '' })); setAppliedFilters(prev => ({ ...prev, status: '' })); }}>
               <p className="text-2xl font-bold">{summary.total}</p>
               <p className="text-sm text-[var(--muted)]">전체 대리점</p>
@@ -169,83 +210,44 @@ export default function AgentOperationPage() {
             </div>
           </div>
 
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">대리점코드</label>
-                <input type="text" value={filters.agentCode} onChange={(e) => handleFilterChange('agentCode', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="AG-XXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">대리점명</label>
-                <input type="text" value={filters.agentName} onChange={(e) => handleFilterChange('agentName', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="대리점명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">국가</label>
-                <select value={filters.country} onChange={(e) => handleFilterChange('country', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="CN">중국</option>
-                  <option value="SG">싱가포르</option>
-                  <option value="JP">일본</option>
-                  <option value="US">미국</option>
-                  <option value="VN">베트남</option>
-                  <option value="TH">태국</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="active">활성</option>
-                  <option value="inactive">비활성</option>
-                  <option value="pending">승인대기</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
               <h3 className="font-bold">대리점 목록 ({filteredList.length}건)</h3>
               {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader<AgentOperation> columnKey="agentCode" label={<>대리점<br/>코드</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="agentName" label="대리점명" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="agentType" label="유형" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="country" label="국가" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AgentOperation> columnKey="city" label="도시" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="contactPerson" label="담당자" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="email" label="이메일" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<AgentOperation> columnKey="contractStart" label={<>계약<br/>기간</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<AgentOperation> columnKey="commission" label="수수료(%)" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader<AgentOperation> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th className="w-10"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
+                    <th className="text-center">대리점코드</th>
+                    <th className="text-center">대리점명</th>
+                    <th className="text-center">유형</th>
+                    <th className="text-center">국가</th>
+                    <th className="text-center">도시</th>
+                    <th className="text-center">담당자</th>
+                    <th className="text-center">이메일</th>
+                    <th className="text-center">계약기간</th>
+                    <th className="text-center">수수료(%)</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={11} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
+                    filteredList.map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
-                        <td className="p-3 text-[#2563EB] font-medium">{row.agentCode}</td>
-                        <td className="p-3 text-sm font-medium">{row.agentName}</td>
-                        <td className="p-3 text-sm">{row.agentType}</td>
-                        <td className="p-3 text-sm text-center">{row.country}</td>
-                        <td className="p-3 text-sm">{row.city}</td>
-                        <td className="p-3 text-sm">{row.contactPerson}</td>
-                        <td className="p-3 text-sm">{row.email}</td>
-                        <td className="p-3 text-sm text-center">{row.contractStart} ~ {row.contractEnd}</td>
-                        <td className="p-3 text-sm text-right">{row.commission}%</td>
+                        <td className="p-3 text-center text-[#2563EB] font-medium">{row.agentCode}</td>
+                        <td className="p-3 text-center text-sm font-medium">{row.agentName}</td>
+                        <td className="p-3 text-center text-sm">{row.agentType}</td>
+                        <td className="p-3 text-center text-sm">{row.country}</td>
+                        <td className="p-3 text-center text-sm">{row.city}</td>
+                        <td className="p-3 text-center text-sm">{row.contactPerson}</td>
+                        <td className="p-3 text-center text-sm">{row.email}</td>
+                        <td className="p-3 text-center text-sm">{row.contractStart} ~ {row.contractEnd}</td>
+                        <td className="p-3 text-center text-sm">{row.commission}%</td>
                         <td className="p-3 text-center">
                           <span className="px-2 py-1 rounded-full text-xs" style={{ color: statusConfig[row.status].color, backgroundColor: statusConfig[row.status].bgColor }}>{statusConfig[row.status].label}</span>
                         </td>
@@ -257,14 +259,12 @@ export default function AgentOperationPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

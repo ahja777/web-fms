@@ -2,11 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import { getToday } from '@/components/DateRangeButtons';
 
 interface CostPayment {
   id: string;
@@ -48,9 +47,10 @@ const sampleData: CostPayment[] = [
   { id: '6', paymentNo: 'CP-2026-0006', paymentDate: '2026-01-12', blNo: 'HBL2026010006', customerName: '삼성전자', costType: 'CFS', description: 'CFS Charge', amount: 95000, currency: 'KRW', paymentMethod: '카드', dueDate: '2026-01-17', status: 'paid' },
 ];
 
+const today = getToday();
 const initialFilters: SearchFilters = {
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: today,
   blNo: '',
   costType: '',
   customerName: '',
@@ -78,7 +78,6 @@ export default function CostPaymentPage() {
     onConfirmClose: handleConfirmClose,
   });
 
-  const { sortConfig, handleSort, sortData } = useSorting<CostPayment>();
   const [allData] = useState<CostPayment[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -134,14 +133,11 @@ export default function CostPaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="부대비용결제관리" subtitle="부대비용관리  부대비용결제관리" />
+        <PageLayout title="부대비용결제관리" subtitle="부대비용관리  부대비용결제관리" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">비용등록</button>
+              <button className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]">비용등록</button>
               <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
             </div>
           </div>
@@ -150,7 +146,7 @@ export default function CostPaymentPage() {
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4">
               <p className="text-sm text-[var(--muted)] mb-1">총 비용</p>
               <p className="text-2xl font-bold">{totalAmount.toLocaleString()} KRW</p>
@@ -169,49 +165,57 @@ export default function CostPaymentPage() {
             </div>
           </div>
 
+          {/* 검색조건 - 화면설계서 기준 */}
           <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">등록일자</label>
-                <div className="flex items-center gap-2">
-                  <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                  <span>~</span>
-                  <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">등록일자 <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">B/L 번호</label>
+                  <input type="text" value={filters.blNo} onChange={(e) => handleFilterChange('blNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="B/L No" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">비용유형</label>
+                  <select value={filters.costType} onChange={(e) => handleFilterChange('costType', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="THC">THC</option>
+                    <option value="CFS">CFS</option>
+                    <option value="D/O">D/O</option>
+                    <option value="통관수수료">통관수수료</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">고객사</label>
+                  <input type="text" value={filters.customerName} onChange={(e) => handleFilterChange('customerName', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="고객사명" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="pending">대기</option>
+                    <option value="approved">승인</option>
+                    <option value="paid">결제완료</option>
+                    <option value="cancelled">취소</option>
+                  </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={(e) => handleFilterChange('blNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="B/L No" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">비용유형</label>
-                <select value={filters.costType} onChange={(e) => handleFilterChange('costType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="THC">THC</option>
-                  <option value="CFS">CFS</option>
-                  <option value="D/O">D/O</option>
-                  <option value="통관수수료">통관수수료</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">고객사</label>
-                <input type="text" value={filters.customerName} onChange={(e) => handleFilterChange('customerName', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="고객사명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="pending">대기</option>
-                  <option value="approved">승인</option>
-                  <option value="paid">결제완료</option>
-                  <option value="cancelled">취소</option>
-                </select>
-              </div>
             </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
@@ -221,39 +225,39 @@ export default function CostPaymentPage() {
               {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader columnKey="paymentNo" label={<>결제<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="paymentDate" label={<>등록<br/>일자</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="blNo" label="B/L No" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="customerName" label="고객사" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="costType" label={<>비용<br/>유형</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="description" label="내역" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="amount" label="금액" sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader columnKey="paymentMethod" label={<>결제<br/>방법</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="dueDate" label={<>결제<br/>기한</>} sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th className="w-12"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
+                    <th>결제번호</th>
+                    <th>등록일자</th>
+                    <th>B/L No</th>
+                    <th>고객사</th>
+                    <th>비용유형</th>
+                    <th>내역</th>
+                    <th className="text-center">금액</th>
+                    <th>결제방법</th>
+                    <th className="text-center">결제기한</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
-                    <tr><td colSpan={11} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
+                    <tr><td colSpan={11} className="text-center py-8 text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
-                      <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
-                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
-                        <td className="p-3 text-[#2563EB] font-medium">{row.paymentNo}</td>
-                        <td className="p-3 text-sm">{row.paymentDate}</td>
-                        <td className="p-3 text-sm">{row.blNo}</td>
-                        <td className="p-3 text-sm">{row.customerName}</td>
-                        <td className="p-3 text-sm font-medium">{row.costType}</td>
-                        <td className="p-3 text-sm">{row.description}</td>
-                        <td className="p-3 text-sm text-right font-semibold">{row.amount.toLocaleString()} {row.currency}</td>
-                        <td className="p-3 text-sm">{row.paymentMethod}</td>
-                        <td className="p-3 text-sm text-center">{row.dueDate}</td>
-                        <td className="p-3 text-center">
+                    filteredList.map((row) => (
+                      <tr key={row.id} className={`cursor-pointer ${selectedIds.has(row.id) ? 'selected' : ''}`} onClick={() => handleRowSelect(row.id)}>
+                        <td className="text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
+                        <td className="text-[#6e5fc9] font-medium">{row.paymentNo}</td>
+                        <td>{row.paymentDate}</td>
+                        <td>{row.blNo}</td>
+                        <td>{row.customerName}</td>
+                        <td className="font-medium">{row.costType}</td>
+                        <td>{row.description}</td>
+                        <td className="text-center font-semibold">{row.amount.toLocaleString()} {row.currency}</td>
+                        <td>{row.paymentMethod}</td>
+                        <td className="text-center">{row.dueDate}</td>
+                        <td className="text-center">
                           <span className="px-2 py-1 rounded-full text-xs" style={{ color: statusConfig[row.status].color, backgroundColor: statusConfig[row.status].bgColor }}>{statusConfig[row.status].label}</span>
                         </td>
                       </tr>
@@ -264,14 +268,12 @@ export default function CostPaymentPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

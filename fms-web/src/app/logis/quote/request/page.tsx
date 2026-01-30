@@ -4,12 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import CodeSearchModal, { CodeType, CodeItem } from '@/components/popup/CodeSearchModal';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 import LocationCodeModal, { LocationType, LocationItem } from '@/components/popup/LocationCodeModal';
 
 // 운임정보 데이터 타입
@@ -91,8 +89,6 @@ export default function QuoteRequestPage() {
   // 선택된 행 관리
   const [selectedRateRows, setSelectedRateRows] = useState<number[]>([]);
   const [selectedTransportRows, setSelectedTransportRows] = useState<number[]>([]);
-  const { sortConfig: rateSortConfig, handleSort: handleRateSort, sortData: sortRateData } = useSorting<RateInfo>();
-  const { sortConfig: transportSortConfig, handleSort: handleTransportSort, sortData: sortTransportData } = useSorting<TransportRate>();
 
   // 섹션 접힘 상태
   const [expandedSections, setExpandedSections] = useState({
@@ -204,20 +200,15 @@ export default function QuoteRequestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="견적요청 등록" subtitle="물류견적관리  견적요청 등록/조회 > 견적요청 등록(화주)" />
+        <PageLayout title="견적요청 등록" subtitle="물류견적관리  견적요청 등록/조회 > 견적요청 등록(화주)" showCloseButton={false} >
 
         <main className="p-6">
           {/* 상단 버튼 영역 */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-            </div>
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button
                 onClick={handleRegister}
-                className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] transition-colors"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] transition-colors"
               >
                 견적등록
               </button>
@@ -232,7 +223,7 @@ export default function QuoteRequestPage() {
               </Link>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#243354] transition-colors"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] transition-colors"
               >
                 저장
               </button>
@@ -265,7 +256,7 @@ export default function QuoteRequestPage() {
                     type="date"
                     value={formData.registrationDate}
                     onChange={(e) => setFormData({ ...formData, registrationDate: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                   />
                 </div>
                 {/* 입력사원 */}
@@ -276,12 +267,12 @@ export default function QuoteRequestPage() {
                       type="text"
                       value={formData.inputEmployee}
                       onChange={(e) => setFormData({ ...formData, inputEmployee: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="사원명"
                     />
                     <button
                       onClick={() => handleCodeSearch('inputEmployee', 'customer')}
-                      className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                      className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -295,7 +286,7 @@ export default function QuoteRequestPage() {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                   >
                     <option value="sea">해상</option>
                     <option value="air">항공</option>
@@ -307,7 +298,7 @@ export default function QuoteRequestPage() {
                   <select
                     value={formData.quoteStatus}
                     onChange={(e) => setFormData({ ...formData, quoteStatus: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                   >
                     <option value="draft">임시저장</option>
                     <option value="requested">요청</option>
@@ -324,19 +315,19 @@ export default function QuoteRequestPage() {
                       type="text"
                       value={formData.originCode}
                       onChange={(e) => setFormData({ ...formData, originCode: e.target.value })}
-                      className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="코드"
                     />
                     <input
                       type="text"
                       value={formData.origin}
                       onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="출발지명"
                     />
                     <button
                       onClick={() => handleLocationSearch('origin')}
-                      className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                      className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
                       title="공항/항구 코드 팝업"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,19 +344,19 @@ export default function QuoteRequestPage() {
                       type="text"
                       value={formData.destinationCode}
                       onChange={(e) => setFormData({ ...formData, destinationCode: e.target.value })}
-                      className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="코드"
                     />
                     <input
                       type="text"
                       value={formData.destination}
                       onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="도착지명"
                     />
                     <button
                       onClick={() => handleLocationSearch('destination')}
-                      className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                      className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
                       title="공항/항구 코드 팝업"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +371,7 @@ export default function QuoteRequestPage() {
                   <select
                     value={formData.tradeTerms}
                     onChange={(e) => setFormData({ ...formData, tradeTerms: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                   >
                     <option value="CIF">CIF (Cost, Insurance and Freight)</option>
                     <option value="CFR">CFR (Cost and Freight)</option>
@@ -397,7 +388,7 @@ export default function QuoteRequestPage() {
                     type="date"
                     value={formData.shippingDate}
                     onChange={(e) => setFormData({ ...formData, shippingDate: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                   />
                 </div>
               </div>
@@ -431,19 +422,19 @@ export default function QuoteRequestPage() {
                       type="text"
                       value={formData.tradingPartnerCode}
                       onChange={(e) => setFormData({ ...formData, tradingPartnerCode: e.target.value })}
-                      className="w-32 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="w-32 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="거래처코드"
                     />
                     <input
                       type="text"
                       value={formData.tradingPartner}
                       onChange={(e) => setFormData({ ...formData, tradingPartner: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                       placeholder="거래처명"
                     />
                     <button
                       onClick={() => handleCodeSearch('tradingPartner', 'customer')}
-                      className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
+                      className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]"
                       title="거래처 코드 팝업"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -459,7 +450,7 @@ export default function QuoteRequestPage() {
                     <input
                       type="file"
                       onChange={(e) => setFormData({ ...formData, attachment: e.target.files?.[0] || null })}
-                      className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838] file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-[var(--surface-200)] file:text-[var(--foreground)]"
+                      className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)] file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-[var(--surface-200)] file:text-[var(--foreground)]"
                     />
                   </div>
                 </div>
@@ -469,7 +460,7 @@ export default function QuoteRequestPage() {
                   <textarea
                     value={formData.cargoDescription}
                     onChange={(e) => setFormData({ ...formData, cargoDescription: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838] resize-none"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)] resize-none"
                     rows={3}
                     placeholder="화물에 대한 상세 설명을 입력하세요"
                   />
@@ -481,7 +472,7 @@ export default function QuoteRequestPage() {
                     type="number"
                     value={formData.weight}
                     onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                     placeholder="0.00"
                   />
                 </div>
@@ -491,7 +482,7 @@ export default function QuoteRequestPage() {
                     type="number"
                     value={formData.volume}
                     onChange={(e) => setFormData({ ...formData, volume: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#E8A838]"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
                     placeholder="0.00"
                   />
                 </div>
@@ -543,10 +534,10 @@ export default function QuoteRequestPage() {
                 </div>
                 {/* 운임정보 그리드 */}
                 <div className="overflow-x-auto border border-[var(--border)] rounded-lg">
-                  <table className="w-full">
-                    <thead className="bg-[var(--surface-100)]">
+                  <table className="table">
+                    <thead>
                       <tr>
-                        <th className="w-10 p-3 text-center">
+                        <th className="w-10 text-center">
                           <input
                             type="checkbox"
                             checked={selectedRateRows.length === rateInfoList.length && rateInfoList.length > 0}
@@ -560,17 +551,17 @@ export default function QuoteRequestPage() {
                             className="rounded"
                           />
                         </th>
-                        <SortableHeader<RateInfo> columnKey="rateType" label={<>운임<br/>유형</>} sortConfig={rateSortConfig} onSort={handleRateSort} />
-                        <SortableHeader<RateInfo> columnKey="rateCode" label={<>운임<br/>코드</>} sortConfig={rateSortConfig} onSort={handleRateSort} />
-                        <SortableHeader<RateInfo> columnKey="currency" label="통화" sortConfig={rateSortConfig} onSort={handleRateSort} />
-                        <SortableHeader<RateInfo> columnKey="baseRate" label={<>기본<br/>운임</>} sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
-                        <SortableHeader<RateInfo> columnKey="surcharge" label="할증료" sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
-                        <SortableHeader<RateInfo> columnKey="total" label="합계" sortConfig={rateSortConfig} onSort={handleRateSort} align="right" />
-                        <SortableHeader<RateInfo> columnKey="remark" label="비고" sortConfig={rateSortConfig} onSort={handleRateSort} />
+                        <th className="text-center">운임유형</th>
+                        <th className="text-center">운임코드</th>
+                        <th className="text-center">통화</th>
+                        <th className="text-center">기본운임</th>
+                        <th className="text-center">할증료</th>
+                        <th className="text-center">합계</th>
+                        <th className="text-center">비고</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sortRateData(rateInfoList).map((row) => (
+                      {rateInfoList.map((row) => (
                         <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                           <td className="p-3 text-center">
                             <input
@@ -586,7 +577,7 @@ export default function QuoteRequestPage() {
                               className="rounded"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <select
                               value={row.rateType}
                               onChange={(e) => {
@@ -594,7 +585,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, rateType: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             >
                               <option value="">선택</option>
                               <option value="해상운임">해상운임</option>
@@ -605,7 +596,7 @@ export default function QuoteRequestPage() {
                               <option value="기타">기타</option>
                             </select>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <div className="flex gap-1">
                               <input
                                 type="text"
@@ -615,7 +606,7 @@ export default function QuoteRequestPage() {
                                     r.id === row.id ? { ...r, rateCode: e.target.value } : r
                                   ));
                                 }}
-                                className="flex-1 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                                className="flex-1 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                                 placeholder="운임코드"
                               />
                               <button className="px-2 py-1 bg-[var(--surface-100)] border border-[var(--border)] rounded hover:bg-[var(--surface-200)]">
@@ -625,7 +616,7 @@ export default function QuoteRequestPage() {
                               </button>
                             </div>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <select
                               value={row.currency}
                               onChange={(e) => {
@@ -633,7 +624,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, currency: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             >
                               <option value="USD">USD</option>
                               <option value="KRW">KRW</option>
@@ -642,7 +633,7 @@ export default function QuoteRequestPage() {
                               <option value="CNY">CNY</option>
                             </select>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="number"
                               value={row.baseRate}
@@ -652,10 +643,10 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, baseRate, total: baseRate + r.surcharge } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-right"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="number"
                               value={row.surcharge}
@@ -665,18 +656,18 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, surcharge, total: r.baseRate + surcharge } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-right"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="number"
                               value={row.total}
                               readOnly
-                              className="w-full px-2 py-1 bg-[var(--surface-100)] border border-[var(--border)] rounded text-sm text-right font-semibold"
+                              className="w-full px-2 py-1 bg-[var(--surface-100)] border border-[var(--border)] rounded text-sm text-center font-semibold"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="text"
                               value={row.remark}
@@ -685,7 +676,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, remark: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                               placeholder="비고"
                             />
                           </td>
@@ -737,10 +728,10 @@ export default function QuoteRequestPage() {
                 </div>
                 {/* 운송요율 그리드 */}
                 <div className="overflow-x-auto border border-[var(--border)] rounded-lg">
-                  <table className="w-full">
-                    <thead className="bg-[var(--surface-100)]">
+                  <table className="table">
+                    <thead>
                       <tr>
-                        <th className="w-10 p-3 text-center">
+                        <th className="w-10 text-center">
                           <input
                             type="checkbox"
                             checked={selectedTransportRows.length === transportRateList.length && transportRateList.length > 0}
@@ -754,17 +745,17 @@ export default function QuoteRequestPage() {
                             className="rounded"
                           />
                         </th>
-                        <SortableHeader<TransportRate> columnKey="rateCode" label="운임코드" sortConfig={transportSortConfig} onSort={handleTransportSort} />
-                        <SortableHeader<TransportRate> columnKey="origin" label="출발지" sortConfig={transportSortConfig} onSort={handleTransportSort} />
-                        <SortableHeader<TransportRate> columnKey="destination" label="도착지" sortConfig={transportSortConfig} onSort={handleTransportSort} />
-                        <SortableHeader<TransportRate> columnKey="transportType" label={<>운송<br/>구분</>} sortConfig={transportSortConfig} onSort={handleTransportSort} />
-                        <SortableHeader<TransportRate> columnKey="vehicleType" label={<>차량<br/>구분</>} sortConfig={transportSortConfig} onSort={handleTransportSort} />
-                        <SortableHeader<TransportRate> columnKey="amount" label="금액" sortConfig={transportSortConfig} onSort={handleTransportSort} align="right" />
-                        <SortableHeader<TransportRate> columnKey="contact" label="연락처" sortConfig={transportSortConfig} onSort={handleTransportSort} />
+                        <th className="text-center">운임코드</th>
+                        <th className="text-center">출발지</th>
+                        <th className="text-center">도착지</th>
+                        <th className="text-center">운송구분</th>
+                        <th className="text-center">차량구분</th>
+                        <th className="text-center">금액</th>
+                        <th className="text-center">연락처</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sortTransportData(transportRateList).map((row) => (
+                      {transportRateList.map((row) => (
                         <tr key={row.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)]">
                           <td className="p-3 text-center">
                             <input
@@ -780,7 +771,7 @@ export default function QuoteRequestPage() {
                               className="rounded"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="text"
                               value={row.rateCode}
@@ -789,11 +780,11 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, rateCode: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                               placeholder="운임코드"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="text"
                               value={row.origin}
@@ -802,11 +793,11 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, origin: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                               placeholder="출발지"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="text"
                               value={row.destination}
@@ -815,11 +806,11 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, destination: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                               placeholder="도착지"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <select
                               value={row.transportType}
                               onChange={(e) => {
@@ -827,7 +818,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, transportType: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             >
                               <option value="">선택</option>
                               <option value="내륙운송">내륙운송</option>
@@ -836,7 +827,7 @@ export default function QuoteRequestPage() {
                               <option value="셔틀">셔틀</option>
                             </select>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <select
                               value={row.vehicleType}
                               onChange={(e) => {
@@ -844,7 +835,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, vehicleType: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             >
                               <option value="">선택</option>
                               <option value="1톤트럭">1톤트럭</option>
@@ -855,7 +846,7 @@ export default function QuoteRequestPage() {
                               <option value="컨테이너">컨테이너</option>
                             </select>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="number"
                               value={row.amount}
@@ -864,10 +855,10 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, amount: parseFloat(e.target.value) || 0 } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-right"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                             />
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 text-center">
                             <input
                               type="text"
                               value={row.contact}
@@ -876,7 +867,7 @@ export default function QuoteRequestPage() {
                                   r.id === row.id ? { ...r, contact: e.target.value } : r
                                 ));
                               }}
-                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm"
+                              className="w-full px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                               placeholder="연락처"
                             />
                           </td>
@@ -889,8 +880,6 @@ export default function QuoteRequestPage() {
             )}
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
@@ -913,6 +902,6 @@ export default function QuoteRequestPage() {
         onSelect={handleLocationSelect}
         type={locationSearchType}
       />
-    </div>
+    </PageLayout>
   );
 }

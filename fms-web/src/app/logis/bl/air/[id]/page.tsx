@@ -2,8 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 
@@ -364,7 +363,7 @@ export default function AWBDetailPage({ params }: PageProps) {
   // 읽기 전용 입력 필드
   const ReadOnlyField = ({ label, value, required = false }: { label: string; value: string | number; required?: boolean }) => (
     <div>
-      <label className="block text-sm font-medium mb-1 text-[var(--muted)]">
+      <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm min-h-[38px] flex items-center">
@@ -376,7 +375,7 @@ export default function AWBDetailPage({ params }: PageProps) {
   // 읽기 전용 텍스트 영역
   const ReadOnlyTextArea = ({ label, value, rows = 3 }: { label: string; value: string; rows?: number }) => (
     <div>
-      <label className="block text-sm font-medium mb-1 text-[var(--muted)]">{label}</label>
+      <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">{label}</label>
       <div
         className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm whitespace-pre-wrap"
         style={{ minHeight: `${rows * 24 + 16}px` }}
@@ -393,7 +392,7 @@ export default function AWBDetailPage({ params }: PageProps) {
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <h3 className="font-bold">Main Information</h3>
@@ -407,13 +406,13 @@ export default function AWBDetailPage({ params }: PageProps) {
             <ReadOnlyField label="BOOKING NO" value={mainData.bookingNo} />
             <ReadOnlyField label="통화종류" value={mainData.currencyCode} />
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">WT/VAL</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">WT/VAL</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {mainData.wtVal === 'P' ? 'Prepaid' : mainData.wtVal === 'C' ? 'Collect' : '-'}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">OTHER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">OTHER</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {mainData.otherChgs === 'P' ? 'Prepaid' : mainData.otherChgs === 'C' ? 'Collect' : '-'}
               </div>
@@ -428,7 +427,7 @@ export default function AWBDetailPage({ params }: PageProps) {
               <ReadOnlyField label="HAWB NO" value={mainData.hawbNo} required />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ACCOUNT INFORMATION</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ACCOUNT INFORMATION</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {mainData.wtVal === 'P' ? 'Freight Prepaid' : 'Freight Collect'}
               </div>
@@ -439,7 +438,7 @@ export default function AWBDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-3 gap-4">
             {/* SHIPPER */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">SHIPPER</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">SHIPPER</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm mb-2">
                 {mainData.shipperCode ? `[${mainData.shipperCode}] ` : ''}{mainData.shipperName || '-'}
               </div>
@@ -447,7 +446,7 @@ export default function AWBDetailPage({ params }: PageProps) {
             </div>
             {/* CONSIGNEE */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">CONSIGNEE</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">CONSIGNEE</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm mb-2">
                 {mainData.consigneeCode ? `[${mainData.consigneeCode}] ` : ''}{mainData.consigneeName || '-'}
               </div>
@@ -455,7 +454,7 @@ export default function AWBDetailPage({ params }: PageProps) {
             </div>
             {/* NOTIFY */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">NOTIFY PARTY</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">NOTIFY PARTY</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm mb-2">
                 {mainData.notifyCode ? `[${mainData.notifyCode}] ` : ''}{mainData.notifyName || '-'}
               </div>
@@ -468,7 +467,7 @@ export default function AWBDetailPage({ params }: PageProps) {
       {/* Flight Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
           <h3 className="font-bold">Flight Information</h3>
@@ -494,24 +493,24 @@ export default function AWBDetailPage({ params }: PageProps) {
       {/* Cargo Information */}
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
           <h3 className="font-bold">Cargo Information</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="p-2 text-center text-xs font-semibold">No.</th>
-                <th className="p-2 text-center text-xs font-semibold">No. of pieces RCP</th>
-                <th className="p-2 text-center text-xs font-semibold">GrossWeight</th>
-                <th className="p-2 text-center text-xs font-semibold">Kg/lb</th>
-                <th className="p-2 text-center text-xs font-semibold">Rate Class</th>
-                <th className="p-2 text-center text-xs font-semibold">Chargeable Weight</th>
-                <th className="p-2 text-center text-xs font-semibold">Rate/Charge</th>
-                <th className="p-2 text-center text-xs font-semibold">Total</th>
-                <th className="p-2 text-center text-xs font-semibold">As Arranged</th>
+                <th className="text-center">No.</th>
+                <th className="text-center">No. of pieces RCP</th>
+                <th className="text-center">GrossWeight</th>
+                <th className="text-center">Kg/lb</th>
+                <th className="text-center">Rate Class</th>
+                <th className="text-center">Chargeable Weight</th>
+                <th className="text-center">Rate/Charge</th>
+                <th className="text-center">Total</th>
+                <th className="text-center">As Arranged</th>
               </tr>
             </thead>
             <tbody>
@@ -524,13 +523,13 @@ export default function AWBDetailPage({ params }: PageProps) {
               ) : cargoData.cargoItems.map((item, index) => (
                 <tr key={item.id} className="border-t border-[var(--border)]">
                   <td className="p-2 text-center text-sm">{index + 1}</td>
-                  <td className="p-2 text-right text-sm">{item.piecesRcp.toLocaleString()}</td>
-                  <td className="p-2 text-right text-sm">{item.grossWeight.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm">{item.piecesRcp.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm">{item.grossWeight.toLocaleString()}</td>
                   <td className="p-2 text-center text-sm">{item.weightUnit === 'K' ? 'Kg' : 'lb'}</td>
                   <td className="p-2 text-center text-sm">{item.rateClass}</td>
-                  <td className="p-2 text-right text-sm">{item.chargeableWeight.toLocaleString()}</td>
-                  <td className="p-2 text-right text-sm">{item.rateCharge.toFixed(2)}</td>
-                  <td className="p-2 text-right text-sm font-medium text-[#E8A838]">{item.total.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm">{item.chargeableWeight.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm">{item.rateCharge.toFixed(2)}</td>
+                  <td className="p-2 text-center text-sm font-medium text-[#E8A838]">{item.total.toLocaleString()}</td>
                   <td className="p-2 text-center text-sm">
                     {item.asArranged ? (
                       <span className="text-green-400">Yes</span>
@@ -551,16 +550,16 @@ export default function AWBDetailPage({ params }: PageProps) {
           <h3 className="font-bold">Other Charges</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="p-2 text-center text-xs font-semibold">No.</th>
-                <th className="p-2 text-left text-xs font-semibold">Codes</th>
-                <th className="p-2 text-center text-xs font-semibold">CUR</th>
-                <th className="p-2 text-right text-xs font-semibold">Rate</th>
-                <th className="p-2 text-right text-xs font-semibold">Amount</th>
-                <th className="p-2 text-center text-xs font-semibold">P/C</th>
-                <th className="p-2 text-center text-xs font-semibold">A/C</th>
+                <th className="text-center">No.</th>
+                <th className="text-center">Codes</th>
+                <th className="text-center">CUR</th>
+                <th className="text-center">Rate</th>
+                <th className="text-center">Amount</th>
+                <th className="text-center">P/C</th>
+                <th className="text-center">A/C</th>
               </tr>
             </thead>
             <tbody>
@@ -573,10 +572,10 @@ export default function AWBDetailPage({ params }: PageProps) {
               ) : cargoData.otherCharges.map((charge, index) => (
                 <tr key={charge.id} className="border-t border-[var(--border)]">
                   <td className="p-2 text-center text-sm">{index + 1}</td>
-                  <td className="p-2 text-sm">{charge.codes}</td>
+                  <td className="p-2 text-center text-sm">{charge.codes}</td>
                   <td className="p-2 text-center text-sm">{charge.currency}</td>
-                  <td className="p-2 text-right text-sm">{charge.rate.toLocaleString()}</td>
-                  <td className="p-2 text-right text-sm font-medium text-[#E8A838]">{charge.amount.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm">{charge.rate.toLocaleString()}</td>
+                  <td className="p-2 text-center text-sm font-medium text-[#E8A838]">{charge.amount.toLocaleString()}</td>
                   <td className="p-2 text-center text-sm">{charge.pc}</td>
                   <td className="p-2 text-center text-sm">{charge.ac}</td>
                 </tr>
@@ -597,7 +596,7 @@ export default function AWBDetailPage({ params }: PageProps) {
             <ReadOnlyTextArea label="Nature and Quantity of Goods" value={cargoData.natureOfGoods} rows={4} />
             {/* Dimensions */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Dimensions</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Dimensions</label>
               <div className="p-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
@@ -614,21 +613,21 @@ export default function AWBDetailPage({ params }: PageProps) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr>
-                          <th className="p-1 text-left">W(cm)</th>
-                          <th className="p-1 text-left">L(cm)</th>
-                          <th className="p-1 text-left">H(cm)</th>
-                          <th className="p-1 text-right">PCS</th>
-                          <th className="p-1 text-right">Vol</th>
+                          <th className="p-1 text-center">W(cm)</th>
+                          <th className="p-1 text-center">L(cm)</th>
+                          <th className="p-1 text-center">H(cm)</th>
+                          <th className="p-1 text-center">PCS</th>
+                          <th className="p-1 text-center">Vol</th>
                         </tr>
                       </thead>
                       <tbody>
                         {cargoData.dimensions.map((dim) => (
                           <tr key={dim.id}>
-                            <td className="p-1">{dim.width}</td>
-                            <td className="p-1">{dim.length}</td>
-                            <td className="p-1">{dim.height}</td>
-                            <td className="p-1 text-right">{dim.pcs}</td>
-                            <td className="p-1 text-right">{dim.volume.toFixed(3)}</td>
+                            <td className="p-1 text-center">{dim.width}</td>
+                            <td className="p-1 text-center">{dim.length}</td>
+                            <td className="p-1 text-center">{dim.height}</td>
+                            <td className="p-1 text-center">{dim.pcs}</td>
+                            <td className="p-1 text-center">{dim.volume.toFixed(3)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -656,7 +655,7 @@ export default function AWBDetailPage({ params }: PageProps) {
     <div className="space-y-6">
       <div className="card">
         <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-          <svg className="w-5 h-5 text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="font-bold">Other Information</h3>
@@ -664,25 +663,25 @@ export default function AWBDetailPage({ params }: PageProps) {
         <div className="p-4">
           <div className="grid grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Agent</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Agent</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {otherData.agentCode ? `[${otherData.agentCode}] ` : ''}{otherData.agentName || '-'}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Sub Agent</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Sub Agent</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {otherData.subAgentCode ? `[${otherData.subAgentCode}] ` : ''}{otherData.subAgentName || '-'}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">Partner</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Partner</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {otherData.partnerCode ? `[${otherData.partnerCode}] ` : ''}{otherData.partnerName || '-'}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사</label>
+              <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사</label>
               <div className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-sm">
                 {otherData.airlineCode ? `[${otherData.airlineCode}] ` : ''}{otherData.airlineName || '-'}
               </div>
@@ -715,18 +714,15 @@ export default function AWBDetailPage({ params }: PageProps) {
           <p className="text-[var(--muted)]">Loading...</p>
         </div>
       </div>
-    );
-  }
+  );
+}
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="AWB 상세조회 (항공)"
-          subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 상세조회"
-         
-        />
+    <PageLayout
+      title="AWB 상세조회 (항공)"
+      subtitle="HOME > 선적관리 > B/L 관리(항공) > AWB 상세조회"
+      showCloseButton={false}
+    >
         <main className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-4">
@@ -741,12 +737,12 @@ export default function AWBDetailPage({ params }: PageProps) {
             <div className="flex gap-2">
               <button
                 onClick={handleEdit}
-                className="px-4 py-2 bg-[#E8A838] text-white rounded-lg hover:bg-[#d99a2f] font-medium"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
               >
                 수정
               </button>
               <button
-                className="px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] font-medium"
                 onClick={() => alert('AWB 출력 기능')}
               >
                 AWB 출력
@@ -755,15 +751,15 @@ export default function AWBDetailPage({ params }: PageProps) {
           </div>
 
           {/* TAB 영역 */}
-          <div className="flex gap-1 mb-4">
+          <div className="flex gap-1 border-b border-[var(--border)] mb-6">
             {(['MAIN', 'CARGO', 'OTHER'] as TabType[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2 rounded-t-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
                   activeTab === tab
-                    ? 'bg-[#E8A838] text-white'
-                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)]'
+                    ? 'bg-[#2563EB] text-white'
+                    : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
                 }`}
               >
                 {tab}
@@ -774,13 +770,11 @@ export default function AWBDetailPage({ params }: PageProps) {
           {/* TAB 컨텐츠 */}
           {renderTabContent()}
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
@@ -160,23 +159,20 @@ export default function BookingAirDetailPage() {
   const statusInfo = statusConfig[displayData.status] || { label: displayData.status, color: 'bg-gray-500' };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="부킹 상세조회 (항공)" subtitle="Logis > Booking > 부킹 상세조회 (항공)" />
+        <PageLayout title="부킹 상세조회 (항공)" subtitle="Logis > Booking > 부킹 상세조회 (항공)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={() => router.push('/logis/booking/air')} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">목록</button>
+              <button onClick={() => router.push('/logis/booking/air')} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">목록</button>
               {isEditing ? (
                 <>
-                  <button onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">취소</button>
-                  <button onClick={handleSave} className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>저장</button>
+                  <button onClick={handleCancel} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">취소</button>
+                  <button onClick={handleSave} className="px-6 py-2 font-semibold bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">저장</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleEdit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">수정</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
+                  <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">수정</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
                 </>
               )}
             </div>
@@ -188,13 +184,13 @@ export default function BookingAirDetailPage() {
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">부킹 번호</label>
-                  <input type="text" value={displayData.bookingNo || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">부킹 번호</label>
+                  <input type="text" value={displayData.bookingNo || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
                   {isEditing ? (
-                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
+                    <select value={displayData.status || ''} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
                       <option value="DRAFT">임시저장</option>
                       <option value="REQUESTED">요청</option>
                       <option value="CONFIRMED">확정</option>
@@ -207,20 +203,20 @@ export default function BookingAirDetailPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사 부킹번호</label>
-                  <input type="text" value={displayData.carrierBookingNo || ''} disabled={!isEditing} onChange={e => handleChange('carrierBookingNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사 부킹번호</label>
+                  <input type="text" value={displayData.carrierBookingNo || ''} disabled={!isEditing} onChange={e => handleChange('carrierBookingNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">항공사</label>
-                  <input type="text" value={displayData.carrierName || ''} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사</label>
+                  <input type="text" value={displayData.carrierName || ''} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">편명</label>
-                  <input type="text" value={displayData.flightNo || ''} disabled={!isEditing} onChange={e => handleChange('flightNo', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">편명</label>
+                  <input type="text" value={displayData.flightNo || ''} disabled={!isEditing} onChange={e => handleChange('flightNo', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">운항일</label>
-                  <input type="date" value={displayData.flightDate || ''} disabled={!isEditing} onChange={e => handleChange('flightDate', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">운항일</label>
+                  <input type="date" value={displayData.flightDate || ''} disabled={!isEditing} onChange={e => handleChange('flightDate', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
               </div>
             </div>
@@ -230,20 +226,20 @@ export default function BookingAirDetailPage() {
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">출발공항</label>
-                  <input type="text" value={displayData.origin || ''} disabled={!isEditing} onChange={e => handleChange('origin', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발공항</label>
+                  <input type="text" value={displayData.origin || ''} disabled={!isEditing} onChange={e => handleChange('origin', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">도착공항</label>
-                  <input type="text" value={displayData.destination || ''} disabled={!isEditing} onChange={e => handleChange('destination', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착공항</label>
+                  <input type="text" value={displayData.destination || ''} disabled={!isEditing} onChange={e => handleChange('destination', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD (출발예정)</label>
-                  <input type="datetime-local" value={displayData.etd?.replace(' ', 'T') || ''} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value.replace('T', ' '))} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD (출발예정)</label>
+                  <input type="datetime-local" value={displayData.etd?.replace(' ', 'T') || ''} disabled={!isEditing} onChange={e => handleChange('etd', e.target.value.replace('T', ' '))} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA (도착예정)</label>
-                  <input type="datetime-local" value={displayData.eta?.replace(' ', 'T') || ''} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value.replace('T', ' '))} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA (도착예정)</label>
+                  <input type="datetime-local" value={displayData.eta?.replace(' ', 'T') || ''} disabled={!isEditing} onChange={e => handleChange('eta', e.target.value.replace('T', ' '))} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
               </div>
             </div>
@@ -253,16 +249,16 @@ export default function BookingAirDetailPage() {
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">화물 정보</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">품목</label>
-                  <input type="text" value={displayData.commodityDesc || ''} disabled={!isEditing} onChange={e => handleChange('commodityDesc', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">품목</label>
+                  <input type="text" value={displayData.commodityDesc || ''} disabled={!isEditing} onChange={e => handleChange('commodityDesc', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장 수량</label>
-                  <input type="number" value={displayData.pkgQty || 0} disabled={!isEditing} onChange={e => handleChange('pkgQty', parseInt(e.target.value) || 0)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장 수량</label>
+                  <input type="number" value={displayData.pkgQty || 0} disabled={!isEditing} onChange={e => handleChange('pkgQty', parseInt(e.target.value) || 0)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-[var(--muted)]">포장 단위</label>
-                  <input type="text" value={displayData.pkgType || ''} disabled={!isEditing} onChange={e => handleChange('pkgType', e.target.value)} className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">포장 단위</label>
+                  <input type="text" value={displayData.pkgType || ''} disabled={!isEditing} onChange={e => handleChange('pkgType', e.target.value)} className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`} />
                 </div>
               </div>
             </div>
@@ -290,7 +286,7 @@ export default function BookingAirDetailPage() {
                 <div className="text-center p-3 bg-[var(--surface-50)] rounded-lg">
                   <div className="text-sm text-[var(--muted)]">용적 (CBM)</div>
                   {isEditing ? (
-                    <input type="number" step="0.001" value={displayData.volume || 0} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className="w-full text-center text-lg font-bold bg-[var(--surface-50)] border border-[var(--border)] rounded mt-1" />
+                    <input type="number" step="0.01" value={displayData.volume || 0} onChange={e => handleChange('volume', parseFloat(e.target.value) || 0)} className="w-full text-center text-lg font-bold bg-[var(--surface-50)] border border-[var(--border)] rounded mt-1" />
                   ) : (
                     <div className="text-lg font-bold">{(displayData.volume || 0).toFixed(2)}</div>
                   )}
@@ -307,7 +303,7 @@ export default function BookingAirDetailPage() {
               disabled={!isEditing}
               onChange={e => handleChange('remark', e.target.value)}
               rows={3}
-              className={`w-full px-3 py-2 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`}
+              className={`w-full h-[38px] px-3 border border-[var(--border)] rounded-lg resize-none ${isEditing ? 'bg-[var(--surface-50)]' : 'bg-[var(--surface-100)] text-[var(--muted)]'}`}
             />
           </div>
 
@@ -315,13 +311,11 @@ export default function BookingAirDetailPage() {
             <span>등록일: {data.createdAt}</span>
           </div>
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

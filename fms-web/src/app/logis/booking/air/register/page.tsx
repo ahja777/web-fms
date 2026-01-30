@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import EmailModal from '@/components/EmailModal';
@@ -191,7 +190,6 @@ export default function BookingAirRegisterPage() {
 
   const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
   };
 
   const handleCargoChange = (index: number, field: keyof CargoItem, value: string | number) => {
@@ -410,23 +408,107 @@ export default function BookingAirRegisterPage() {
     router.push(LIST_PATHS.BOOKING_AIR);
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const etdDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const etaDate = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    setFormData({
+      ...initialFormData,
+      bookingDate: today,
+      bookingType: 'EXPORT',
+      serviceType: 'AIRPORT_TO_AIRPORT',
+      incoterms: 'FOB',
+      shipperCode: 'SH001',
+      shipperName: '삼성전자 주식회사',
+      shipperAddress: '경기도 수원시 영통구 삼성로 129',
+      shipperContact: '김철수',
+      shipperTel: '031-200-1234',
+      shipperEmail: 'shipper@samsung.com',
+      consigneeCode: 'CN001',
+      consigneeName: 'Samsung Electronics America',
+      consigneeAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
+      consigneeContact: 'John Smith',
+      consigneeTel: '+1-201-229-4000',
+      consigneeEmail: 'consignee@samsung.com',
+      notifyPartyCode: 'NP001',
+      notifyPartyName: 'Same as Consignee',
+      notifyPartyAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
+      airline: 'KOREAN AIR',
+      flightNo: 'KE081',
+      origin: 'ICN',
+      destination: 'JFK',
+      etd: etdDate,
+      eta: etaDate,
+      transitPort: '',
+      transitTime: '14시간',
+      mawbNo: '180-12345678',
+      hawbNo: 'HAWB-2024-001',
+      totalPieces: 50,
+      totalGrossWeight: 500,
+      totalChargeableWeight: 600,
+      totalVolume: 3.6,
+      specialHandling: 'FRAGILE',
+      dangerousGoods: false,
+      dgClass: '',
+      unNumber: '',
+      remarks: '테스트 데이터 - 항공 부킹 등록',
+    });
+
+    setCargoItems([
+      {
+        id: '1',
+        pieces: 30,
+        packageType: 'CARTON',
+        grossWeight: 300,
+        chargeableWeight: 350,
+        length: 60,
+        width: 40,
+        height: 50,
+        volume: 1.2,
+        commodity: '반도체 부품',
+        hsCode: '8542.31.0000',
+      },
+      {
+        id: '2',
+        pieces: 20,
+        packageType: 'PALLET',
+        grossWeight: 200,
+        chargeableWeight: 250,
+        length: 120,
+        width: 100,
+        height: 100,
+        volume: 2.4,
+        commodity: '전자 디스플레이',
+        hsCode: '8528.52.0000',
+      },
+    ]);
+
+    setHasUnsavedChanges(true);
+    alert('테스트 데이터가 입력되었습니다.');
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="선적부킹 등록 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공) > 예약등록" onClose={handleCloseClick} />
-        <main ref={formRef} className="p-6">
+      <Header title="선적부킹 등록 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공) > 예약등록" showCloseButton={false} />
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                테스트데이터
+              </button>
               <button
                 onClick={handleNew}
                 disabled={isNewMode}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                  isNewMode
-                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                className="px-4 py-2 rounded-lg flex items-center gap-2 bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -435,7 +517,7 @@ export default function BookingAirRegisterPage() {
               </button>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -445,7 +527,7 @@ export default function BookingAirRegisterPage() {
               {formData.bookingNo && (
                 <button
                   onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -455,13 +537,13 @@ export default function BookingAirRegisterPage() {
               )}
               <button
                 onClick={() => setShowScheduleModal(true)}
-                className="px-4 py-2 bg-[#1E40AF] text-white rounded-lg hover:bg-[#1E3A8A]"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 스케줄조회
               </button>
               <button
                 onClick={() => setShowEmailModal(true)}
-                className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -470,7 +552,7 @@ export default function BookingAirRegisterPage() {
               </button>
               <button
                 onClick={handleGoList}
-                className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -480,7 +562,7 @@ export default function BookingAirRegisterPage() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -501,7 +583,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.bookingNo || '자동생성'}
                   disabled
-                  className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
                 />
               </div>
               <div>
@@ -510,7 +592,7 @@ export default function BookingAirRegisterPage() {
                   type="date"
                   value={formData.bookingDate}
                   onChange={(e) => handleInputChange('bookingDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -518,7 +600,7 @@ export default function BookingAirRegisterPage() {
                 <select
                   value={formData.bookingType}
                   onChange={(e) => handleInputChange('bookingType', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="EXPORT">수출</option>
                   <option value="IMPORT">수입</option>
@@ -530,7 +612,7 @@ export default function BookingAirRegisterPage() {
                 <select
                   value={formData.serviceType}
                   onChange={(e) => handleInputChange('serviceType', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="AIRPORT_TO_AIRPORT">Airport to Airport</option>
                   <option value="AIRPORT_TO_DOOR">Airport to Door</option>
@@ -543,7 +625,7 @@ export default function BookingAirRegisterPage() {
                 <select
                   value={formData.incoterms}
                   onChange={(e) => handleInputChange('incoterms', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="EXW">EXW</option>
                   <option value="FCA">FCA</option>
@@ -573,7 +655,7 @@ export default function BookingAirRegisterPage() {
                         type="text"
                         value={formData.shipperCode}
                         onChange={(e) => handleInputChange('shipperCode', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="업체코드"
                       />
                       <button
@@ -591,7 +673,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.shipperName}
                     onChange={(e) => handleInputChange('shipperName', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="화주명"
                   />
                 </div>
@@ -601,7 +683,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.shipperAddress}
                     onChange={(e) => handleInputChange('shipperAddress', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="주소"
                   />
                 </div>
@@ -612,7 +694,7 @@ export default function BookingAirRegisterPage() {
                       type="text"
                       value={formData.shipperContact}
                       onChange={(e) => handleInputChange('shipperContact', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="담당자명"
                     />
                   </div>
@@ -622,7 +704,7 @@ export default function BookingAirRegisterPage() {
                       type="text"
                       value={formData.shipperTel}
                       onChange={(e) => handleInputChange('shipperTel', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="000-0000-0000"
                     />
                   </div>
@@ -633,7 +715,7 @@ export default function BookingAirRegisterPage() {
                     type="email"
                     value={formData.shipperEmail}
                     onChange={(e) => handleInputChange('shipperEmail', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="email@example.com"
                   />
                 </div>
@@ -654,7 +736,7 @@ export default function BookingAirRegisterPage() {
                         type="text"
                         value={formData.consigneeCode}
                         onChange={(e) => handleInputChange('consigneeCode', e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                        className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                         placeholder="업체코드"
                       />
                       <button
@@ -672,7 +754,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.consigneeName}
                     onChange={(e) => handleInputChange('consigneeName', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="수하인명"
                   />
                 </div>
@@ -682,7 +764,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.consigneeAddress}
                     onChange={(e) => handleInputChange('consigneeAddress', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="주소"
                   />
                 </div>
@@ -693,7 +775,7 @@ export default function BookingAirRegisterPage() {
                       type="text"
                       value={formData.consigneeContact}
                       onChange={(e) => handleInputChange('consigneeContact', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="담당자명"
                     />
                   </div>
@@ -703,7 +785,7 @@ export default function BookingAirRegisterPage() {
                       type="text"
                       value={formData.consigneeTel}
                       onChange={(e) => handleInputChange('consigneeTel', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="000-0000-0000"
                     />
                   </div>
@@ -714,7 +796,7 @@ export default function BookingAirRegisterPage() {
                     type="email"
                     value={formData.consigneeEmail}
                     onChange={(e) => handleInputChange('consigneeEmail', e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="email@example.com"
                   />
                 </div>
@@ -740,7 +822,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.airline}
                   onChange={(e) => handleInputChange('airline', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="항공사"
                 />
               </div>
@@ -750,7 +832,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.flightNo}
                   onChange={(e) => handleInputChange('flightNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="KE001"
                 />
               </div>
@@ -761,7 +843,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.origin}
                     onChange={(e) => handleInputChange('origin', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="ICN"
                   />
                   <button
@@ -779,7 +861,7 @@ export default function BookingAirRegisterPage() {
                     type="text"
                     value={formData.destination}
                     onChange={(e) => handleInputChange('destination', e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                    className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     placeholder="JFK"
                   />
                   <button
@@ -796,7 +878,7 @@ export default function BookingAirRegisterPage() {
                   type="date"
                   value={formData.etd}
                   onChange={(e) => handleInputChange('etd', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -805,7 +887,7 @@ export default function BookingAirRegisterPage() {
                   type="date"
                   value={formData.eta}
                   onChange={(e) => handleInputChange('eta', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -814,7 +896,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.transitPort}
                   onChange={(e) => handleInputChange('transitPort', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="경유 공항 (선택)"
                 />
               </div>
@@ -824,7 +906,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.transitTime}
                   onChange={(e) => handleInputChange('transitTime', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="예: 14시간"
                 />
               </div>
@@ -843,7 +925,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.mawbNo}
                   onChange={(e) => handleInputChange('mawbNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="000-00000000"
                 />
               </div>
@@ -853,7 +935,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.hawbNo}
                   onChange={(e) => handleInputChange('hawbNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="자동생성 또는 입력"
                 />
               </div>
@@ -872,21 +954,21 @@ export default function BookingAirRegisterPage() {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="p-3 text-left text-sm">No</th>
-                    <th className="p-3 text-left text-sm">품명 (Commodity)</th>
-                    <th className="p-3 text-left text-sm">HS Code</th>
-                    <th className="p-3 text-left text-sm">포장<br/>유형</th>
-                    <th className="p-3 text-center text-sm">수량 (PCS)</th>
-                    <th className="p-3 text-center text-sm">L (cm)</th>
-                    <th className="p-3 text-center text-sm">W (cm)</th>
-                    <th className="p-3 text-center text-sm">H (cm)</th>
-                    <th className="p-3 text-right text-sm">체적 (CBM)</th>
-                    <th className="p-3 text-right text-sm">총중량 (kg)</th>
-                    <th className="p-3 text-right text-sm">과금중량<br/>(kg)</th>
-                    <th className="p-3 text-center text-sm">삭제</th>
+                    <th className="text-center">No</th>
+                    <th className="text-center">품명 (Commodity)</th>
+                    <th className="text-center">HS Code</th>
+                    <th className="text-center">포장유형</th>
+                    <th className="text-center">수량 (PCS)</th>
+                    <th className="text-center">L (cm)</th>
+                    <th className="text-center">W (cm)</th>
+                    <th className="text-center">H (cm)</th>
+                    <th className="text-center">체적 (CBM)</th>
+                    <th className="text-center">총중량 (kg)</th>
+                    <th className="text-center">과금중량 (kg)</th>
+                    <th className="text-center">삭제</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -961,7 +1043,7 @@ export default function BookingAirRegisterPage() {
                           min="0"
                         />
                       </td>
-                      <td className="p-2 text-right text-sm">{item.volume.toFixed(3)}</td>
+                      <td className="p-2 text-center text-sm">{item.volume.toFixed(3)}</td>
                       <td className="p-2">
                         <input
                           type="number"
@@ -972,7 +1054,7 @@ export default function BookingAirRegisterPage() {
                           step="0.01"
                         />
                       </td>
-                      <td className="p-2 text-right text-sm font-medium">{item.chargeableWeight.toFixed(2)}</td>
+                      <td className="p-2 text-center text-sm font-medium">{item.chargeableWeight.toFixed(2)}</td>
                       <td className="p-2 text-center">
                         <button
                           onClick={() => removeCargoItem(index)}
@@ -989,12 +1071,12 @@ export default function BookingAirRegisterPage() {
                 </tbody>
                 <tfoot className="bg-[var(--surface-100)] font-medium">
                   <tr>
-                    <td colSpan={4} className="p-3 text-right">합계</td>
+                    <td colSpan={4} className="p-3 text-center">합계</td>
                     <td className="p-3 text-center">{formData.totalPieces}</td>
                     <td colSpan={3}></td>
-                    <td className="p-3 text-right">{formData.totalVolume.toFixed(3)} CBM</td>
-                    <td className="p-3 text-right">{formData.totalGrossWeight.toFixed(2)} kg</td>
-                    <td className="p-3 text-right">{formData.totalChargeableWeight.toFixed(2)} kg</td>
+                    <td className="p-3 text-center">{formData.totalVolume.toFixed(3)} CBM</td>
+                    <td className="p-3 text-center">{formData.totalGrossWeight.toFixed(2)} kg</td>
+                    <td className="p-3 text-center">{formData.totalChargeableWeight.toFixed(2)} kg</td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -1025,7 +1107,7 @@ export default function BookingAirRegisterPage() {
                     <select
                       value={formData.dgClass}
                       onChange={(e) => handleInputChange('dgClass', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                     >
                       <option value="">선택</option>
                       <option value="1">Class 1 - 폭발물</option>
@@ -1045,7 +1127,7 @@ export default function BookingAirRegisterPage() {
                       type="text"
                       value={formData.unNumber}
                       onChange={(e) => handleInputChange('unNumber', e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                      className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                       placeholder="UN0000"
                     />
                   </div>
@@ -1057,7 +1139,7 @@ export default function BookingAirRegisterPage() {
                   type="text"
                   value={formData.specialHandling}
                   onChange={(e) => handleInputChange('specialHandling', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="예: PERISHABLE, FRAGILE, TEMPERATURE CONTROL, LIVE ANIMAL 등"
                 />
               </div>
@@ -1074,7 +1156,7 @@ export default function BookingAirRegisterPage() {
                 value={formData.remarks}
                 onChange={(e) => handleInputChange('remarks', e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg resize-none"
                 placeholder="기타 요청사항이나 메모를 입력하세요..."
               />
             </div>
@@ -1084,27 +1166,25 @@ export default function BookingAirRegisterPage() {
           <div className="flex justify-center gap-3">
             <button
               onClick={handleGoList}
-              className="px-6 py-3 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
             >
               목록
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-3 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]"
             >
               {isSaving ? '저장중...' : '임시저장'}
             </button>
             <button
               onClick={handleSubmit}
-              className="px-6 py-3 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-[#1D4ED8]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]"
             >
               예약요청
             </button>
           </div>
         </main>
-      </div>
-
       {/* 스케줄 조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}

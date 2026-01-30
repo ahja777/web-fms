@@ -4,13 +4,11 @@ import { useRouter } from 'next/navigation';
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
 
 interface ContainerShareData {
   id: number;
@@ -79,7 +77,6 @@ export default function ContainerSharePage() {
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [data] = useState<ContainerShareData[]>(mockData);
   const [selectedShare, setSelectedShare] = useState<ContainerShareData | null>(null);
-  const { sortConfig, handleSort, sortData } = useSorting<ContainerShareData>();
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setFilters(prev => ({ ...prev, startDate, endDate }));
@@ -92,14 +89,14 @@ export default function ContainerSharePage() {
     setAppliedFilters(resetFilters);
   };
 
-  const filteredData = sortData(data.filter(item => {
+  const filteredData = data.filter(item => {
     if (appliedFilters.shareNo && !item.shareNo.includes(appliedFilters.shareNo)) return false;
     if (appliedFilters.containerNo && !item.containerNo.includes(appliedFilters.containerNo)) return false;
     if (appliedFilters.pol && !item.pol.includes(appliedFilters.pol)) return false;
     if (appliedFilters.pod && !item.pod.includes(appliedFilters.pod)) return false;
     if (appliedFilters.status && item.status !== appliedFilters.status) return false;
     return true;
-  }));
+  });
 
   const summaryStats = {
     total: filteredData.length,
@@ -125,57 +122,63 @@ export default function ContainerSharePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="컨테이너공유관리 (콘솔)" subtitle="Logis > 견적/부킹관리 > 컨테이너공유관리" />
+        <PageLayout title="컨테이너공유관리 (콘솔)" subtitle="Logis > 견적/부킹관리 > 컨테이너공유관리" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <Link href="/logis/container/share/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+          <div className="flex justify-end items-center mb-6">
+            <Link href="/logis/container/share/register" className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">
               신규 등록
             </Link>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD 기간</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD 기간</label>
+                  <div className="flex gap-2 items-center flex-nowrap">
+                    <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <span className="text-[var(--muted)] flex-shrink-0">~</span>
+                    <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="w-[130px] h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg flex-shrink-0 text-sm" />
+                    <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">컨테이너 번호</label>
-                <input type="text" value={filters.containerNo} onChange={e => setFilters(prev => ({ ...prev, containerNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">구간</label>
-                <div className="flex gap-2">
-                  <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="POL" />
-                  <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="POD" />
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">컨테이너 번호</label>
+                  <input type="text" value={filters.containerNo} onChange={e => setFilters(prev => ({ ...prev, containerNo: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="HDMU1234567" />
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="OPEN">오픈</option>
-                  <option value="PARTIAL">일부적입</option>
-                  <option value="FULL">만적</option>
-                  <option value="CLOSED">마감</option>
-                </select>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">구간</label>
+                  <div className="flex gap-2">
+                    <input type="text" value={filters.pol} onChange={e => setFilters(prev => ({ ...prev, pol: e.target.value }))} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="POL" />
+                    <input type="text" value={filters.pod} onChange={e => setFilters(prev => ({ ...prev, pod: e.target.value }))} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm" placeholder="POD" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-sm">
+                    <option value="">전체</option>
+                    <option value="OPEN">오픈</option>
+                    <option value="PARTIAL">일부적입</option>
+                    <option value="FULL">만적</option>
+                    <option value="CLOSED">마감</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-green-500">{summaryStats.open}</div><div className="text-sm text-[var(--muted)]">오픈</div></div>
             <div className="card p-4 text-center"><div className="text-2xl font-bold text-blue-500">{summaryStats.partial}</div><div className="text-sm text-[var(--muted)]">일부적입</div></div>
@@ -184,37 +187,37 @@ export default function ContainerSharePage() {
 
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 card overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <SortableHeader<ContainerShareData> columnKey="shareNo" label={<>공유<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="containerNo" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="pol" label="구간" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="etd" label="ETD" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="usedWeight" label={<>적입<br/>현황</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader<ContainerShareData> columnKey="hblCount" label="HBL" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader<ContainerShareData> columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} />
+                    <th className="text-center">공유번호</th>
+                    <th className="text-center">컨테이너</th>
+                    <th className="text-center">구간</th>
+                    <th className="text-center">ETD</th>
+                    <th className="text-center">선명/항차</th>
+                    <th className="text-center">적입현황</th>
+                    <th className="text-center">HBL</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {filteredData.map(item => (
                     <tr key={item.id} className={`hover:bg-[var(--surface-50)] cursor-pointer ${selectedShare?.id === item.id ? 'bg-[var(--surface-100)]' : ''}`} onClick={() => setSelectedShare(item)}>
-                      <td className="px-4 py-3"><Link href={`/logis/container/share/${item.id}`} className="text-blue-400 hover:underline">{item.shareNo}</Link></td>
-                      <td className="px-4 py-3 text-sm">{item.containerNo} ({item.containerType})</td>
-                      <td className="px-4 py-3 text-sm">{item.pol} → {item.pod}</td>
-                      <td className="px-4 py-3 text-sm">{item.etd}</td>
-                      <td className="px-4 py-3 text-sm">{item.vessel} / {item.voyage}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-[var(--surface-100)] rounded-full overflow-hidden">
+                      <td className="px-4 py-3 text-center"><Link href={`/logis/container/share/${item.id}`} className="text-blue-400 hover:underline">{item.shareNo}</Link></td>
+                      <td className="px-4 py-3 text-sm text-center">{item.containerNo} ({item.containerType})</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.pol} → {item.pod}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.etd}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.vessel} / {item.voyage}</td>
+                      <td className="px-4 py-3 text-sm text-center">
+                        <div className="flex items-center gap-2 justify-center">
+                          <div className="flex-1 max-w-[100px] h-2 bg-[var(--surface-100)] rounded-full overflow-hidden">
                             <div className="h-full bg-blue-500" style={{ width: `${(item.usedWeight / item.totalWeight) * 100}%` }} />
                           </div>
                           <span className="text-xs">{Math.round((item.usedWeight / item.totalWeight) * 100)}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">{item.hblCount}</td>
-                      <td className="px-4 py-3"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
+                      <td className="px-4 py-3 text-center"><span className={`px-2 py-1 text-xs rounded-full text-white ${statusConfig[item.status].color}`}>{statusConfig[item.status].label}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -254,14 +257,12 @@ export default function ContainerSharePage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

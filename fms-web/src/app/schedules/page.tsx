@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import Modal from '@/components/Modal';
 import ScheduleForm from '@/components/schedule/ScheduleForm';
 import { VesselSchedule, ScheduleFormData } from '@/types/schedule';
@@ -162,27 +161,24 @@ export default function SchedulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pattern-dots">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="Schedule Management" subtitle="Vessel schedules and space management" />
-
-        <main className="p-8">
+    <PageLayout title="Schedule Management" subtitle="Vessel schedules and space management" showCloseButton={false}>
+        <main className="p-6">
           {/* Search Filters */}
-          <div className="card mb-6 opacity-0 animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
-            <div className="card-header">
-              <h2 className="text-lg font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>
-                Search Filters
-              </h2>
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
             </div>
-            <div className="card-body">
+            <div className="p-4">
               <div className="grid grid-cols-6 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">Carrier</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Carrier</label>
                   <select
                     value={filters.carrier_id}
                     onChange={(e) => setFilters({ ...filters, carrier_id: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="">All Carriers</option>
                     {carriers.map(c => (
@@ -191,11 +187,11 @@ export default function SchedulesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">POL</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">POL</label>
                   <select
                     value={filters.pol_port_cd}
                     onChange={(e) => setFilters({ ...filters, pol_port_cd: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="">All Ports</option>
                     {ports.map(p => (
@@ -204,11 +200,11 @@ export default function SchedulesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">POD</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">POD</label>
                   <select
                     value={filters.pod_port_cd}
                     onChange={(e) => setFilters({ ...filters, pod_port_cd: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="">All Ports</option>
                     {ports.map(p => (
@@ -217,29 +213,29 @@ export default function SchedulesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">ETD From</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD From</label>
                   <input
                     type="date"
                     value={filters.etd_from}
                     onChange={(e) => setFilters({ ...filters, etd_from: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">ETD To</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD To</label>
                   <input
                     type="date"
                     value={filters.etd_to}
                     onChange={(e) => setFilters({ ...filters, etd_to: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--muted)] mb-2">Status</label>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Status</label>
                   <select
                     value={filters.status}
                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                    className="input-field w-full"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   >
                     <option value="">All Status</option>
                     <option value="SCHEDULED">Scheduled</option>
@@ -249,22 +245,28 @@ export default function SchedulesPage() {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 mt-4">
-                <button onClick={handleReset} className="btn-secondary">
-                  Reset
-                </button>
-                <button onClick={handleSearch} className="btn-primary">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Search
-                </button>
-              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)] transition-colors"
+              >
+                초기화
+              </button>
+              <button
+                onClick={handleSearch}
+                className="px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                조회
+              </button>
             </div>
           </div>
 
           {/* Schedule List */}
-          <div className="card opacity-0 animate-slide-up" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+          <div className="card">
             <div className="card-header flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold text-[var(--foreground)]" style={{ fontFamily: 'var(--font-display)' }}>
@@ -437,8 +439,6 @@ export default function SchedulesPage() {
             )}
           </div>
         </main>
-      </div>
-
       {/* Detail Modal */}
       <Modal
         isOpen={isDetailModalOpen}
@@ -607,6 +607,6 @@ export default function SchedulesPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   );
 }

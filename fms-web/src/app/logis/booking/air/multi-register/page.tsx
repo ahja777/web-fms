@@ -2,8 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
@@ -244,17 +243,14 @@ export default function MultiBookingRegisterPage() {
   const selectedCount = bookingRows.filter(r => r.selected).length;
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="멀티예약 등록 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공) > 멀티예약" onClose={handleCloseClick} />
+        <PageLayout title="멀티예약 등록 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공) > 멀티예약" onClose={handleCloseClick} >
         <main className="p-6">
           {/* 상단 버튼 */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button
                 onClick={handleGoList}
-                className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -264,7 +260,7 @@ export default function MultiBookingRegisterPage() {
               <button
                 onClick={handleSave}
                 disabled={isSaving || validCount === 0}
-                className="px-4 py-2 bg-[#7C3AED] text-white font-semibold rounded-lg hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -292,7 +288,7 @@ export default function MultiBookingRegisterPage() {
                   type="text"
                   value={schedule.airline}
                   onChange={(e) => handleScheduleChange('airline', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="항공사"
                 />
               </div>
@@ -302,7 +298,7 @@ export default function MultiBookingRegisterPage() {
                   type="text"
                   value={schedule.flightNo}
                   onChange={(e) => handleScheduleChange('flightNo', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="KE001"
                 />
               </div>
@@ -312,7 +308,7 @@ export default function MultiBookingRegisterPage() {
                   type="text"
                   value={schedule.origin}
                   onChange={(e) => handleScheduleChange('origin', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="ICN"
                 />
               </div>
@@ -322,7 +318,7 @@ export default function MultiBookingRegisterPage() {
                   type="text"
                   value={schedule.destination}
                   onChange={(e) => handleScheduleChange('destination', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="JFK"
                 />
               </div>
@@ -332,7 +328,7 @@ export default function MultiBookingRegisterPage() {
                   type="date"
                   value={schedule.etd}
                   onChange={(e) => handleScheduleChange('etd', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -341,7 +337,7 @@ export default function MultiBookingRegisterPage() {
                   type="date"
                   value={schedule.eta}
                   onChange={(e) => handleScheduleChange('eta', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -350,7 +346,7 @@ export default function MultiBookingRegisterPage() {
                   type="text"
                   value={schedule.transitPort}
                   onChange={(e) => handleScheduleChange('transitPort', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="선택"
                 />
               </div>
@@ -395,19 +391,19 @@ export default function MultiBookingRegisterPage() {
                         onChange={(e) => handleSelectAll(e.target.checked)}
                       />
                     </th>
-                    <th className="p-2 text-left w-8">No</th>
-                    <th className="p-2 text-left min-w-[120px]">화주 (Shipper) <span className="text-red-500">*</span></th>
-                    <th className="p-2 text-left min-w-[120px]">수하인 (Consignee) <span className="text-red-500">*</span></th>
-                    <th className="p-2 text-left min-w-[100px]">품명</th>
-                    <th className="p-2 text-left w-24">HS Code</th>
+                    <th className="p-2 text-center w-8">No</th>
+                    <th className="p-2 text-center min-w-[120px]">화주 (Shipper) <span className="text-red-500">*</span></th>
+                    <th className="p-2 text-center min-w-[120px]">수하인 (Consignee) <span className="text-red-500">*</span></th>
+                    <th className="p-2 text-center min-w-[100px]">품명</th>
+                    <th className="p-2 text-center w-24">HS Code</th>
                     <th className="p-2 text-center w-16">PCS <span className="text-red-500">*</span></th>
                     <th className="p-2 text-center w-14">L</th>
                     <th className="p-2 text-center w-14">W</th>
                     <th className="p-2 text-center w-14">H</th>
-                    <th className="p-2 text-right w-20">CBM</th>
-                    <th className="p-2 text-right w-20">G.W</th>
-                    <th className="p-2 text-right w-20">C.W</th>
-                    <th className="p-2 text-left min-w-[80px]">특수취급</th>
+                    <th className="p-2 text-center w-20">CBM</th>
+                    <th className="p-2 text-center w-20">G.W</th>
+                    <th className="p-2 text-center w-20">C.W</th>
+                    <th className="p-2 text-center min-w-[80px]">특수취급</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -496,7 +492,7 @@ export default function MultiBookingRegisterPage() {
                           placeholder="cm"
                         />
                       </td>
-                      <td className="p-1 text-right">{row.volume.toFixed(3)}</td>
+                      <td className="p-1 text-center">{row.volume.toFixed(3)}</td>
                       <td className="p-1">
                         <input
                           type="number"
@@ -508,7 +504,7 @@ export default function MultiBookingRegisterPage() {
                           placeholder="kg"
                         />
                       </td>
-                      <td className="p-1 text-right font-medium">{row.chargeableWeight.toFixed(1)}</td>
+                      <td className="p-1 text-center font-medium">{row.chargeableWeight.toFixed(1)}</td>
                       <td className="p-1">
                         <input
                           type="text"
@@ -523,12 +519,12 @@ export default function MultiBookingRegisterPage() {
                 </tbody>
                 <tfoot className="bg-[var(--surface-100)] font-medium">
                   <tr>
-                    <td colSpan={6} className="p-2 text-right">합계 ({validCount}건 유효)</td>
+                    <td colSpan={6} className="p-2 text-center">합계 ({validCount}건 유효)</td>
                     <td className="p-2 text-center">{totals.pieces}</td>
                     <td colSpan={3}></td>
-                    <td className="p-2 text-right">{totals.volume.toFixed(3)}</td>
-                    <td className="p-2 text-right">{totals.grossWeight.toFixed(1)}</td>
-                    <td className="p-2 text-right">{totals.chargeableWeight.toFixed(1)}</td>
+                    <td className="p-2 text-center">{totals.volume.toFixed(3)}</td>
+                    <td className="p-2 text-center">{totals.grossWeight.toFixed(1)}</td>
+                    <td className="p-2 text-center">{totals.chargeableWeight.toFixed(1)}</td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -558,27 +554,25 @@ export default function MultiBookingRegisterPage() {
           <div className="flex justify-center gap-3">
             <button
               onClick={handleGoList}
-              className="px-6 py-3 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
             >
               목록
             </button>
             <button
               onClick={() => router.push('/logis/booking/air/register')}
-              className="px-6 py-3 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]"
             >
               단건 등록으로 전환
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || validCount === 0}
-              className="px-6 py-3 bg-[#7C3AED] text-white font-semibold rounded-lg hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? '저장중...' : `멀티예약 저장 (${validCount}건)`}
             </button>
           </div>
         </main>
-      </div>
-
       {/* 스케줄 조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}
@@ -593,6 +587,6 @@ export default function MultiBookingRegisterPage() {
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

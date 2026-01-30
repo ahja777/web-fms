@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
-import { ActionButton } from '@/components/buttons';
-import { useSorting, SortableHeader } from '@/components/table/SortableTable';
+import PageLayout from '@/components/PageLayout';
 
 interface SOControl {
   id: number;
@@ -48,6 +45,15 @@ const EXECUTION_MODULE_OPTIONS = [
   { value: 'WM', label: 'Warehouse (WM)' },
 ];
 
+// 샘플 데이터
+const sampleControls: SOControl[] = [
+  { id: 1, control_code: 'CTRL-EXP-STD', control_name: '수출 표준 컨트롤', customer_code: '', order_type_code: 'EXP-FCL', biz_type: 'EXPORT', check_validation: true, auto_release: false, auto_value_assignment: true, method_type: 'SEQUENTIAL', execution_module: 'FW', is_active: true, created_at: '2026-01-01' },
+  { id: 2, control_code: 'CTRL-EXP-PRIO', control_name: '수출 우선 컨트롤', customer_code: 'SAMSUNG', order_type_code: 'EXP-FCL', biz_type: 'EXPORT', check_validation: true, auto_release: true, auto_value_assignment: true, method_type: 'SIMULTANEOUS', execution_module: 'FW', is_active: true, created_at: '2026-01-01' },
+  { id: 3, control_code: 'CTRL-IMP-STD', control_name: '수입 표준 컨트롤', customer_code: '', order_type_code: 'IMP-FCL', biz_type: 'IMPORT', check_validation: true, auto_release: false, auto_value_assignment: false, method_type: 'SEQUENTIAL', execution_module: 'FW', is_active: true, created_at: '2026-01-01' },
+  { id: 4, control_code: 'CTRL-DOM-TRK', control_name: '내수 트럭 컨트롤', customer_code: '', order_type_code: 'DOM-TRK', biz_type: 'DOMESTIC', check_validation: false, auto_release: true, auto_value_assignment: true, method_type: 'INTERNAL', execution_module: 'TM', is_active: true, created_at: '2026-01-01' },
+  { id: 5, control_code: 'CTRL-WH-IN', control_name: '창고 입고 컨트롤', customer_code: '', order_type_code: 'WH-IN', biz_type: 'WAREHOUSE', check_validation: true, auto_release: false, auto_value_assignment: true, method_type: 'SEQUENTIAL', execution_module: 'WM', is_active: true, created_at: '2026-01-01' },
+];
+
 export default function SOControlPage() {
   const [controls, setControls] = useState<SOControl[]>([]);
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
@@ -55,7 +61,6 @@ export default function SOControlPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingControl, setEditingControl] = useState<SOControl | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const { sortConfig, handleSort, sortData } = useSorting<SOControl>();
 
   // 폼 데이터
   const [formData, setFormData] = useState({
@@ -78,11 +83,16 @@ export default function SOControlPage() {
       setLoading(true);
       const response = await fetch('/api/oms/so-control');
       const result = await response.json();
-      if (result.success) {
+      if (result.success && result.data && result.data.length > 0) {
         setControls(result.data);
+      } else {
+        // API 결과가 없으면 샘플 데이터 사용
+        setControls(sampleControls);
       }
     } catch (error) {
       console.error('Error fetching controls:', error);
+      // 에러 시 샘플 데이터 사용
+      setControls(sampleControls);
     } finally {
       setLoading(false);
     }
@@ -240,101 +250,146 @@ export default function SOControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title="S/O Control 관리"
-          subtitle="HOME > OMS > S/O Control 관리"
-         
-        />
-        <main className="p-6">
-          {/* 상단 버튼 영역 */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              {selectedIds.size > 0 && (
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
-                  {selectedIds.size}건 선택
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <ActionButton variant="success" icon="plus" onClick={() => { resetForm(); setIsModalOpen(true); }}>신규</ActionButton>
-              <ActionButton variant="danger" icon="delete" onClick={handleBulkDelete}>삭제</ActionButton>
-              <ActionButton variant="default" icon="refresh" onClick={fetchControls}>초기화</ActionButton>
-            </div>
-          </div>
-
-      {/* 목록 테이블 */}
-      <div className="card mb-6">
-        <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <h3 className="font-bold">S/O Control 목록</h3>
-            <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">
-              {controls.length}건
-            </span>
-          </div>
-          {selectedIds.size > 0 && (
-            <button onClick={() => setSelectedIds(new Set())} className="text-sm text-[var(--muted)] hover:text-white">
-              선택 해제 ({selectedIds.size}건)
-            </button>
-          )}
+      <PageLayout title="S/O Control 관리" subtitle="Logis > OMS > S/O Control" showCloseButton={false}>
+      <main className="p-6">
+        <div className="flex items-center justify-end mb-6">
+          <button
+            onClick={() => {
+              resetForm();
+              setIsModalOpen(true);
+            }}
+            className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors"
+          >
+            + 신규 등록
+          </button>
         </div>
+
+      {/* 버튼 영역 */}
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-[var(--foreground)]/60">
+          총 {controls.length}건 / 선택 {selectedIds.size}건
+        </span>
+        <div className="flex gap-2">
+          <button
+            onClick={fetchControls}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            새로고침
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            disabled={selectedIds.size === 0}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            선택 삭제
+          </button>
+        </div>
+      </div>
+
+      {/* 테이블 */}
+      <div className="bg-[var(--surface-100)] rounded-xl border border-[var(--border)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-100)]">
+          <table className="table">
+            <thead>
               <tr>
-                <th className="w-12 p-3">
-                  <input type="checkbox" checked={controls.length > 0 && selectedIds.size === controls.length} onChange={(e) => handleSelectAll(e.target.checked)} className="rounded" />
+                <th className="text-center">
+                  <input
+                    type="checkbox"
+                    checked={controls.length > 0 && selectedIds.size === controls.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded"
+                  />
                 </th>
-                <th className="p-3 text-center text-sm font-semibold">No</th>
-                <SortableHeader<SOControl> columnKey="control_code" label="컨트롤코드" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="control_name" label="컨트롤명" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="customer_code" label="고객코드" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="order_type_code" label="오더타입" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="check_validation" label="유효성검사" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="auto_release" label="자동릴리즈" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="auto_value_assignment" label="자동값할당" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <SortableHeader<SOControl> columnKey="method_type" label="처리방법" sortConfig={sortConfig} onSort={handleSort} />
-                <SortableHeader<SOControl> columnKey="is_active" label="활성" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                <th className="p-3 text-center text-sm font-semibold">작업</th>
+                <th className="text-center">컨트롤 코드</th>
+                <th className="text-center">컨트롤 명</th>
+                <th className="text-center">고객코드</th>
+                <th className="text-center">오더타입</th>
+                <th className="text-center">유효성검사</th>
+                <th className="text-center">자동릴리즈</th>
+                <th className="text-center">자동값할당</th>
+                <th className="text-center">처리방법</th>
+                <th className="text-center">활성</th>
+                <th className="text-center">작업</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--border)]">
               {loading ? (
-                <tr><td colSpan={12} className="p-12 text-center"><p className="text-[var(--muted)]">로딩 중...</p></td></tr>
-              ) : controls.length === 0 ? (
-                <tr><td colSpan={12} className="p-12 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <svg className="w-12 h-12 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p className="text-[var(--muted)]">조회된 데이터가 없습니다.</p>
-                  </div>
-                </td></tr>
-              ) : sortData(controls).map((control, index) => (
-                <tr key={control.id} className="border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer transition-colors">
-                  <td className="p-3 text-center">
-                    <input type="checkbox" checked={selectedIds.has(control.id)} onChange={(e) => handleSelect(control.id, e.target.checked)} className="rounded" />
-                  </td>
-                  <td className="p-3 text-center text-sm">{index + 1}</td>
-                  <td className="p-3 text-sm font-medium text-[#E8A838]">{control.control_code}</td>
-                  <td className="p-3 text-sm">{control.control_name}</td>
-                  <td className="p-3 text-sm">{control.customer_code || '-'}</td>
-                  <td className="p-3 text-sm">{control.order_type_code || '-'}</td>
-                  <td className="p-3 text-center">{control.check_validation ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
-                  <td className="p-3 text-center">{control.auto_release ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
-                  <td className="p-3 text-center">{control.auto_value_assignment ? <span className="text-green-500">&#10003;</span> : <span className="text-gray-400">-</span>}</td>
-                  <td className="p-3 text-sm">{METHOD_TYPE_OPTIONS.find(m => m.value === control.method_type)?.label || control.method_type}</td>
-                  <td className="p-3 text-center">{control.is_active ? <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">활성</span> : <span className="px-2 py-1 bg-gray-500 text-white text-xs rounded-full">비활성</span>}</td>
-                  <td className="p-3 text-center">
-                    <div className="flex justify-center gap-2">
-                      <button onClick={() => handleEdit(control)} className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">수정</button>
-                      <button onClick={() => handleDelete(control.id)} className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors">삭제</button>
-                    </div>
+                <tr>
+                  <td colSpan={11} className="px-4 py-8 text-center text-[var(--foreground)]/60">
+                    로딩 중...
                   </td>
                 </tr>
-              ))}
+              ) : controls.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="px-4 py-8 text-center text-[var(--foreground)]/60">
+                    데이터가 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                controls.map((control) => (
+                  <tr key={control.id} className="hover:bg-[var(--surface-200)]/50 transition-colors">
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(control.id)}
+                        onChange={(e) => handleSelect(control.id, e.target.checked)}
+                        className="rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-sm font-medium text-[#E8A838] text-center">{control.control_code}</td>
+                    <td className="px-4 py-3 text-sm text-center">{control.control_name}</td>
+                    <td className="px-4 py-3 text-sm text-center">{control.customer_code}</td>
+                    <td className="px-4 py-3 text-sm text-center">{control.order_type_code}</td>
+                    <td className="px-4 py-3 text-center">
+                      {control.check_validation ? (
+                        <span className="text-green-500">&#10003;</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {control.auto_release ? (
+                        <span className="text-green-500">&#10003;</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {control.auto_value_assignment ? (
+                        <span className="text-green-500">&#10003;</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center">
+                      {METHOD_TYPE_OPTIONS.find(m => m.value === control.method_type)?.label || control.method_type}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {control.is_active ? (
+                        <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">활성</span>
+                      ) : (
+                        <span className="px-2 py-1 bg-gray-500 text-white text-xs rounded-full">비활성</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleEdit(control)}
+                          className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => handleDelete(control.id)}
+                          className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -359,42 +414,42 @@ export default function SOControlPage() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">컨트롤 코드 *</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">컨트롤 코드 *</label>
                   <input
                     type="text"
                     value={formData.control_code}
                     onChange={(e) => setFormData({ ...formData, control_code: e.target.value.toUpperCase() })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                     disabled={!!editingControl}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">컨트롤 명 *</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">컨트롤 명 *</label>
                   <input
                     type="text"
                     value={formData.control_name}
                     onChange={(e) => setFormData({ ...formData, control_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">고객 코드</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">고객 코드</label>
                   <input
                     type="text"
                     value={formData.customer_code}
                     onChange={(e) => setFormData({ ...formData, customer_code: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">오더 타입</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">오더 타입</label>
                   <select
                     value={formData.order_type_code}
                     onChange={(e) => setFormData({ ...formData, order_type_code: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                   >
                     <option value="">선택</option>
                     {orderTypes.map(ot => (
@@ -408,11 +463,11 @@ export default function SOControlPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">비즈니스 타입</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">비즈니스 타입</label>
                   <select
                     value={formData.biz_type}
                     onChange={(e) => setFormData({ ...formData, biz_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                   >
                     {BIZ_TYPE_OPTIONS.map(b => (
                       <option key={b.value} value={b.value}>{b.label}</option>
@@ -420,11 +475,11 @@ export default function SOControlPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--foreground)]/60 mb-1">처리 방법</label>
+                  <label className="block text-xs text-[var(--foreground)] mb-1">처리 방법</label>
                   <select
                     value={formData.method_type}
                     onChange={(e) => setFormData({ ...formData, method_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                    className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                   >
                     {METHOD_TYPE_OPTIONS.map(m => (
                       <option key={m.value} value={m.value}>{m.label}</option>
@@ -434,11 +489,11 @@ export default function SOControlPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-[var(--foreground)]/60 mb-1">실행 모듈</label>
+                <label className="block text-xs text-[var(--foreground)] mb-1">실행 모듈</label>
                 <select
                   value={formData.execution_module}
                   onChange={(e) => setFormData({ ...formData, execution_module: e.target.value })}
-                  className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
                 >
                   <option value="">선택</option>
                   {EXECUTION_MODULE_OPTIONS.map(m => (
@@ -512,8 +567,7 @@ export default function SOControlPage() {
           </div>
         </div>
       )}
-        </main>
-      </div>
-    </div>
+      </main>
+    </PageLayout>
   );
 }

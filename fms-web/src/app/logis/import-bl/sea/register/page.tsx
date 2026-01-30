@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
 import FreightSearchModal from '@/components/FreightSearchModal';
@@ -750,6 +749,90 @@ function ImportBLRegisterPageContent() {
     window.location.href = '/logis/import-bl/sea/register';
   };
 
+  // 테스트 데이터 입력
+  const handleFillTestData = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const etdDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const etaDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    setFormData({
+      ...initialFormData,
+      importExport: 'IN',
+      businessType: 'CONSOL',
+      paymentMethod: 'PREPAID',
+      mblNo: 'MSKU1234567890',
+      hblNo: 'HBLKR2024001234',
+      shipperCode: 'SH001',
+      shipperName: 'SAMSUNG ELECTRONICS CO., LTD.',
+      shipperAddress: '129, Samsung-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Korea',
+      consigneeCode: 'CN001',
+      consigneeName: 'SAMSUNG ELECTRONICS AMERICA, INC.',
+      consigneeAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
+      notifyCode: 'NP001',
+      notifyName: 'Same as Consignee',
+      notifyAddress: '85 Challenger Road, Ridgefield Park, NJ 07660, USA',
+      carrierCode: 'MAEU',
+      carrierName: 'MAERSK LINE',
+      vesselName: 'MAERSK EINDHOVEN',
+      voyageNo: '2408E',
+      portOfLoading: 'KRPUS',
+      portOfLoadingName: 'BUSAN, KOREA',
+      portOfDischarge: 'USLAX',
+      portOfDischargeName: 'LOS ANGELES, USA',
+      placeOfReceipt: 'BUSAN',
+      placeOfDelivery: 'LOS ANGELES',
+      finalDestination: 'LOS ANGELES',
+      etd: etdDate,
+      eta: etaDate,
+      serviceTerm: 'CY/CY',
+      freightTerm: 'PREPAID',
+      freightPayableAt: 'Destination',
+      blIssueDate: today,
+      blIssuePlace: 'BUSAN, KOREA',
+      containerType: 'FCL',
+      packageQty: 200,
+      packageUnit: 'CT',
+      grossWeight: 15000,
+      weightUnit: 'KG',
+      measurement: 45,
+      measurementUnit: 'CBM',
+      asArranged: true,
+      cargoDescription: 'SEMICONDUCTOR PRODUCTS\nHS CODE: 8542.31.0000\nMADE IN KOREA',
+      marksAndNumbers: 'N/M\nCONTAINER NO. AS PER ATTACHED LIST',
+      containers: [
+        {
+          id: '1',
+          containerNo: 'MSKU1234567',
+          sealNo: 'SEAL001',
+          containerType: '40HC',
+          size: '40',
+          packageQty: 100,
+          packageUnit: 'CT',
+          grossWeight: 7500,
+          measurement: 22.5,
+        },
+        {
+          id: '2',
+          containerNo: 'MSKU7654321',
+          sealNo: 'SEAL002',
+          containerType: '40HC',
+          size: '40',
+          packageQty: 100,
+          packageUnit: 'CT',
+          grossWeight: 7500,
+          measurement: 22.5,
+        },
+      ],
+      otherCharges: [],
+      remarks: '테스트 데이터 - 수입 B/L 등록',
+    });
+
+    setErrors({});
+    setHasUnsavedChanges(true);
+    setMessage({ type: 'success', text: '테스트 데이터가 입력되었습니다.' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
   // 삭제 처리
   const handleDelete = async () => {
     if (!hblId || !confirm('정말 삭제하시겠습니까?')) return;
@@ -778,15 +861,15 @@ function ImportBLRegisterPageContent() {
 
   // 탭 렌더링
   const renderTabs = () => (
-    <div className="flex border-b border-[var(--border)] mb-6">
+    <div className="flex gap-1 border-b border-[var(--border)] mb-6">
       {(['MAIN', 'CARGO', 'OTHER'] as TabType[]).map(tab => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
-          className={`px-6 py-3 font-medium text-sm transition-all relative flex items-center gap-2 ${
+          className={`flex items-center gap-2 px-6 py-3 font-medium rounded-t-lg transition-colors ${
             activeTab === tab
-              ? 'text-[#E8A838]'
-              : 'text-[var(--muted)] hover:text-[var(--foreground)]'
+              ? 'bg-[#2563EB] text-white'
+              : 'bg-[var(--surface-100)] text-[var(--muted)] hover:bg-[var(--surface-200)] hover:text-[var(--foreground)]'
           }`}
         >
           {tab === 'MAIN' && (
@@ -799,9 +882,6 @@ function ImportBLRegisterPageContent() {
           )}
           {tab === 'CARGO' && 'Cargo Information'}
           {tab === 'OTHER' && 'Other Charges'}
-          {activeTab === tab && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8A838]" />
-          )}
         </button>
       ))}
     </div>
@@ -844,7 +924,7 @@ function ImportBLRegisterPageContent() {
                 type="text"
                 value={formData.jobNo || '(자동생성)'}
                 disabled
-                className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
               />
             </div>
 
@@ -856,7 +936,7 @@ function ImportBLRegisterPageContent() {
               <select
                 value={formData.importExport}
                 onChange={(e) => handleChange('importExport', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               >
                 <option value="IN">수입 (IN)</option>
                 <option value="OUT">수출 (OUT)</option>
@@ -871,7 +951,7 @@ function ImportBLRegisterPageContent() {
               <select
                 value={formData.businessType}
                 onChange={(e) => handleChange('businessType', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               >
                 <option value="CONSOL">Consol</option>
                 <option value="CO-LOAD">Co-Load</option>
@@ -887,7 +967,7 @@ function ImportBLRegisterPageContent() {
               <select
                 value={formData.paymentMethod}
                 onChange={(e) => handleChange('paymentMethod', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               >
                 <option value="PREPAID">Prepaid</option>
                 <option value="COLLECT">Collect</option>
@@ -904,7 +984,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.mblNo}
                 onChange={(e) => handleChange('mblNo', e.target.value)}
                 placeholder="MBL 번호 입력"
-                className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
+                className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
                   errors.mblNo ? 'border-red-500' : 'border-[var(--border)]'
                 }`}
               />
@@ -922,7 +1002,7 @@ function ImportBLRegisterPageContent() {
                 onChange={(e) => handleChange('hblNo', e.target.value)}
                 placeholder="HBL 번호 입력"
                 disabled={formData.businessType === 'SIMPLE'}
-                className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)] disabled:text-[var(--muted)] ${
+                className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)] disabled:text-[var(--muted)] ${
                   errors.hblNo ? 'border-red-500' : 'border-[var(--border)]'
                 }`}
               />
@@ -940,7 +1020,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.srNo}
                   onChange={(e) => handleChange('srNo', e.target.value)}
                   placeholder="S/R 번호"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -960,7 +1040,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.bookingNo}
                 disabled
                 placeholder="(부킹 조회 시 자동입력)"
-                className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]"
               />
             </div>
           </div>
@@ -988,7 +1068,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.shipperCode}
                   onChange={(e) => handleChange('shipperCode', e.target.value)}
                   placeholder="코드"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleCodeSearch('shipper', 'customer')}
@@ -1009,7 +1089,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.shipperName}
                 onChange={(e) => handleChange('shipperName', e.target.value)}
                 placeholder="영문 상호명"
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
             <div className="col-span-6">
@@ -1021,7 +1101,7 @@ function ImportBLRegisterPageContent() {
                 onChange={(e) => handleChange('shipperAddress', e.target.value)}
                 placeholder="영문 주소"
                 rows={2}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
               />
             </div>
           </div>
@@ -1038,7 +1118,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.consigneeCode}
                   onChange={(e) => handleChange('consigneeCode', e.target.value)}
                   placeholder="코드"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleCodeSearch('consignee', 'customer')}
@@ -1059,7 +1139,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.consigneeName}
                 onChange={(e) => handleChange('consigneeName', e.target.value)}
                 placeholder="영문 상호명"
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
             <div className="col-span-6">
@@ -1071,7 +1151,7 @@ function ImportBLRegisterPageContent() {
                 onChange={(e) => handleChange('consigneeAddress', e.target.value)}
                 placeholder="영문 주소"
                 rows={2}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
               />
             </div>
           </div>
@@ -1089,7 +1169,7 @@ function ImportBLRegisterPageContent() {
                   onChange={(e) => handleChange('notifyCode', e.target.value)}
                   placeholder="코드"
                   disabled={formData.notifyToOrder || formData.notifySameAsConsignee}
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)]"
                 />
                 <button
                   onClick={() => handleCodeSearch('notify', 'customer')}
@@ -1132,7 +1212,7 @@ function ImportBLRegisterPageContent() {
                 onChange={(e) => handleChange('notifyName', e.target.value)}
                 placeholder="영문 상호명"
                 disabled={formData.notifyToOrder || formData.notifySameAsConsignee}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:bg-[var(--surface-100)]"
               />
             </div>
             <div className="col-span-6">
@@ -1145,7 +1225,7 @@ function ImportBLRegisterPageContent() {
                 placeholder="영문 주소"
                 rows={2}
                 disabled={formData.notifyToOrder || formData.notifySameAsConsignee}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none disabled:bg-[var(--surface-100)]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none disabled:bg-[var(--surface-100)]"
               />
             </div>
           </div>
@@ -1173,14 +1253,14 @@ function ImportBLRegisterPageContent() {
                   value={formData.placeOfReceipt}
                   onChange={(e) => handleChange('placeOfReceipt', e.target.value)}
                   placeholder="항구코드"
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <input
                   type="text"
                   value={formData.placeOfReceiptName}
                   onChange={(e) => handleChange('placeOfReceiptName', e.target.value)}
                   placeholder="항구명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleLocationSearch('placeOfReceipt', 'seaport')}
@@ -1204,7 +1284,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.portOfLoading}
                   onChange={(e) => handleChange('portOfLoading', e.target.value)}
                   placeholder="항구코드"
-                  className={`w-24 px-3 py-2 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
+                  className={`w-24 h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
                     errors.portOfLoading ? 'border-red-500' : 'border-[var(--border)]'
                   }`}
                 />
@@ -1213,7 +1293,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.portOfLoadingName}
                   onChange={(e) => handleChange('portOfLoadingName', e.target.value)}
                   placeholder="항구명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleLocationSearch('portOfLoading', 'seaport')}
@@ -1238,7 +1318,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.portOfDischarge}
                   onChange={(e) => handleChange('portOfDischarge', e.target.value)}
                   placeholder="항구코드"
-                  className={`w-24 px-3 py-2 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
+                  className={`w-24 h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] ${
                     errors.portOfDischarge ? 'border-red-500' : 'border-[var(--border)]'
                   }`}
                 />
@@ -1247,7 +1327,7 @@ function ImportBLRegisterPageContent() {
                   value={formData.portOfDischargeName}
                   onChange={(e) => handleChange('portOfDischargeName', e.target.value)}
                   placeholder="항구명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleLocationSearch('portOfDischarge', 'seaport')}
@@ -1272,14 +1352,14 @@ function ImportBLRegisterPageContent() {
                   value={formData.placeOfDelivery}
                   onChange={(e) => handleChange('placeOfDelivery', e.target.value)}
                   placeholder="항구코드"
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <input
                   type="text"
                   value={formData.placeOfDeliveryName}
                   onChange={(e) => handleChange('placeOfDeliveryName', e.target.value)}
                   placeholder="항구명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleLocationSearch('placeOfDelivery', 'seaport')}
@@ -1303,14 +1383,14 @@ function ImportBLRegisterPageContent() {
                   value={formData.finalDestination}
                   onChange={(e) => handleChange('finalDestination', e.target.value)}
                   placeholder="항구코드"
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <input
                   type="text"
                   value={formData.finalDestinationName}
                   onChange={(e) => handleChange('finalDestinationName', e.target.value)}
                   placeholder="항구명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleLocationSearch('finalDestination', 'seaport')}
@@ -1334,14 +1414,14 @@ function ImportBLRegisterPageContent() {
                   value={formData.carrierCode}
                   onChange={(e) => handleChange('carrierCode', e.target.value)}
                   placeholder="코드"
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <input
                   type="text"
                   value={formData.carrierName}
                   onChange={(e) => handleChange('carrierName', e.target.value)}
                   placeholder="선사명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <button
                   onClick={() => handleCodeSearch('carrier', 'carrier')}
@@ -1365,14 +1445,14 @@ function ImportBLRegisterPageContent() {
                   value={formData.vesselName}
                   onChange={(e) => handleChange('vesselName', e.target.value)}
                   placeholder="선명"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <input
                   type="text"
                   value={formData.voyageNo}
                   onChange={(e) => handleChange('voyageNo', e.target.value)}
                   placeholder="항차"
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
               </div>
             </div>
@@ -1385,7 +1465,7 @@ function ImportBLRegisterPageContent() {
               <select
                 value={formData.serviceTerm}
                 onChange={(e) => handleChange('serviceTerm', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               >
                 {serviceTermOptions.map(term => (
                   <option key={term} value={term}>{term}</option>
@@ -1402,7 +1482,7 @@ function ImportBLRegisterPageContent() {
                 type="date"
                 value={formData.etd}
                 onChange={(e) => handleChange('etd', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
 
@@ -1415,7 +1495,7 @@ function ImportBLRegisterPageContent() {
                 type="date"
                 value={formData.eta}
                 onChange={(e) => handleChange('eta', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
 
@@ -1427,7 +1507,7 @@ function ImportBLRegisterPageContent() {
               <select
                 value={formData.freightTerm}
                 onChange={(e) => handleChange('freightTerm', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               >
                 <option value="PREPAID">Prepaid</option>
                 <option value="COLLECT">Collect</option>
@@ -1444,7 +1524,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.freightPayableAt}
                 onChange={(e) => handleChange('freightPayableAt', e.target.value)}
                 placeholder="지불장소"
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
 
@@ -1457,7 +1537,7 @@ function ImportBLRegisterPageContent() {
                 type="date"
                 value={formData.blIssueDate}
                 onChange={(e) => handleChange('blIssueDate', e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
 
@@ -1471,7 +1551,7 @@ function ImportBLRegisterPageContent() {
                 value={formData.blIssuePlace}
                 onChange={(e) => handleChange('blIssuePlace', e.target.value)}
                 placeholder="발행 장소"
-                className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
               />
             </div>
           </div>
@@ -1526,12 +1606,12 @@ function ImportBLRegisterPageContent() {
                   value={formData.packageQty || ''}
                   onChange={(e) => handleChange('packageQty', parseInt(e.target.value) || 0)}
                   placeholder="수량"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <select
                   value={formData.packageUnit}
                   onChange={(e) => handleChange('packageUnit', e.target.value)}
-                  className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 >
                   {packageUnitOptions.map(opt => (
                     <option key={opt.code} value={opt.code}>{opt.code}</option>
@@ -1551,12 +1631,12 @@ function ImportBLRegisterPageContent() {
                   value={formData.grossWeight || ''}
                   onChange={(e) => handleChange('grossWeight', parseFloat(e.target.value) || 0)}
                   placeholder="중량"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <select
                   value={formData.weightUnit}
                   onChange={(e) => handleChange('weightUnit', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 >
                   <option value="KG">KG</option>
                   <option value="LB">LB</option>
@@ -1576,12 +1656,12 @@ function ImportBLRegisterPageContent() {
                   value={formData.measurement || ''}
                   onChange={(e) => handleChange('measurement', parseFloat(e.target.value) || 0)}
                   placeholder="용적"
-                  className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 />
                 <select
                   value={formData.measurementUnit}
                   onChange={(e) => handleChange('measurementUnit', e.target.value)}
-                  className="w-20 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
+                  className="w-20 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
                 >
                   <option value="CBM">CBM</option>
                   <option value="CFT">CFT</option>
@@ -1589,7 +1669,7 @@ function ImportBLRegisterPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowDimensionsCalculator(true)}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap"
+                  className="h-[38px] px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap"
                 >
                   계산
                 </button>
@@ -1644,7 +1724,7 @@ function ImportBLRegisterPageContent() {
               onChange={(e) => handleChange('marksAndNumbers', e.target.value)}
               placeholder="화인 및 번호 입력"
               rows={6}
-              className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none font-mono"
+              className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none font-mono"
             />
           </div>
         </div>
@@ -1662,7 +1742,7 @@ function ImportBLRegisterPageContent() {
               onChange={(e) => handleChange('cargoDescription', e.target.value)}
               placeholder="화물 상세 설명 입력"
               rows={6}
-              className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none font-mono"
+              className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none font-mono"
             />
           </div>
         </div>
@@ -1692,17 +1772,17 @@ function ImportBLRegisterPageContent() {
                 컨테이너 정보를 추가하세요.
               </div>
             ) : (
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="p-3 text-left text-sm font-medium">No</th>
-                    <th className="p-3 text-left text-sm font-medium">Container No</th>
-                    <th className="p-3 text-left text-sm font-medium">Seal No</th>
-                    <th className="p-3 text-left text-sm font-medium">Type</th>
-                    <th className="p-3 text-left text-sm font-medium">Package</th>
-                    <th className="p-3 text-left text-sm font-medium">G.Weight</th>
-                    <th className="p-3 text-left text-sm font-medium">Measurement</th>
-                    <th className="p-3 text-center text-sm font-medium">삭제</th>
+                    <th>No</th>
+                    <th>Container No</th>
+                    <th>Seal No</th>
+                    <th>Type</th>
+                    <th>Package</th>
+                    <th>G.Weight</th>
+                    <th>Measurement</th>
+                    <th className="text-center">삭제</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1810,15 +1890,15 @@ function ImportBLRegisterPageContent() {
               기타 비용을 추가하세요.
             </div>
           ) : (
-            <table className="w-full">
-              <thead className="bg-[var(--surface-100)]">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="p-3 text-left text-sm font-medium">CODE</th>
-                  <th className="p-3 text-left text-sm font-medium">Charges</th>
-                  <th className="p-3 text-left text-sm font-medium">Currency</th>
-                  <th className="p-3 text-right text-sm font-medium">Prepaid</th>
-                  <th className="p-3 text-right text-sm font-medium">Collect</th>
-                  <th className="p-3 text-center text-sm font-medium">삭제</th>
+                  <th>CODE</th>
+                  <th>Charges</th>
+                  <th>Currency</th>
+                  <th className="text-center">Prepaid</th>
+                  <th className="text-center">Collect</th>
+                  <th className="text-center">삭제</th>
                 </tr>
               </thead>
               <tbody>
@@ -1860,7 +1940,7 @@ function ImportBLRegisterPageContent() {
                         type="number"
                         value={charge.prepaid || ''}
                         onChange={(e) => updateOtherCharge(charge.id, 'prepaid', parseFloat(e.target.value) || 0)}
-                        className="w-28 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-right"
+                        className="w-28 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                       />
                     </td>
                     <td className="p-3">
@@ -1868,7 +1948,7 @@ function ImportBLRegisterPageContent() {
                         type="number"
                         value={charge.collect || ''}
                         onChange={(e) => updateOtherCharge(charge.id, 'collect', parseFloat(e.target.value) || 0)}
-                        className="w-28 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-right"
+                        className="w-28 px-2 py-1 bg-[var(--surface-50)] border border-[var(--border)] rounded text-sm text-center"
                       />
                     </td>
                     <td className="p-3 text-center">
@@ -1886,11 +1966,11 @@ function ImportBLRegisterPageContent() {
               </tbody>
               <tfoot className="bg-[var(--surface-50)]">
                 <tr className="border-t-2 border-[var(--border)]">
-                  <td colSpan={3} className="p-3 text-right font-bold">Total</td>
-                  <td className="p-3 text-right font-bold">
+                  <td colSpan={3} className="p-3 text-center font-bold">Total</td>
+                  <td className="p-3 text-center font-bold">
                     {formData.otherCharges.reduce((sum, c) => sum + c.prepaid, 0).toLocaleString()}
                   </td>
-                  <td className="p-3 text-right font-bold">
+                  <td className="p-3 text-center font-bold">
                     {formData.otherCharges.reduce((sum, c) => sum + c.collect, 0).toLocaleString()}
                   </td>
                   <td></td>
@@ -1915,7 +1995,7 @@ function ImportBLRegisterPageContent() {
             onChange={(e) => handleChange('remarks', e.target.value)}
             placeholder="비고 사항 입력"
             rows={4}
-            className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
+            className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none"
           />
         </div>
       </div>
@@ -1924,15 +2004,13 @@ function ImportBLRegisterPageContent() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header
-          title={isEditMode ? "수입 B/L 수정 (해상)" : "수입 B/L 등록 (해상)"}
-          subtitle={`수입 B/L관리 > B/L관리 (해상) > ${isEditMode ? '수정' : '등록'}`}
-          onClose={handleCloseClick}
-        />
+      <Header
+        title={isEditMode ? "수입 B/L 수정 (해상)" : "수입 B/L 등록 (해상)"}
+        subtitle={`수입 B/L관리 > B/L관리 (해상) > ${isEditMode ? '수정' : '등록'}`}
+        showCloseButton={false}
+      />
 
-        <main ref={formRef} className="p-6">
+      <main ref={formRef} className="p-6">
           {/* 상단 버튼 영역 */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
@@ -1956,14 +2034,25 @@ function ImportBLRegisterPageContent() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {/* 테스트데이터 버튼 */}
+              <button
+                onClick={handleFillTestData}
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                테스트데이터
+              </button>
+
               {/* 신규 버튼 */}
               <button
                 onClick={handleNew}
                 disabled={isNewMode}
                 className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
                   isNewMode
-                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-[var(--surface-200)] text-[var(--muted)] cursor-not-allowed'
+                    : 'bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1975,7 +2064,7 @@ function ImportBLRegisterPageContent() {
               {/* 초기화 버튼 */}
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -2093,7 +2182,7 @@ function ImportBLRegisterPageContent() {
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="flex flex-col items-center gap-4">
-                <svg className="w-10 h-10 animate-spin text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-10 h-10 animate-spin text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 <p className="text-[var(--muted)]">B/L 데이터를 불러오는 중...</p>
@@ -2111,8 +2200,6 @@ function ImportBLRegisterPageContent() {
             </>
           )}
         </main>
-      </div>
-
       {/* 스케줄조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}
@@ -2185,7 +2272,7 @@ function LoadingFallback() {
   return (
     <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <svg className="w-10 h-10 animate-spin text-[#E8A838]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-10 h-10 animate-spin text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
         <p className="text-[var(--muted)]">로딩 중...</p>

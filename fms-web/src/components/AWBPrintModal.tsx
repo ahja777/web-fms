@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { formatWeightWithComma } from '@/utils/format';
 
 // AWB 데이터 인터페이스
 export interface AWBData {
@@ -463,7 +462,7 @@ function HAWBFormTemplate({ data }: { data: AWBData }) {
               <div className="text-[11px]">{data.pieces}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '12%', padding: '6px' }}>
-              <div className="text-[11px]">{formatWeightWithComma(data.grossWeight)}</div>
+              <div className="text-[11px]">{data.grossWeight.toLocaleString()}</div>
             </td>
             <td className="text-center border-r border-black align-top" style={{ width: '5%', padding: '6px' }}>
               <div className="text-[11px]">{data.weightUnit}</div>
@@ -472,7 +471,7 @@ function HAWBFormTemplate({ data }: { data: AWBData }) {
               <div className="text-[11px]">{data.rateClass || 'Q'}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '12%', padding: '6px' }}>
-              <div className="text-[11px]">{formatWeightWithComma(data.chargeableWeight || data.grossWeight)}</div>
+              <div className="text-[11px]">{data.chargeableWeight?.toLocaleString() || data.grossWeight.toLocaleString()}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '10%', padding: '6px' }}>
               <div className="text-[10px]">{data.rate ? data.rate.toFixed(2) : ''}</div>
@@ -869,7 +868,7 @@ function MAWBFormTemplate({ data }: { data: AWBData }) {
               <div className="text-[11px]">{data.pieces}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '12%', padding: '6px' }}>
-              <div className="text-[11px]">{formatWeightWithComma(data.grossWeight)}</div>
+              <div className="text-[11px]">{data.grossWeight.toLocaleString()}</div>
             </td>
             <td className="text-center border-r border-black align-top" style={{ width: '5%', padding: '6px' }}>
               <div className="text-[11px]">{data.weightUnit}</div>
@@ -878,7 +877,7 @@ function MAWBFormTemplate({ data }: { data: AWBData }) {
               <div className="text-[11px]">{data.rateClass || 'Q'}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '12%', padding: '6px' }}>
-              <div className="text-[11px]">{data.chargeableWeight ? formatWeightWithComma(data.chargeableWeight) : ''}</div>
+              <div className="text-[11px]">{data.chargeableWeight?.toLocaleString() || ''}</div>
             </td>
             <td className="text-right border-r border-black align-top" style={{ width: '10%', padding: '6px' }}>
               <div className="text-[10px]">{data.rate ? data.rate.toFixed(2) : ''}</div>
@@ -1139,10 +1138,10 @@ function CheckAWBTemplate({ data }: { data: AWBData }) {
                   {data.pieces}
                 </div>
                 <div className="col-span-1 text-[10px] border-r border-gray-300 pr-1 text-right">
-                  {formatWeightWithComma(data.grossWeight)} {data.weightUnit}
+                  {data.grossWeight.toLocaleString()} {data.weightUnit}
                 </div>
                 <div className="col-span-1 text-[10px] border-r border-gray-300 pr-1 text-right">
-                  {data.chargeableWeight ? formatWeightWithComma(data.chargeableWeight) : '-'}
+                  {data.chargeableWeight?.toLocaleString() || '-'}
                 </div>
                 <div className="col-span-1 text-[10px] border-r border-gray-300 pr-1 text-right">
                   {data.rate ? data.rate.toFixed(2) : '-'}

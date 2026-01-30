@@ -5,16 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
 import * as XLSX from 'xlsx';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import EmailModal from '@/components/EmailModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
-import { ListTopButtons, SearchButtons, ActionButton } from '@/components/buttons';
+import { ListTopButtons, ActionButton } from '@/components/buttons';
 import BLPrintModal, { BLData as PrintBLData } from '@/components/BLPrintModal';
-import { formatWeightWithComma, formatCBM } from '@/utils/format';
 
 // B/L 데이터 타입
 interface BLData {
@@ -164,9 +162,25 @@ const columnLabels: Record<string, string> = {
 const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof BLData; sortConfig: SortConfig }) => {
   const isActive = sortConfig.key === columnKey;
   return (
-    <span className="inline-flex flex-col ml-1" style={{ fontSize: '10px', lineHeight: '6px' }}>
-      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
-      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
     </span>
   );
 };
@@ -217,6 +231,15 @@ interface ExcelUploadData {
 
 // localStorage 키
 const STORAGE_KEY = 'fms_import_bl_sea_data';
+
+// 샘플 데이터
+const sampleBLData: BLData[] = [
+  { id: '1', mblNo: 'MBLKR2026010001', hblNo: 'HBLKR2026010001', blType: 'HBL', vesselName: 'EVER GIVEN', voyageNo: '2601E', polCode: 'USLAX', polName: 'Los Angeles', podCode: 'KRPUS', podName: '부산', etd: '2026-01-15', eta: '2026-02-01', atd: '2026-01-15', ata: '', shipper: 'ABC Corp USA', consignee: '삼성전자', notifyParty: '삼성전자 물류팀', containerQty: 2, containerType: '40HC', weight: 18500, volume: 55.2, status: 'in_transit', carrier: 'Evergreen' },
+  { id: '2', mblNo: 'MBLKR2026010002', hblNo: 'HBLKR2026010002', blType: 'HBL', vesselName: 'MSC OSCAR', voyageNo: '2602W', polCode: 'DEHAM', polName: 'Hamburg', podCode: 'KRPUS', podName: '부산', etd: '2026-01-10', eta: '2026-01-28', atd: '2026-01-10', ata: '2026-01-28', shipper: 'XYZ GmbH', consignee: 'LG전자', notifyParty: 'LG전자 수입팀', containerQty: 3, containerType: '40HC', weight: 25000, volume: 78.5, status: 'arrived', carrier: 'MSC' },
+  { id: '3', mblNo: 'MBLKR2026010003', hblNo: 'HBLKR2026010003', blType: 'HBL', vesselName: 'HMM ALGECIRAS', voyageNo: '2603E', polCode: 'CNSHA', polName: 'Shanghai', podCode: 'KRPUS', podName: '부산', etd: '2026-01-20', eta: '2026-01-25', atd: '2026-01-20', ata: '2026-01-25', shipper: 'DEF Trading Co', consignee: '현대자동차', notifyParty: '현대자동차 구매팀', containerQty: 5, containerType: '20GP', weight: 45000, volume: 120, status: 'customs', carrier: 'HMM' },
+  { id: '4', mblNo: 'MBLKR2026010004', hblNo: 'HBLKR2026010004', blType: 'HBL', vesselName: 'MAERSK EINDHOVEN', voyageNo: '2604W', polCode: 'JPNGO', polName: 'Nagoya', podCode: 'KRPUS', podName: '부산', etd: '2026-01-22', eta: '2026-01-24', atd: '', ata: '', shipper: 'GHI Japan Inc', consignee: 'SK하이닉스', notifyParty: 'SK하이닉스 물류', containerQty: 1, containerType: '40RF', weight: 8000, volume: 28, status: 'pending', carrier: 'Maersk' },
+  { id: '5', mblNo: 'MBLKR2026010005', hblNo: 'HBLKR2026010005', blType: 'HBL', vesselName: 'ONE APUS', voyageNo: '2605E', polCode: 'SGSIN', polName: 'Singapore', podCode: 'KRPUS', podName: '부산', etd: '2026-01-05', eta: '2026-01-12', atd: '2026-01-05', ata: '2026-01-12', shipper: 'JKL Pte Ltd', consignee: '포스코', notifyParty: '포스코 수입팀', containerQty: 10, containerType: '40HC', weight: 150000, volume: 300, status: 'delivered', carrier: 'ONE' },
+];
 
 export default function ImportBLSeaPage() {
   const router = useRouter();
@@ -325,16 +348,19 @@ export default function ImportBLSeaPage() {
           const localData: BLData[] = JSON.parse(stored);
           // localStorage 데이터와 API 데이터 병합 (중복 제거)
           const mergedData = [...apiData, ...localData.filter((d: BLData) => !apiData.find(a => a.id === d.id))];
-          setAllData(mergedData);
+          setAllData(mergedData.length > 0 ? mergedData : sampleBLData);
         } catch (e) {
           console.error('Failed to parse localStorage data:', e);
-          setAllData(apiData);
+          setAllData(apiData.length > 0 ? apiData : sampleBLData);
         }
       } else {
-        setAllData(apiData);
+        // API 데이터가 없으면 샘플 데이터 사용
+        setAllData(apiData.length > 0 ? apiData : sampleBLData);
       }
     } catch (error) {
       console.error('Failed to fetch B/L data:', error);
+      // 에러 시 샘플 데이터 사용
+      setAllData(sampleBLData);
     } finally {
       setLoading(false);
     }
@@ -833,15 +859,12 @@ export default function ImportBLSeaPage() {
   const paginatedData = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="수입 B/L 관리 (해상)" subtitle="수입 B/L관리  B/L관리 (해상)" />
+        <PageLayout title="수입 B/L 관리 (해상)" subtitle="수입 B/L관리  B/L관리 (해상)" showCloseButton={false} >
 
         <main ref={formRef} className="p-6">
           {viewMode === 'list' ? (
             <>
-              {/* 상단 버튼 영역 - 표준화된 컴포넌트 사용 */}
+              {/* 상단 버튼 영역 - 통일된 스타일 */}
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                   {selectedRows.length > 0 && (
@@ -851,13 +874,13 @@ export default function ImportBLSeaPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <ActionButton variant="success" icon="plus" onClick={handleNew}>신규</ActionButton>
-                  <ActionButton variant="secondary" icon="edit" onClick={handleEdit}>수정</ActionButton>
-                  <ActionButton variant="danger" icon="delete" onClick={handleDeleteSelected}>삭제</ActionButton>
+                  <ActionButton variant="default" icon="plus" onClick={handleNew}>신규</ActionButton>
+                  <ActionButton variant="default" icon="edit" onClick={handleEdit}>수정</ActionButton>
+                  <ActionButton variant="default" icon="delete" onClick={handleDeleteSelected}>삭제</ActionButton>
                   <ActionButton variant="default" icon="email" onClick={handleEmail}>E-mail</ActionButton>
-                  <ActionButton variant="primary" icon="print" onClick={handlePrintBL}>B/L 출력</ActionButton>
+                  <ActionButton variant="default" icon="print" onClick={handlePrintBL}>B/L 출력</ActionButton>
                   <ActionButton variant="default" icon="refresh" onClick={handleReset}>초기화</ActionButton>
-                  <label className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center gap-2">
+                  <label className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors cursor-pointer flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
@@ -876,8 +899,185 @@ export default function ImportBLSeaPage() {
                 <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
               )}
 
+              {/* 검색조건 - 화면설계서 기준 */}
+              <div className="card mb-6">
+                <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <h3 className="font-bold">검색조건</h3>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    {/* 일자유형 및 기간 */}
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">조회기간</label>
+                      <div className="flex items-center gap-2 flex-nowrap">
+                        <select
+                          value={filters.dateType}
+                          onChange={(e) => handleFilterChange('dateType', e.target.value)}
+                          className="w-24 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)] flex-shrink-0"
+                        >
+                          <option value="eta">ETA</option>
+                          <option value="etd">ETD</option>
+                          <option value="ata">ATA</option>
+                          <option value="atd">ATD</option>
+                        </select>
+                        <input
+                          type="date"
+                          value={filters.dateFrom}
+                          onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                          className="w-[140px] h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)] flex-shrink-0"
+                        />
+                        <span className="text-[var(--muted)] flex-shrink-0">~</span>
+                        <input
+                          type="date"
+                          value={filters.dateTo}
+                          onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                          className="w-[140px] h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)] flex-shrink-0"
+                        />
+                        <DateRangeButtons onRangeSelect={(start, end) => { handleFilterChange('dateFrom', start); handleFilterChange('dateTo', end); }} />
+                      </div>
+                    </div>
+                    {/* MBL No */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">MBL No</label>
+                      <input
+                        type="text"
+                        value={filters.mblNo}
+                        onChange={(e) => handleFilterChange('mblNo', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                        placeholder="MBL 번호"
+                      />
+                    </div>
+                    {/* HBL No */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">HBL No</label>
+                      <input
+                        type="text"
+                        value={filters.hblNo}
+                        onChange={(e) => handleFilterChange('hblNo', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                        placeholder="HBL 번호"
+                      />
+                    </div>
+                    {/* B/L Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">B/L Type</label>
+                      <select
+                        value={filters.blType}
+                        onChange={(e) => handleFilterChange('blType', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                      >
+                        <option value="">전체</option>
+                        <option value="MBL">MBL</option>
+                        <option value="HBL">HBL</option>
+                      </select>
+                    </div>
+                    {/* 상태 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">상태</label>
+                      <select
+                        value={filters.status}
+                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                      >
+                        <option value="">전체</option>
+                        <option value="pending">대기</option>
+                        <option value="departed">출항</option>
+                        <option value="in_transit">운송중</option>
+                        <option value="arrived">도착</option>
+                        <option value="customs">통관중</option>
+                        <option value="delivered">인도완료</option>
+                      </select>
+                    </div>
+                    {/* 선사 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선사</label>
+                      <select
+                        value={filters.carrier}
+                        onChange={(e) => handleFilterChange('carrier', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                      >
+                        <option value="">전체</option>
+                        <option value="MAERSK">MAERSK</option>
+                        <option value="MSC">MSC</option>
+                        <option value="COSCO">COSCO</option>
+                        <option value="EVERGREEN">EVERGREEN</option>
+                        <option value="HAPAG-LLOYD">HAPAG-LLOYD</option>
+                        <option value="ONE">ONE</option>
+                        <option value="YANGMING">YANGMING</option>
+                        <option value="HMM">HMM</option>
+                      </select>
+                    </div>
+                    {/* 선적항 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선적항 (POL)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={filters.pol}
+                          onChange={(e) => handleFilterChange('pol', e.target.value)}
+                          className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                          placeholder="항구 코드/명"
+                        />
+                        <button className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    {/* 양하항 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">양하항 (POD)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={filters.pod}
+                          onChange={(e) => handleFilterChange('pod', e.target.value)}
+                          className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                          placeholder="항구 코드/명"
+                        />
+                        <button className="h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    {/* 수화인 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수화인 (Consignee)</label>
+                      <input
+                        type="text"
+                        value={filters.consignee}
+                        onChange={(e) => handleFilterChange('consignee', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                        placeholder="수화인명"
+                      />
+                    </div>
+                    {/* 선명 */}
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선명</label>
+                      <input
+                        type="text"
+                        value={filters.vesselName}
+                        onChange={(e) => handleFilterChange('vesselName', e.target.value)}
+                        className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--border-hover)]"
+                        placeholder="선박명"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+                  <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+                  <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+                </div>
+              </div>
+
               {/* 상태별 현황 카드 */}
-              <div className="grid grid-cols-8 gap-3 mb-6">
+              <div className="grid grid-cols-5 gap-4 mb-6">
                 <div className="card p-4 text-center cursor-pointer hover:shadow-lg" onClick={() => { setFilters(prev => ({ ...prev, status: '' })); setAppliedFilters(prev => ({ ...prev, status: '' })); }}>
                   <p className="text-2xl font-bold">{loading ? '-' : summary.total}</p>
                   <p className="text-sm text-[var(--muted)]">전체</p>
@@ -912,203 +1112,6 @@ export default function ImportBLSeaPage() {
                 </div>
               </div>
 
-              {/* 검색 조건 섹션 */}
-              <div className="card mb-6">
-                <div className="p-4 border-b border-[var(--border)]">
-                  <h3 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    검색조건
-                  </h3>
-                </div>
-                <div className="p-4">
-                  {/* 첫 번째 줄 */}
-                  <div className="grid grid-cols-6 gap-4 mb-4">
-                    {/* 업무구분 (고정값) */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">업무구분</label>
-                      <input
-                        type="text"
-                        value="해상"
-                        readOnly
-                        className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                      />
-                    </div>
-                    {/* 수출입구분 (고정값) */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수출입구분</label>
-                      <input
-                        type="text"
-                        value="수입(IN)"
-                        readOnly
-                        className="w-full px-3 py-2 bg-[var(--surface-200)] border border-[var(--border)] rounded-lg text-sm"
-                      />
-                    </div>
-                    {/* 일자유형 및 기간 */}
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">조회기간</label>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={filters.dateType}
-                          onChange={(e) => handleFilterChange('dateType', e.target.value)}
-                          className="w-24 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        >
-                          <option value="eta">ETA</option>
-                          <option value="etd">ETD</option>
-                          <option value="ata">ATA</option>
-                          <option value="atd">ATD</option>
-                        </select>
-                        <input
-                          type="date"
-                          value={filters.dateFrom}
-                          onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                          className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        />
-                        <span className="text-[var(--muted)]">~</span>
-                        <input
-                          type="date"
-                          value={filters.dateTo}
-                          onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                          className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        />
-                      </div>
-                    </div>
-                    {/* MBL No */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">MBL No</label>
-                      <input
-                        type="text"
-                        value={filters.mblNo}
-                        onChange={(e) => handleFilterChange('mblNo', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        placeholder="MBL 번호"
-                      />
-                    </div>
-                    {/* HBL No */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">HBL No</label>
-                      <input
-                        type="text"
-                        value={filters.hblNo}
-                        onChange={(e) => handleFilterChange('hblNo', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        placeholder="HBL 번호"
-                      />
-                    </div>
-                    {/* B/L Type */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">B/L Type</label>
-                      <select
-                        value={filters.blType}
-                        onChange={(e) => handleFilterChange('blType', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                      >
-                        <option value="">전체</option>
-                        <option value="MBL">MBL</option>
-                        <option value="HBL">HBL</option>
-                      </select>
-                    </div>
-                    {/* 상태 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">상태</label>
-                      <select
-                        value={filters.status}
-                        onChange={(e) => handleFilterChange('status', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                      >
-                        <option value="">전체</option>
-                        <option value="pending">대기</option>
-                        <option value="departed">출항</option>
-                        <option value="in_transit">운송중</option>
-                        <option value="arrived">도착</option>
-                        <option value="customs">통관중</option>
-                        <option value="delivered">인도완료</option>
-                      </select>
-                    </div>
-                    {/* 선사 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선사</label>
-                      <select
-                        value={filters.carrier}
-                        onChange={(e) => handleFilterChange('carrier', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                      >
-                        <option value="">전체</option>
-                        <option value="MAERSK">MAERSK</option>
-                        <option value="MSC">MSC</option>
-                        <option value="COSCO">COSCO</option>
-                        <option value="EVERGREEN">EVERGREEN</option>
-                        <option value="HAPAG-LLOYD">HAPAG-LLOYD</option>
-                        <option value="ONE">ONE</option>
-                        <option value="YANGMING">YANGMING</option>
-                        <option value="HMM">HMM</option>
-                      </select>
-                    </div>
-                    {/* 선적항 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선적항 (POL)</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={filters.pol}
-                          onChange={(e) => handleFilterChange('pol', e.target.value)}
-                          className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                          placeholder="항구 코드/명"
-                        />
-                        <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    {/* 양하항 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">양하항 (POD)</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={filters.pod}
-                          onChange={(e) => handleFilterChange('pod', e.target.value)}
-                          className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                          placeholder="항구 코드/명"
-                        />
-                        <button className="px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    {/* 수화인 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수화인 (Consignee)</label>
-                      <input
-                        type="text"
-                        value={filters.consignee}
-                        onChange={(e) => handleFilterChange('consignee', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        placeholder="수화인명"
-                      />
-                    </div>
-                    {/* 선명 */}
-                    <div>
-                      <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선명</label>
-                      <input
-                        type="text"
-                        value={filters.vesselName}
-                        onChange={(e) => handleFilterChange('vesselName', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[#059669]"
-                        placeholder="선박명"
-                      />
-                    </div>
-                  </div>
-                  {/* 검색 버튼 - 표준화된 컴포넌트 사용 */}
-                  <SearchButtons onSearch={handleSearch} onReset={handleReset} />
-                </div>
-              </div>
-
               {/* 조회 결과 섹션 */}
               <div className="card">
                 <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
@@ -1132,10 +1135,10 @@ export default function ImportBLSeaPage() {
                   </div>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[var(--surface-100)]">
+                  <table className="table">
+                    <thead>
                       <tr>
-                        <th className="w-10 p-3 text-center">
+                        <th className="w-10">
                           <input
                             type="checkbox"
                             checked={selectedRows.length === paginatedData.length && paginatedData.length > 0}
@@ -1149,16 +1152,16 @@ export default function ImportBLSeaPage() {
                             className="rounded"
                           />
                         </th>
-                        <th className="p-3 text-left text-sm font-medium text-[var(--foreground)]">No</th>
-                        <SortableHeader columnKey="hblNo" label="HBL No" className="text-left font-medium text-[var(--foreground)]" />
-                        <SortableHeader columnKey="mblNo" label="MBL No" className="text-left font-medium text-[var(--foreground)]" />
+                        <th className="p-3 text-center text-sm font-medium text-[var(--foreground)]">No</th>
+                        <SortableHeader columnKey="hblNo" label="HBL No" className="text-center font-medium text-[var(--foreground)]" />
+                        <SortableHeader columnKey="mblNo" label="MBL No" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="blType" label="Type" className="text-center font-medium text-[var(--foreground)]" />
-                        <SortableHeader columnKey="vesselName" label="선명/항차" className="text-left font-medium text-[var(--foreground)]" />
-                        <SortableHeader columnKey="polCode" label="POL" className="text-left font-medium text-[var(--foreground)]" />
-                        <SortableHeader columnKey="podCode" label="POD" className="text-left font-medium text-[var(--foreground)]" />
+                        <SortableHeader columnKey="vesselName" label="선명/항차" className="text-center font-medium text-[var(--foreground)]" />
+                        <SortableHeader columnKey="polCode" label="POL" className="text-center font-medium text-[var(--foreground)]" />
+                        <SortableHeader columnKey="podCode" label="POD" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="etd" label="ETD" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="eta" label="ETA" className="text-center font-medium text-[var(--foreground)]" />
-                        <SortableHeader columnKey="consignee" label="수화인" className="text-left font-medium text-[var(--foreground)]" />
+                        <SortableHeader columnKey="consignee" label="수화인" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="containerQty" label="CNT" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="status" label="상태" className="text-center font-medium text-[var(--foreground)]" />
                         <SortableHeader columnKey="carrier" label="선사" className="text-center font-medium text-[var(--foreground)]" />
@@ -1315,7 +1318,7 @@ export default function ImportBLSeaPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => router.push(`/logis/import-bl/sea/register?hblId=${selectedBL.id}`)}
-                      className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A] transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1324,7 +1327,7 @@ export default function ImportBLSeaPage() {
                     </button>
                     <button
                       onClick={() => handleDeleteSingle(selectedBL)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1352,15 +1355,15 @@ export default function ImportBLSeaPage() {
                     </div>
                     <div className="p-4 grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">HBL No</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">HBL No</label>
                         <p className="text-[var(--foreground)] font-semibold">{selectedBL.hblNo || '-'}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">MBL No</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">MBL No</label>
                         <p className="text-[var(--foreground)]">{selectedBL.mblNo || '-'}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">B/L Type</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">B/L Type</label>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           selectedBL.blType === 'MBL'
                             ? 'bg-orange-100 text-orange-700'
@@ -1370,7 +1373,7 @@ export default function ImportBLSeaPage() {
                         </span>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">상태</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">상태</label>
                         <span
                           className="inline-block px-2 py-1 rounded-full text-xs font-medium"
                           style={{
@@ -1382,11 +1385,11 @@ export default function ImportBLSeaPage() {
                         </span>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">선사</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선사</label>
                         <p className="text-[var(--foreground)]">{selectedBL.carrier || '-'}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">선명 / 항차</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선명 / 항차</label>
                         <p className="text-[var(--foreground)]">{selectedBL.vesselName || '-'} / {selectedBL.voyageNo || '-'}</p>
                       </div>
                     </div>
@@ -1402,21 +1405,21 @@ export default function ImportBLSeaPage() {
                     </div>
                     <div className="p-4 grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">선적항 (POL)</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">선적항 (POL)</label>
                         <p className="text-[var(--foreground)]">
                           <span className="font-semibold">{selectedBL.polCode || '-'}</span>
                           {selectedBL.polName && <span> - {selectedBL.polName}</span>}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">양하항 (POD)</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">양하항 (POD)</label>
                         <p className="text-[var(--foreground)]">
                           <span className="font-semibold">{selectedBL.podCode || '-'}</span>
                           {selectedBL.podName && <span> - {selectedBL.podName}</span>}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">ETD / ATD</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">ETD / ATD</label>
                         <p className="text-[var(--foreground)]">
                           <span className={selectedBL.etd ? '' : 'text-[var(--muted)]'}>{selectedBL.etd || '-'}</span>
                           {' / '}
@@ -1424,7 +1427,7 @@ export default function ImportBLSeaPage() {
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">ETA / ATA</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">ETA / ATA</label>
                         <p className="text-[var(--foreground)]">
                           <span className={selectedBL.eta ? '' : 'text-[var(--muted)]'}>{selectedBL.eta || '-'}</span>
                           {' / '}
@@ -1432,15 +1435,15 @@ export default function ImportBLSeaPage() {
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">수량 / 포장</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수량 / 포장</label>
                         <p className="text-[var(--foreground)]">
                           {selectedBL.containerQty || 0} {selectedBL.containerType || '-'}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">중량 / 용적</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">중량 / 용적</label>
                         <p className="text-[var(--foreground)]">
-                          {formatWeightWithComma(selectedBL.weight, true)} / {formatCBM(selectedBL.volume, true)}
+                          {(selectedBL.weight || 0).toLocaleString()} kg / {selectedBL.volume || 0} CBM
                         </p>
                       </div>
                     </div>
@@ -1456,15 +1459,15 @@ export default function ImportBLSeaPage() {
                     </div>
                     <div className="p-4 grid grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">송화인 (Shipper)</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">송화인 (Shipper)</label>
                         <p className="text-[var(--foreground)]">{selectedBL.shipper || '-'}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">수화인 (Consignee)</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">수화인 (Consignee)</label>
                         <p className="text-[var(--foreground)] font-semibold">{selectedBL.consignee || '-'}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[var(--muted)] mb-1">통지처 (Notify Party)</label>
+                        <label className="block text-sm font-medium text-[var(--foreground)] mb-1">통지처 (Notify Party)</label>
                         <p className="text-[var(--foreground)]">{selectedBL.notifyParty || '-'}</p>
                       </div>
                     </div>
@@ -1474,8 +1477,6 @@ export default function ImportBLSeaPage() {
             )
           )}
         </main>
-      </div>
-
       {/* 삭제 확인 모달 */}
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -1596,17 +1597,17 @@ export default function ImportBLSeaPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-[var(--surface-100)]">
                     <tr>
-                      <th className="p-2 text-left font-medium">행</th>
-                      <th className="p-2 text-left font-medium">상태</th>
-                      <th className="p-2 text-left font-medium">MBL No</th>
-                      <th className="p-2 text-left font-medium">HBL No</th>
-                      <th className="p-2 text-left font-medium">선명</th>
-                      <th className="p-2 text-left font-medium">POL</th>
-                      <th className="p-2 text-left font-medium">POD</th>
-                      <th className="p-2 text-left font-medium">ETD</th>
-                      <th className="p-2 text-left font-medium">ETA</th>
-                      <th className="p-2 text-left font-medium">송화인</th>
-                      <th className="p-2 text-left font-medium">수화인</th>
+                      <th className="p-2 text-center font-medium">행</th>
+                      <th className="p-2 text-center font-medium">상태</th>
+                      <th className="p-2 text-center font-medium">MBL No</th>
+                      <th className="p-2 text-center font-medium">HBL No</th>
+                      <th className="p-2 text-center font-medium">선명</th>
+                      <th className="p-2 text-center font-medium">POL</th>
+                      <th className="p-2 text-center font-medium">POD</th>
+                      <th className="p-2 text-center font-medium">ETD</th>
+                      <th className="p-2 text-center font-medium">ETA</th>
+                      <th className="p-2 text-center font-medium">송화인</th>
+                      <th className="p-2 text-center font-medium">수화인</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1709,6 +1710,6 @@ export default function ImportBLSeaPage() {
         onClose={() => setShowPrintModal(false)}
         blData={printData}
       />
-    </div>
+    </PageLayout>
   );
 }

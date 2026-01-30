@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { formatWeightWithComma, formatCBM } from '@/utils/format';
 
 // B/L 데이터 인터페이스
 export interface BLData {
@@ -434,10 +433,10 @@ function BLFormTemplate({ data }: { data: BLData }) {
               </div>
             </td>
             <td style={{ width: '12%', borderRight: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'right' }}>
-              <div className="text-[10px]">{formatWeightWithComma(data.weight)}</div>
+              <div className="text-[10px]">{data.weight.toLocaleString()}</div>
             </td>
             <td style={{ width: '13%', padding: '6px', verticalAlign: 'top', textAlign: 'right' }}>
-              <div className="text-[10px]">{data.measurement ? formatCBM(data.measurement) : ''}</div>
+              <div className="text-[10px]">{data.measurement ? Number(data.measurement).toFixed(3) : ''}</div>
             </td>
           </tr>
         </tbody>
@@ -677,8 +676,8 @@ function CheckBLTemplate({ data }: { data: BLData }) {
                   <div className="mt-4 font-bold text-[11px]">FREIGHT {data.freightTerms || 'PREPAID'}</div>
                 </div>
                 <div className="col-span-1 text-right text-[9px]">
-                  <div>{formatWeightWithComma(data.weight, true)}</div>
-                  <div>{formatCBM(data.measurement, true)}</div>
+                  <div>{data.weight.toLocaleString()} Kg</div>
+                  <div>{data.measurement ? `${data.measurement.toFixed(3)} CBM` : '0 CBM'}</div>
                 </div>
               </div>
 
@@ -686,7 +685,7 @@ function CheckBLTemplate({ data }: { data: BLData }) {
               <div className="mt-2 pt-2 border-t border-gray-300 text-[9px]">
                 <div className="font-bold">Total No. of containers</div>
                 {data.containerNo ? (
-                  <div>{data.containerType}/{data.containerNo}/{data.sealNo || ''},//{formatWeightWithComma(data.weight)}Kg/{formatCBM(data.measurement)}CBM</div>
+                  <div>{data.containerType}/{data.containerNo}/{data.sealNo || ''},//{data.weight}Kg/{data.measurement || 0}CBM</div>
                 ) : (
                   <div>{data.containerQty} x {data.containerType}</div>
                 )}

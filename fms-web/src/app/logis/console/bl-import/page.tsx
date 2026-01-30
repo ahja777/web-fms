@@ -2,12 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { HBLConsoleModal, type HBLConsoleItem } from '@/components/popup';
-import { useSorting, SortableHeader, SortConfig } from '@/components/table/SortableTable';
+import { getToday } from '@/components/DateRangeButtons';
 
 interface ConsoleBL {
   id: string;
@@ -52,9 +51,10 @@ const sampleData: ConsoleBL[] = [
   { id: '5', consoleNo: 'CON-2026-0005', consoleDate: '2026-01-11', mblNo: 'MBL2026010005', hblCount: 6, carrier: 'HMM', vessel: 'HMM ALGECIRAS', voyage: '003S', pol: 'VNSGN (호치민)', pod: 'KRINC (인천)', eta: '2026-01-19', totalContainers: 2, totalWeight: 32000, status: 'consolidated' },
 ];
 
+const today = getToday();
 const initialFilters: SearchFilters = {
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: today,
   consoleNo: '',
   mblNo: '',
   carrier: '',
@@ -83,7 +83,6 @@ export default function ConsoleBLImportPage() {
     onConfirmClose: handleConfirmClose,
   });
 
-  const { sortConfig, handleSort, sortData } = useSorting<ConsoleBL>();
   const [allData] = useState<ConsoleBL[]>(sampleData);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(initialFilters);
@@ -151,15 +150,12 @@ export default function ConsoleBLImportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="B/L취합관리 (수입/해상)" subtitle="콘솔취합관리  B/L취합관리 (수입/해상)" />
+        <PageLayout title="B/L취합관리 (수입/해상)" subtitle="콘솔취합관리  B/L취합관리 (수입/해상)" showCloseButton={false} >
         <main className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]">콘솔등록</button>
-              <button onClick={() => setShowHBLModal(true)} className="px-4 py-2 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9]">HBL 추가</button>
+              <button className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]">콘솔등록</button>
+              <button onClick={() => setShowHBLModal(true)} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">HBL 추가</button>
               <button onClick={() => alert(`Excel 다운로드: ${selectedIds.size > 0 ? selectedIds.size : filteredList.length}건`)} className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">Excel</button>
             </div>
           </div>
@@ -168,6 +164,67 @@ export default function ConsoleBLImportPage() {
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
 
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">콘솔일자 <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">콘솔번호</label>
+                  <input type="text" value={filters.consoleNo} onChange={(e) => handleFilterChange('consoleNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="CON-YYYY-XXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">MBL No</label>
+                  <input type="text" value={filters.mblNo} onChange={(e) => handleFilterChange('mblNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="MBL No" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사</label>
+                  <select value={filters.carrier} onChange={(e) => handleFilterChange('carrier', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="MAERSK">MAERSK</option>
+                    <option value="MSC">MSC</option>
+                    <option value="COSCO">COSCO</option>
+                    <option value="EVERGREEN">EVERGREEN</option>
+                    <option value="HMM">HMM</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">POL</label>
+                  <input type="text" value={filters.pol} onChange={(e) => handleFilterChange('pol', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="선적항" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="collecting">취합중</option>
+                    <option value="consolidated">취합완료</option>
+                    <option value="shipped">선적</option>
+                    <option value="arrived">도착</option>
+                    <option value="released">반출</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
+
+          {/* 현황 카드 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center cursor-pointer hover:shadow-lg" onClick={() => { setFilters(prev => ({ ...prev, status: 'collecting' })); setAppliedFilters(prev => ({ ...prev, status: 'collecting' })); }}>
               <p className="text-2xl font-bold text-[#EA580C]">{summary.collecting}</p>
@@ -191,87 +248,35 @@ export default function ConsoleBLImportPage() {
             </div>
           </div>
 
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">콘솔일자</label>
-                <div className="flex items-center gap-2">
-                  <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                  <span>~</span>
-                  <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">콘솔번호</label>
-                <input type="text" value={filters.consoleNo} onChange={(e) => handleFilterChange('consoleNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="CON-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">MBL No</label>
-                <input type="text" value={filters.mblNo} onChange={(e) => handleFilterChange('mblNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="MBL No" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">선사</label>
-                <select value={filters.carrier} onChange={(e) => handleFilterChange('carrier', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="MAERSK">MAERSK</option>
-                  <option value="MSC">MSC</option>
-                  <option value="COSCO">COSCO</option>
-                  <option value="EVERGREEN">EVERGREEN</option>
-                  <option value="HMM">HMM</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">POL</label>
-                <input type="text" value={filters.pol} onChange={(e) => handleFilterChange('pol', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="선적항" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="collecting">취합중</option>
-                  <option value="consolidated">취합완료</option>
-                  <option value="shipped">선적</option>
-                  <option value="arrived">도착</option>
-                  <option value="released">반출</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
               <h3 className="font-bold">콘솔 목록 ({filteredList.length}건)</h3>
               {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader columnKey="consoleNo" label={<>콘솔<br/>번호</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="consoleDate" label={<>콘솔<br/>일자</>} sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="mblNo" label="MBL No" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="hblCount" label="HBL 수" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="carrier" label="선사" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="vessel" label="선명/항차" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="pol" label="POL" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="pod" label="POD" sortConfig={sortConfig} onSort={handleSort} />
-                    <SortableHeader columnKey="eta" label="ETA" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="totalContainers" label="컨테이너" sortConfig={sortConfig} onSort={handleSort} align="center" />
-                    <SortableHeader columnKey="totalWeight" label={<>중량<br/>(kg)</>} sortConfig={sortConfig} onSort={handleSort} align="right" />
-                    <SortableHeader columnKey="status" label="상태" sortConfig={sortConfig} onSort={handleSort} align="center" />
+                    <th className="w-10"><input type="checkbox" checked={filteredList.length > 0 && selectedIds.size === filteredList.length} onChange={handleSelectAll} /></th>
+                    <th>콘솔번호</th>
+                    <th>콘솔일자</th>
+                    <th>MBL No</th>
+                    <th className="text-center">HBL 수</th>
+                    <th>선사</th>
+                    <th>선명/항차</th>
+                    <th>POL</th>
+                    <th>POD</th>
+                    <th className="text-center">ETA</th>
+                    <th className="text-center">컨테이너</th>
+                    <th className="text-center">중량(kg)</th>
+                    <th className="text-center">상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr><td colSpan={13} className="p-8 text-center text-[var(--muted)]">조회된 데이터가 없습니다.</td></tr>
                   ) : (
-                    sortData(filteredList).map((row) => (
+                    filteredList.map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
                         <td className="p-3 text-[#2563EB] font-medium">{row.consoleNo}</td>
@@ -284,7 +289,7 @@ export default function ConsoleBLImportPage() {
                         <td className="p-3 text-sm">{row.pod}</td>
                         <td className="p-3 text-sm text-center">{row.eta}</td>
                         <td className="p-3 text-sm text-center">{row.totalContainers}</td>
-                        <td className="p-3 text-sm text-right">{row.totalWeight.toLocaleString()}</td>
+                        <td className="p-3 text-sm text-center">{row.totalWeight.toLocaleString()}</td>
                         <td className="p-3 text-center">
                           <span className="px-2 py-1 rounded-full text-xs" style={{ color: statusConfig[row.status].color, backgroundColor: statusConfig[row.status].bgColor }}>{statusConfig[row.status].label}</span>
                         </td>
@@ -296,8 +301,6 @@ export default function ConsoleBLImportPage() {
             </div>
           </div>
         </main>
-      </div>
-
       <HBLConsoleModal
         isOpen={showHBLModal}
         onClose={() => setShowHBLModal(false)}
@@ -310,6 +313,6 @@ export default function ConsoleBLImportPage() {
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

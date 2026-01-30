@@ -3,8 +3,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LIST_PATHS } from '@/constants/paths';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
@@ -65,9 +64,25 @@ const columnLabels: Record<string, string> = {
 const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof AirBooking; sortConfig: SortConfig }) => {
   const isActive = sortConfig.key === columnKey;
   return (
-    <span className="inline-flex flex-col ml-1" style={{ fontSize: '10px', lineHeight: '6px' }}>
-      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
-      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
     </span>
   );
 };
@@ -125,11 +140,12 @@ const excelColumns: { key: keyof AirBooking; label: string }[] = [
   { key: 'status', label: '상태' },
 ];
 
-// 기본 필터 설정 (날짜 필터 비활성화)
+// 기본 필터 설정 (오늘 날짜로 초기화)
+const today = getToday();
 const getInitialFilters = (): SearchFilters => {
   return {
-    startDate: '',
-    endDate: '',
+    startDate: today,
+    endDate: today,
     bookingNo: '',
     shipper: '',
     airline: '',
@@ -172,8 +188,8 @@ export default function BookingAirPage() {
             eta: item.eta?.toString().substring(0, 10) || '',
             pieces: Number(item.pkgQty) || 0,
             weight: Number(item.grossWeight) || 0,
-            volume: Number(item.volume) || 0,
-            commodity: (item.commodityDesc as string) || '',
+            volume: 0,
+            commodity: '',
             status: String(item.status || 'draft').toLowerCase(),
           }));
           setAllData(formattedData);
@@ -221,6 +237,24 @@ export default function BookingAirPage() {
     const targets = allData.filter(item => selectedIds.has(item.id));
     setPrintData(targets);
     setShowPrintModal(true);
+  };
+
+  // 부킹확정/취소 핸들러
+  const handleBookingConfirm = () => {
+    if (selectedIds.size === 0) {
+      setShowSelectionAlert(true);
+      return;
+    }
+    alert(`${selectedIds.size}건의 부킹을 확정/취소 처리합니다.`);
+  };
+
+  // 부킹요청 핸들러
+  const handleBookingRequest = () => {
+    if (selectedIds.size === 0) {
+      setShowSelectionAlert(true);
+      return;
+    }
+    alert(`${selectedIds.size}건의 부킹을 요청합니다.`);
   };
 
   const filteredList = useMemo(() => {
@@ -303,12 +337,12 @@ export default function BookingAirPage() {
     }));
   };
 
-  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirBooking; label: React.ReactNode; className?: string }) => (
+  const SortableHeader = ({ columnKey, label, className = '' }: { columnKey: keyof AirBooking; label: string; className?: string }) => (
     <th
-      className={`p-3 text-sm cursor-pointer hover:bg-[var(--surface-200)] select-none whitespace-nowrap ${className}`}
+      className={`cursor-pointer select-none text-center ${className}`}
       onClick={() => handleSort(columnKey)}
     >
-      <span className="inline-flex items-center">
+      <span className="inline-flex items-center justify-center">
         {label}
         <SortIcon columnKey={columnKey} sortConfig={sortConfig} />
       </span>
@@ -323,22 +357,19 @@ export default function BookingAirPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="선적부킹관리 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공)" />
+        <PageLayout title="선적부킹관리 (항공)" subtitle="견적/부킹관리  선적부킹관리 (항공)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button
                 onClick={() => router.push('/logis/booking/air/register')}
-                className="px-4 py-2 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]"
               >
                 예약등록
               </button>
               <button
                 onClick={() => router.push('/logis/booking/air/multi-register')}
-                className="px-4 py-2 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9]"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
               >
                 멀티예약
               </button>
@@ -347,7 +378,7 @@ export default function BookingAirPage() {
                 className={`px-4 py-2 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
                   selectedIds.size === 0
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-[#E8A838] text-white hover:bg-[#D4972F]'
+                    : 'bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,6 +397,71 @@ export default function BookingAirPage() {
           {searchMessage && (
             <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-lg">{searchMessage}</div>
           )}
+
+          {/* 검색조건 - 화면설계서 기준 */}
+          <div className="card mb-6">
+            <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+              <svg className="w-5 h-5 text-[var(--foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="font-bold">검색조건</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">
+                    예약일자 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                    <span className="text-[var(--muted)]">~</span>
+                    <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">예약번호</label>
+                  <input type="text" value={filters.bookingNo} onChange={(e) => handleFilterChange('bookingNo', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="AB-YYYY-XXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항공사</label>
+                  <select value={filters.airline} onChange={(e) => handleFilterChange('airline', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="KOREAN AIR">대한항공</option>
+                    <option value="ASIANA">아시아나</option>
+                    <option value="LUFTHANSA">루프트한자</option>
+                    <option value="EMIRATES">에미레이트</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">출발공항</label>
+                  <input type="text" value={filters.origin} onChange={(e) => handleFilterChange('origin', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="공항코드" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">도착공항</label>
+                  <input type="text" value={filters.destination} onChange={(e) => handleFilterChange('destination', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="공항코드" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">화주</label>
+                  <input type="text" value={filters.shipper} onChange={(e) => handleFilterChange('shipper', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm" placeholder="화주명" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label>
+                  <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--border-hover)] text-sm">
+                    <option value="">전체</option>
+                    <option value="draft">작성중</option>
+                    <option value="requested">요청</option>
+                    <option value="confirmed">예약확정</option>
+                    <option value="rejected">거절</option>
+                    <option value="cancelled">취소</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[var(--border)] flex justify-center gap-2">
+              <button onClick={handleSearch} className="px-6 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] font-medium">조회</button>
+              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+            </div>
+          </div>
 
           {/* 현황 카드 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
@@ -391,82 +487,50 @@ export default function BookingAirPage() {
             </div>
           </div>
 
-          <div className="card mb-6">
-            <div className="p-4 border-b border-[var(--border)]"><h3 className="font-bold">검색조건</h3></div>
-            <div className="p-4 grid grid-cols-4 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">예약일자</label>
-                <div className="flex items-center gap-2 flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                  <span>~</span>
-                  <input type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" />
-                  <DateRangeButtons onRangeSelect={(start, end) => { handleFilterChange('startDate', start); handleFilterChange('endDate', end); }} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">예약번호</label>
-                <input type="text" value={filters.bookingNo} onChange={(e) => handleFilterChange('bookingNo', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="AB-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">항공사</label>
-                <select value={filters.airline} onChange={(e) => handleFilterChange('airline', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="KOREAN AIR">대한항공</option>
-                  <option value="ASIANA">아시아나</option>
-                  <option value="LUFTHANSA">루프트한자</option>
-                  <option value="EMIRATES">에미레이트</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">화주</label>
-                <input type="text" value={filters.shipper} onChange={(e) => handleFilterChange('shipper', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="화주명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">출발공항</label>
-                <input type="text" value={filters.origin} onChange={(e) => handleFilterChange('origin', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="공항코드" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">도착공항</label>
-                <input type="text" value={filters.destination} onChange={(e) => handleFilterChange('destination', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="공항코드" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">상태</label>
-                <select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">전체</option>
-                  <option value="draft">작성중</option>
-                  <option value="requested">요청</option>
-                  <option value="confirmed">예약확정</option>
-                  <option value="rejected">거절</option>
-                  <option value="cancelled">취소</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-4 flex justify-center gap-2">
-              <button onClick={handleSearch} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#2A3754]">조회</button>
-              <button onClick={handleReset} className="px-6 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
-            </div>
-          </div>
-
           <div className="card">
             <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
-              <h3 className="font-bold">예약목록 ({sortedList.length}건){getSortStatusText()}</h3>
-              {selectedIds.size > 0 && <span className="text-sm text-blue-600">{selectedIds.size}건 선택됨</span>}
+              <div className="flex items-center gap-3">
+                <h3 className="font-bold">예약목록</h3>
+                <span className="px-2 py-1 bg-[#E8A838]/20 text-[#E8A838] rounded text-sm font-medium">
+                  {sortedList.length}건
+                </span>
+                {getSortStatusText() && <span className="text-sm text-[var(--muted)]">{getSortStatusText()}</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedIds.size > 0 && (
+                  <button onClick={() => setSelectedIds(new Set())} className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
+                    선택 해제 ({selectedIds.size}건)
+                  </button>
+                )}
+                <button
+                  onClick={handleBookingConfirm}
+                  className="px-3 py-1.5 bg-[#059669] text-white rounded-lg hover:bg-[#047857] text-sm font-medium"
+                >
+                  부킹확정/취소
+                </button>
+                <button
+                  onClick={handleBookingRequest}
+                  className="px-3 py-1.5 bg-[#2563EB] text-white rounded-lg hover:bg-[#1d4ed8] text-sm font-medium"
+                >
+                  부킹요청
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="w-10 p-3"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} /></th>
-                    <SortableHeader columnKey="bookingNo" label="예약번호" className="text-left" />
-                    <SortableHeader columnKey="bookingDate" label="예약일자" className="text-left" />
-                    <SortableHeader columnKey="shipper" label="화주" className="text-left" />
-                    <SortableHeader columnKey="airline" label="항공사" className="text-left" />
-                    <SortableHeader columnKey="flightNo" label="편명" className="text-left" />
-                    <SortableHeader columnKey="origin" label="출발" className="text-left" />
-                    <SortableHeader columnKey="destination" label="도착" className="text-left" />
+                    <th className="w-10 text-center"><input type="checkbox" checked={sortedList.length > 0 && selectedIds.size === sortedList.length} onChange={handleSelectAll} /></th>
+                    <SortableHeader columnKey="bookingNo" label="예약번호" className="text-center" />
+                    <SortableHeader columnKey="bookingDate" label="예약일자" className="text-center" />
+                    <SortableHeader columnKey="shipper" label="화주" className="text-center" />
+                    <SortableHeader columnKey="airline" label="항공사" className="text-center" />
+                    <SortableHeader columnKey="flightNo" label="편명" className="text-center" />
+                    <SortableHeader columnKey="origin" label="출발" className="text-center" />
+                    <SortableHeader columnKey="destination" label="도착" className="text-center" />
                     <SortableHeader columnKey="etd" label="ETD" className="text-center" />
                     <SortableHeader columnKey="pieces" label="PCS" className="text-center" />
-                    <SortableHeader columnKey="weight" label="중량(kg)" className="text-right" />
+                    <SortableHeader columnKey="weight" label="중량(kg)" className="text-center" />
                     <SortableHeader columnKey="status" label="상태" className="text-center" />
                   </tr>
                 </thead>
@@ -477,16 +541,16 @@ export default function BookingAirPage() {
                     sortedList.map((row) => (
                       <tr key={row.id} className={`border-t border-[var(--border)] hover:bg-[var(--surface-50)] cursor-pointer ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`} onClick={() => handleRowSelect(row.id)}>
                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => handleRowSelect(row.id)} /></td>
-                        <td className="p-3 text-[#2563EB] font-medium">{row.bookingNo}</td>
-                        <td className="p-3 text-sm">{row.bookingDate}</td>
-                        <td className="p-3 text-sm">{row.shipper}</td>
-                        <td className="p-3 text-sm font-medium">{row.airline}</td>
-                        <td className="p-3 text-sm">{row.flightNo}</td>
-                        <td className="p-3 text-sm">{row.origin}</td>
-                        <td className="p-3 text-sm">{row.destination}</td>
+                        <td className="p-3 text-center text-[#2563EB] font-medium">{row.bookingNo}</td>
+                        <td className="p-3 text-sm text-center">{row.bookingDate}</td>
+                        <td className="p-3 text-sm text-center">{row.shipper}</td>
+                        <td className="p-3 text-sm text-center font-medium">{row.airline}</td>
+                        <td className="p-3 text-sm text-center">{row.flightNo}</td>
+                        <td className="p-3 text-sm text-center">{row.origin}</td>
+                        <td className="p-3 text-sm text-center">{row.destination}</td>
                         <td className="p-3 text-sm text-center">{row.etd}</td>
                         <td className="p-3 text-sm text-center">{row.pieces}</td>
-                        <td className="p-3 text-sm text-right">{row.weight.toLocaleString()}</td>
+                        <td className="p-3 text-sm text-center">{row.weight.toLocaleString()}</td>
                         <td className="p-3 text-center">
                           <span className="px-2 py-1 rounded-full text-xs" style={{ color: getStatusConfig(row.status).color, backgroundColor: getStatusConfig(row.status).bgColor }}>{getStatusConfig(row.status).label}</span>
                         </td>
@@ -498,8 +562,6 @@ export default function BookingAirPage() {
             </div>
           </div>
         </main>
-      </div>
-
       {/* 화면 닫기 확인 모달 */}
       <CloseConfirmModal
         isOpen={showCloseModal}
@@ -522,6 +584,6 @@ export default function BookingAirPage() {
         title="출력 안내"
         message="목록에서 출력할 데이터를 선택해주세요."
       />
-    </div>
+    </PageLayout>
   );
 }

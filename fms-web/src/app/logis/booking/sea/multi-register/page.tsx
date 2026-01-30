@@ -2,8 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import ScheduleSearchModal from '@/components/ScheduleSearchModal';
@@ -239,17 +238,14 @@ export default function MultiBookingSeaRegisterPage() {
   const selectedCount = bookingRows.filter(r => r.selected).length;
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="멀티부킹 등록 (해상)" subtitle="견적/부킹관리  선적부킹관리 (해상) > 멀티예약" onClose={handleCloseClick} />
+        <PageLayout title="멀티부킹 등록 (해상)" subtitle="견적/부킹관리  선적부킹관리 (해상) > 멀티예약" onClose={handleCloseClick} >
         <main className="p-6">
           {/* 상단 버튼 */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
               <button
                 onClick={handleGoList}
-                className="px-4 py-2 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)] flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -259,7 +255,7 @@ export default function MultiBookingSeaRegisterPage() {
               <button
                 onClick={handleSave}
                 disabled={isSaving || validCount === 0}
-                className="px-4 py-2 bg-[#7C3AED] text-white font-semibold rounded-lg hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -287,7 +283,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.carrier}
                   onChange={(e) => handleScheduleChange('carrier', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="선사"
                 />
               </div>
@@ -297,7 +293,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.vessel}
                   onChange={(e) => handleScheduleChange('vessel', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="선박명"
                 />
               </div>
@@ -307,7 +303,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.voyage}
                   onChange={(e) => handleScheduleChange('voyage', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="001E"
                 />
               </div>
@@ -317,7 +313,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.pol}
                   onChange={(e) => handleScheduleChange('pol', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="KRPUS"
                 />
               </div>
@@ -327,7 +323,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.pod}
                   onChange={(e) => handleScheduleChange('pod', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="USLAX"
                 />
               </div>
@@ -337,7 +333,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="text"
                   value={schedule.finalDest}
                   onChange={(e) => handleScheduleChange('finalDest', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                   placeholder="Los Angeles"
                 />
               </div>
@@ -347,7 +343,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="date"
                   value={schedule.etd}
                   onChange={(e) => handleScheduleChange('etd', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -356,7 +352,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="date"
                   value={schedule.eta}
                   onChange={(e) => handleScheduleChange('eta', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -365,7 +361,7 @@ export default function MultiBookingSeaRegisterPage() {
                   type="date"
                   value={schedule.closingDate}
                   onChange={(e) => handleScheduleChange('closingDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 />
               </div>
               <div>
@@ -373,7 +369,7 @@ export default function MultiBookingSeaRegisterPage() {
                 <select
                   value={schedule.freightTerms}
                   onChange={(e) => handleScheduleChange('freightTerms', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="CY-CY">CY-CY</option>
                   <option value="CY-DOOR">CY-DOOR</option>
@@ -386,7 +382,7 @@ export default function MultiBookingSeaRegisterPage() {
                 <select
                   value={schedule.paymentTerms}
                   onChange={(e) => handleScheduleChange('paymentTerms', e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
+                  className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"
                 >
                   <option value="PREPAID">Prepaid</option>
                   <option value="COLLECT">Collect</option>
@@ -433,16 +429,16 @@ export default function MultiBookingSeaRegisterPage() {
                         onChange={(e) => handleSelectAll(e.target.checked)}
                       />
                     </th>
-                    <th className="p-2 text-left w-8">No</th>
-                    <th className="p-2 text-left min-w-[120px]">화주 (Shipper) <span className="text-red-500">*</span></th>
-                    <th className="p-2 text-left min-w-[120px]">수하인 (Consignee) <span className="text-red-500">*</span></th>
-                    <th className="p-2 text-left min-w-[100px]">품명</th>
-                    <th className="p-2 text-left w-24">HS Code</th>
-                    <th className="p-2 text-left w-24">컨테이너</th>
+                    <th className="p-2 text-center w-8">No</th>
+                    <th className="p-2 text-center min-w-[120px]">화주 (Shipper) <span className="text-red-500">*</span></th>
+                    <th className="p-2 text-center min-w-[120px]">수하인 (Consignee) <span className="text-red-500">*</span></th>
+                    <th className="p-2 text-center min-w-[100px]">품명</th>
+                    <th className="p-2 text-center w-24">HS Code</th>
+                    <th className="p-2 text-center w-24">컨테이너</th>
                     <th className="p-2 text-center w-16">수량 <span className="text-red-500">*</span></th>
-                    <th className="p-2 text-right w-24">G.W (kg)</th>
-                    <th className="p-2 text-right w-20">CBM</th>
-                    <th className="p-2 text-left min-w-[80px]">특수요청</th>
+                    <th className="p-2 text-center w-24">G.W (kg)</th>
+                    <th className="p-2 text-center w-20">CBM</th>
+                    <th className="p-2 text-center min-w-[80px]">특수요청</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -550,10 +546,10 @@ export default function MultiBookingSeaRegisterPage() {
                 </tbody>
                 <tfoot className="bg-[var(--surface-100)] font-medium">
                   <tr>
-                    <td colSpan={7} className="p-2 text-right">합계 ({validCount}건 유효)</td>
+                    <td colSpan={7} className="p-2 text-center">합계 ({validCount}건 유효)</td>
                     <td className="p-2 text-center">{totals.containers}</td>
-                    <td className="p-2 text-right">{totals.grossWeight.toLocaleString()}</td>
-                    <td className="p-2 text-right">{totals.measurement.toFixed(3)}</td>
+                    <td className="p-2 text-center">{totals.grossWeight.toLocaleString()}</td>
+                    <td className="p-2 text-center">{totals.measurement.toFixed(3)}</td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -583,27 +579,25 @@ export default function MultiBookingSeaRegisterPage() {
           <div className="flex justify-center gap-3">
             <button
               onClick={handleGoList}
-              className="px-6 py-3 bg-[var(--surface-100)] rounded-lg hover:bg-[var(--surface-200)]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]"
             >
               목록
             </button>
             <button
               onClick={() => router.push('/logis/booking/sea/register')}
-              className="px-6 py-3 bg-[#E8A838] text-[#0C1222] font-semibold rounded-lg hover:bg-[#D4943A]"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)]"
             >
               단건 등록으로 전환
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || validCount === 0}
-              className="px-6 py-3 bg-[#7C3AED] text-white font-semibold rounded-lg hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? '저장중...' : `멀티부킹 저장 (${validCount}건)`}
             </button>
           </div>
         </main>
-      </div>
-
       {/* 스케줄 조회 모달 */}
       <ScheduleSearchModal
         isOpen={showScheduleModal}
@@ -618,6 +612,6 @@ export default function MultiBookingSeaRegisterPage() {
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

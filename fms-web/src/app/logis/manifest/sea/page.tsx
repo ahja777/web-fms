@@ -5,10 +5,10 @@ import { LIST_PATHS } from '@/constants/paths';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import DateRangeButtons, { getToday } from '@/components/DateRangeButtons';
+import SearchFilterPanel, { SearchFilterGrid, SearchFilterField, DateRangeField, TextField, SelectField } from '@/components/search/SearchFilterPanel';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 
@@ -37,13 +37,29 @@ interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-// 정렬 아이콘 컴포넌트
+// 정렬 아이콘 컴포넌트 (CSS 삼각형 스타일)
 const SortIcon = ({ columnKey, sortConfig }: { columnKey: keyof ManifestData; sortConfig: SortConfig }) => {
   const isActive = sortConfig.key === columnKey;
   return (
-    <span className="inline-flex flex-col ml-1 text-[10px] leading-none">
-      <span style={{ color: isActive && sortConfig.direction === 'asc' ? '#E8A838' : '#9CA3AF' }}>&#9650;</span>
-      <span style={{ color: isActive && sortConfig.direction === 'desc' ? '#E8A838' : '#9CA3AF' }}>&#9660;</span>
+    <span className="inline-flex flex-col ml-1.5 gap-px">
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderBottom: `5px solid ${isActive && sortConfig.direction === 'asc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
+      <span
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: '4px solid transparent',
+          borderRight: '4px solid transparent',
+          borderTop: `5px solid ${isActive && sortConfig.direction === 'desc' ? '#ffffff' : 'rgba(255,255,255,0.35)'}`,
+        }}
+      />
     </span>
   );
 };
@@ -190,10 +206,10 @@ export default function ManifestListPage() {
   // 정렬 가능한 헤더 컴포넌트
   const SortableHeader = ({ columnKey, children, className = '' }: { columnKey: keyof ManifestData; children: React.ReactNode; className?: string }) => (
     <th
-      className={`px-4 py-3 text-left text-sm font-medium cursor-pointer hover:bg-[var(--surface-200)] select-none ${className}`}
+      className={`cursor-pointer select-none text-center ${className}`}
       onClick={() => handleSort(columnKey)}
     >
-      <span className="inline-flex items-center">
+      <span className="inline-flex items-center justify-center">
         {children}
         <SortIcon columnKey={columnKey} sortConfig={sortConfig} />
       </span>
@@ -268,68 +284,75 @@ export default function ManifestListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="적하목록 관리" subtitle="Logis > 적하목록 > 적하목록 관리 (해상)" />
+        <PageLayout title="적하목록 관리" subtitle="Logis > 적하목록 > 적하목록 관리 (해상)" showCloseButton={false} >
         <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">삭제</button>
-              <Link href="/logis/manifest/sea/register" className="px-6 py-2 font-semibold rounded-lg" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>
+              <button onClick={handleDelete} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">삭제</button>
+              <Link href="/logis/manifest/sea/register" className="px-6 py-2 font-semibold rounded-lg bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]">
                 신규 등록
               </Link>
             </div>
           </div>
 
-          <div className="card p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">적하목록 일자</label>
-                <div className="flex gap-2 items-center flex-nowrap">
-                  <input type="date" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <span className="text-[var(--muted)]">~</span>
-                  <input type="date" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="flex-1 px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" />
-                  <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">적하목록 번호</label>
-                <input type="text" value={filters.mfNo} onChange={e => setFilters(prev => ({ ...prev, mfNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="MF-YYYY-XXXX" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">B/L 번호</label>
-                <input type="text" value={filters.blNo} onChange={e => setFilters(prev => ({ ...prev, blNo: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HDMU1234567" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">구분</label>
-                <select value={filters.mfType} onChange={e => setFilters(prev => ({ ...prev, mfType: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="수출">수출</option>
-                  <option value="수입">수입</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명</label>
-                <input type="text" value={filters.vessel} onChange={e => setFilters(prev => ({ ...prev, vessel: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="선박명" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label>
-                <select value={filters.status} onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg">
-                  <option value="">전체</option>
-                  <option value="DRAFT">작성중</option>
-                  <option value="READY">제출대기</option>
-                  <option value="SENT">전송완료</option>
-                  <option value="ACCEPTED">수리</option>
-                  <option value="REJECTED">반려</option>
-                </select>
-              </div>
-              <div className="col-span-2 flex items-end gap-2">
-                <button onClick={handleSearch} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">검색</button>
-                <button onClick={handleReset} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              </div>
-            </div>
-          </div>
+          {/* 검색조건 - SearchFilterPanel 컴포넌트 사용 */}
+          <SearchFilterPanel onSearch={handleSearch} onReset={handleReset} className="mb-6">
+            <SearchFilterGrid columns={6}>
+              <SearchFilterField label="적하목록 일자" colSpan={2}>
+                <DateRangeField
+                  startValue={filters.startDate}
+                  endValue={filters.endDate}
+                  onStartChange={(value) => setFilters(prev => ({ ...prev, startDate: value }))}
+                  onEndChange={(value) => setFilters(prev => ({ ...prev, endDate: value }))}
+                />
+                <DateRangeButtons onRangeSelect={handleDateRangeSelect} />
+              </SearchFilterField>
+              <SearchFilterField label="적하목록 번호">
+                <TextField
+                  value={filters.mfNo}
+                  onChange={(value) => setFilters(prev => ({ ...prev, mfNo: value }))}
+                  placeholder="MF-YYYY-XXXX"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="B/L 번호">
+                <TextField
+                  value={filters.blNo}
+                  onChange={(value) => setFilters(prev => ({ ...prev, blNo: value }))}
+                  placeholder="HDMU1234567"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="구분">
+                <SelectField
+                  value={filters.mfType}
+                  onChange={(value) => setFilters(prev => ({ ...prev, mfType: value }))}
+                  options={[
+                    { value: '수출', label: '수출' },
+                    { value: '수입', label: '수입' },
+                  ]}
+                />
+              </SearchFilterField>
+              <SearchFilterField label="선명">
+                <TextField
+                  value={filters.vessel}
+                  onChange={(value) => setFilters(prev => ({ ...prev, vessel: value }))}
+                  placeholder="선박명"
+                />
+              </SearchFilterField>
+              <SearchFilterField label="상태">
+                <SelectField
+                  value={filters.status}
+                  onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                  options={[
+                    { value: 'DRAFT', label: '작성중' },
+                    { value: 'READY', label: '제출대기' },
+                    { value: 'SENT', label: '전송완료' },
+                    { value: 'ACCEPTED', label: '수리' },
+                    { value: 'REJECTED', label: '반려' },
+                  ]}
+                />
+              </SearchFilterField>
+            </SearchFilterGrid>
+          </SearchFilterPanel>
 
           <div className="grid grid-cols-5 gap-4 mb-6">
             <div className="card p-4 text-center"><div className="text-2xl font-bold">{summaryStats.total}</div><div className="text-sm text-[var(--muted)]">전체</div></div>
@@ -343,13 +366,13 @@ export default function ManifestListPage() {
             {loading ? (
               <div className="p-8 text-center text-[var(--muted)]">데이터를 불러오는 중...</div>
             ) : (
-              <table className="w-full">
-                <thead className="bg-[var(--surface-100)]">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">
+                    <th className="text-center w-12">
                       <input type="checkbox" checked={selectedIds.length === sortedData.length && sortedData.length > 0} onChange={e => handleSelectAll(e.target.checked)} className="w-4 h-4" />
                     </th>
-                    <SortableHeader columnKey="mfNo">적하목록<br/>번호</SortableHeader>
+                    <SortableHeader columnKey="mfNo">적하목록번호</SortableHeader>
                     <SortableHeader columnKey="mfDate">일자</SortableHeader>
                     <SortableHeader columnKey="mfType">구분</SortableHeader>
                     <SortableHeader columnKey="blNo">B/L 번호</SortableHeader>
@@ -360,27 +383,27 @@ export default function ManifestListPage() {
                     <SortableHeader columnKey="grossWeight">중량(KG)</SortableHeader>
                     <SortableHeader columnKey="ediStatus">EDI</SortableHeader>
                     <SortableHeader columnKey="status">상태</SortableHeader>
-                    <th className="px-4 py-3 text-left text-sm font-medium">전송</th>
+                    <th className="text-center">전송</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {sortedData.map(item => (
                     <tr key={item.id} className="hover:bg-[var(--surface-50)] cursor-pointer">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={e => handleSelectOne(item.id, e.target.checked)} className="w-4 h-4" />
                       </td>
-                      <td className="px-4 py-3"><Link href={'/logis/manifest/sea/' + item.id} className="text-blue-400 hover:underline">{item.mfNo}</Link></td>
-                      <td className="px-4 py-3 text-sm">{item.mfDate}</td>
-                      <td className="px-4 py-3 text-sm">{item.mfType}</td>
-                      <td className="px-4 py-3 text-sm">{item.blNo}</td>
-                      <td className="px-4 py-3 text-sm">{item.vessel}<br /><span className="text-[var(--muted)]">{item.voyage}</span></td>
-                      <td className="px-4 py-3 text-sm">{item.pol} → {item.pod}</td>
-                      <td className="px-4 py-3 text-sm">{item.shipper}</td>
-                      <td className="px-4 py-3 text-sm">{item.containerQty}</td>
-                      <td className="px-4 py-3 text-sm">{item.grossWeight.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-sm"><span className={ediStatusConfig[item.ediStatus]?.color || 'text-gray-500'}>{ediStatusConfig[item.ediStatus]?.label || '-'}</span></td>
-                      <td className="px-4 py-3"><span className={'px-2 py-1 text-xs rounded-full text-white ' + (statusConfig[item.status]?.color || 'bg-gray-500')}>{statusConfig[item.status]?.label || item.status}</span></td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center"><Link href={'/logis/manifest/sea/' + item.id} className="text-blue-400 hover:underline">{item.mfNo}</Link></td>
+                      <td className="px-4 py-3 text-sm text-center">{item.mfDate}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.mfType}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.blNo}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.vessel}<br /><span className="text-[var(--muted)]">{item.voyage}</span></td>
+                      <td className="px-4 py-3 text-sm text-center">{item.pol} → {item.pod}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.shipper}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.containerQty}</td>
+                      <td className="px-4 py-3 text-sm text-center">{item.grossWeight.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-center"><span className={ediStatusConfig[item.ediStatus]?.color || 'text-gray-500'}>{ediStatusConfig[item.ediStatus]?.label || '-'}</span></td>
+                      <td className="px-4 py-3 text-center"><span className={'px-2 py-1 text-xs rounded-full text-white ' + (statusConfig[item.status]?.color || 'bg-gray-500')}>{statusConfig[item.status]?.label || item.status}</span></td>
+                      <td className="px-4 py-3 text-center">
                         {(item.status === 'DRAFT' || item.status === 'READY' || item.status === 'REJECTED') && (
                           <button onClick={() => handleSendEDI(item.id)} className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">EDI전송</button>
                         )}
@@ -392,13 +415,11 @@ export default function ManifestListPage() {
             )}
           </div>
         </main>
-      </div>
-
       <CloseConfirmModal
         isOpen={showCloseModal}
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }

@@ -2,11 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import { useEnterNavigation } from '@/hooks/useEnterNavigation';
 import { useScreenClose } from '@/hooks/useScreenClose';
-import { UnsavedChangesModal } from '@/components/UnsavedChangesModal';
 import { LIST_PATHS } from '@/constants/paths';
 import {
   CodeSearchModal,
@@ -84,7 +82,6 @@ export default function ScheduleRegisterPage() {
   const formRef = useRef<HTMLDivElement>(null);
   useEnterNavigation({ containerRef: formRef as React.RefObject<HTMLElement> });
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // useScreenClose 훅
   const {
@@ -93,7 +90,7 @@ export default function ScheduleRegisterPage() {
     handleModalClose,
     handleDiscard: handleDiscardChanges,
   } = useScreenClose({
-    hasChanges: hasUnsavedChanges,
+    hasChanges: false,  // 이 페이지는 변경사항 추적 없음
     listPath: LIST_PATHS.SCHEDULE_SEA,
   });
 
@@ -136,7 +133,6 @@ export default function ScheduleRegisterPage() {
       }
       return newData;
     });
-    setHasUnsavedChanges(true);
   };
 
   
@@ -230,6 +226,37 @@ export default function ScheduleRegisterPage() {
     }
   };
 
+  const handleFillTestData = () => {
+    // HMM의 carrier_id = 1
+    setFormData({
+      ...initialFormData,
+      carrierId: 1,
+      carrier: 'HMM',
+      vessel: 'HMM GDANSK',
+      voyage: '001E',
+      callSign: 'H9HM',
+      pol: 'KRPUS',
+      polTerminal: 'HPNT',
+      pod: 'USLAX',
+      podTerminal: 'APL',
+      etd: '2026-01-25',
+      eta: '2026-02-12',
+      transitTime: 18,
+      cutOffDate: '2026-01-23',
+      cutOffTime: '17:00',
+      docCutOffDate: '2026-01-24',
+      docCutOffTime: '12:00',
+      vgmCutOff: '2026-01-23',
+      serviceType: 'DIRECT',
+      space20: 200,
+      space40: 300,
+      space40hc: 500,
+      spaceRF: 50,
+      status: 'OPEN',
+      remarks: '정기 서비스 스케줄',
+    });
+  };
+
   const handleReset = () => {
     if (!confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
     setFormData(initialFormData);
@@ -237,19 +264,18 @@ export default function ScheduleRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="스케줄 등록 (해상)" subtitle="Logis > 스케줄관리 > 스케줄 등록 (해상)" onClose={handleCloseClick} />
-        <main ref={formRef} className="p-6">
-          <div className="flex justify-between items-center mb-6">
+      <Header title="스케줄 등록 (해상)" subtitle="Logis > 스케줄관리 > 스케줄 등록 (해상)" showCloseButton={false} />
+      <main ref={formRef} className="p-6">
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2">
+              <button onClick={handleFillTestData} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">테스트데이터</button>
               <button
                 onClick={() => { setFormData(initialFormData); setIsNewMode(true); }}
                 disabled={isNewMode}
-                className={`px-4 py-2 rounded-lg ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                className={`px-4 py-2 rounded-lg ${isNewMode ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-[var(--surface-100)] text-[var(--foreground)] hover:bg-[var(--surface-200)]'}`}
               >신규</button>
-              <button onClick={handleReset} className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">초기화</button>
-              <button onClick={handleSubmit} disabled={isLoading} className="px-6 py-2 font-semibold rounded-lg disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #E8A838 0%, #D4943A 100%)', color: '#0C1222' }}>{isLoading ? '저장 중...' : '저장'}</button>
+              <button onClick={handleReset} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">초기화</button>
+              <button onClick={handleSubmit} disabled={isLoading} className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] disabled:opacity-50">{isLoading ? '저장 중...' : '저장'}</button>
             </div>
           </div>
 
@@ -257,9 +283,9 @@ export default function ScheduleRegisterPage() {
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">기본 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">스케줄 번호</label><input type="text" value={formData.scheduleNo} disabled className="w-full px-3 py-2 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">상태</label><select value={formData.status} onChange={e => handleChange('status', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="OPEN">부킹가능</option><option value="LIMITED">잔여공간</option><option value="FULL">만석</option><option value="CLOSED">마감</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선사 <span className="text-red-500">*</span></label><select value={formData.carrierId || ''} onChange={e => {
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">스케줄 번호</label><input type="text" value={formData.scheduleNo} disabled className="w-full h-[38px] px-3 bg-[var(--surface-100)] border border-[var(--border)] rounded-lg text-[var(--muted)]" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">상태</label><select value={formData.status} onChange={e => handleChange('status', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="OPEN">부킹가능</option><option value="LIMITED">잔여공간</option><option value="FULL">만석</option><option value="CLOSED">마감</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선사 <span className="text-red-500">*</span></label><select value={formData.carrierId || ''} onChange={e => {
                   const selectedId = e.target.value ? parseInt(e.target.value) : null;
                   const selectedCarrier = carriers.find(c => c.carrier_id === selectedId);
                   setFormData(prev => ({
@@ -268,52 +294,50 @@ export default function ScheduleRegisterPage() {
                     carrier: selectedCarrier?.carrier_name || ''
                   }));
                   setValidationErrors(prev => ({ ...prev, carrierId: false }));
-                }} className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${validationErrors.carrierId ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`}><option value="">선택</option>{carriers.map(c => (<option key={c.carrier_id} value={c.carrier_id}>{c.carrier_name}</option>))}</select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">서비스 타입</label><select value={formData.serviceType} onChange={e => handleChange('serviceType', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="DIRECT">DIRECT</option><option value="T/S">T/S (환적)</option><option value="FEEDER">FEEDER</option></select></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선명 <span className="text-red-500">*</span></label><input type="text" value={formData.vessel} onChange={e => { handleChange('vessel', e.target.value); setValidationErrors(prev => ({ ...prev, vessel: false })); }} className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${validationErrors.vessel ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`} placeholder="선박명" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">항차</label><input type="text" value={formData.voyage} onChange={e => handleChange('voyage', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="001E" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">호출부호 (Call Sign)</label><input type="text" value={formData.callSign} onChange={e => handleChange('callSign', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="H9HM" /></div>
+                }} className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${validationErrors.carrierId ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`}><option value="">선택</option>{carriers.map(c => (<option key={c.carrier_id} value={c.carrier_id}>{c.carrier_name}</option>))}</select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">서비스 타입</label><select value={formData.serviceType} onChange={e => handleChange('serviceType', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg"><option value="DIRECT">DIRECT</option><option value="T/S">T/S (환적)</option><option value="FEEDER">FEEDER</option></select></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선명 <span className="text-red-500">*</span></label><input type="text" value={formData.vessel} onChange={e => { handleChange('vessel', e.target.value); setValidationErrors(prev => ({ ...prev, vessel: false })); }} className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${validationErrors.vessel ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`} placeholder="선박명" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">항차</label><input type="text" value={formData.voyage} onChange={e => handleChange('voyage', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="001E" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">호출부호 (Call Sign)</label><input type="text" value={formData.callSign} onChange={e => handleChange('callSign', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="H9HM" /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">구간/일정 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적항 (POL)</label><input type="text" value={formData.pol} onChange={e => handleChange('pol', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">선적터미널</label><input type="text" value={formData.polTerminal} onChange={e => handleChange('polTerminal', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HPNT" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하항 (POD)</label><input type="text" value={formData.pod} onChange={e => handleChange('pod', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">양하터미널</label><input type="text" value={formData.podTerminal} onChange={e => handleChange('podTerminal', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="APL" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETD <span className="text-red-500">*</span></label><input type="date" value={formData.etd} onChange={e => { handleChange('etd', e.target.value); setValidationErrors(prev => ({ ...prev, etd: false })); }} className={`w-full px-3 py-2 bg-[var(--surface-50)] border rounded-lg ${validationErrors.etd ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`} /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">ETA</label><input type="date" value={formData.eta} onChange={e => handleChange('eta', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Transit Time (일)</label><input type="number" value={formData.transitTime} onChange={e => handleChange('transitTime', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적항 (POL)</label><input type="text" value={formData.pol} onChange={e => handleChange('pol', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="KRPUS" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">선적터미널</label><input type="text" value={formData.polTerminal} onChange={e => handleChange('polTerminal', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="HPNT" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하항 (POD)</label><input type="text" value={formData.pod} onChange={e => handleChange('pod', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="USLAX" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">양하터미널</label><input type="text" value={formData.podTerminal} onChange={e => handleChange('podTerminal', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="APL" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETD <span className="text-red-500">*</span></label><input type="date" value={formData.etd} onChange={e => { handleChange('etd', e.target.value); setValidationErrors(prev => ({ ...prev, etd: false })); }} className={`w-full h-[38px] px-3 bg-[var(--surface-50)] border rounded-lg ${validationErrors.etd ? 'border-red-500 ring-1 ring-red-500' : 'border-[var(--border)]'}`} /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">ETA</label><input type="date" value={formData.eta} onChange={e => handleChange('eta', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Transit Time (일)</label><input type="number" value={formData.transitTime} onChange={e => handleChange('transitTime', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Cut-Off 정보</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cargo Cut-Off 일자</label><input type="date" value={formData.cutOffDate} onChange={e => handleChange('cutOffDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Cargo Cut-Off 시간</label><input type="time" value={formData.cutOffTime} onChange={e => handleChange('cutOffTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Doc Cut-Off 일자</label><input type="date" value={formData.docCutOffDate} onChange={e => handleChange('docCutOffDate', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">Doc Cut-Off 시간</label><input type="time" value={formData.docCutOffTime} onChange={e => handleChange('docCutOffTime', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">VGM Cut-Off</label><input type="date" value={formData.vgmCutOff} onChange={e => handleChange('vgmCutOff', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cargo Cut-Off 일자</label><input type="date" value={formData.cutOffDate} onChange={e => handleChange('cutOffDate', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Cargo Cut-Off 시간</label><input type="time" value={formData.cutOffTime} onChange={e => handleChange('cutOffTime', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Doc Cut-Off 일자</label><input type="date" value={formData.docCutOffDate} onChange={e => handleChange('docCutOffDate', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">Doc Cut-Off 시간</label><input type="time" value={formData.docCutOffTime} onChange={e => handleChange('docCutOffTime', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">VGM Cut-Off</label><input type="date" value={formData.vgmCutOff} onChange={e => handleChange('vgmCutOff', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
               </div>
             </div>
 
             <div className="card p-6">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b border-[var(--border)]">Space 정보 (TEU)</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">20GP</label><input type="number" value={formData.space20} onChange={e => handleChange('space20', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">40GP</label><input type="number" value={formData.space40} onChange={e => handleChange('space40', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">40HC</label><input type="number" value={formData.space40hc} onChange={e => handleChange('space40hc', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1 text-[var(--muted)]">RF (냉동)</label><input type="number" value={formData.spaceRF} onChange={e => handleChange('spaceRF', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
-                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--muted)]">비고</label><input type="text" value={formData.remarks} onChange={e => handleChange('remarks', e.target.value)} className="w-full px-3 py-2 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="특이사항" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">20GP</label><input type="number" value={formData.space20} onChange={e => handleChange('space20', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">40GP</label><input type="number" value={formData.space40} onChange={e => handleChange('space40', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">40HC</label><input type="number" value={formData.space40hc} onChange={e => handleChange('space40hc', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">RF (냉동)</label><input type="number" value={formData.spaceRF} onChange={e => handleChange('spaceRF', parseInt(e.target.value) || 0)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" /></div>
+                <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-[var(--foreground)]">비고</label><input type="text" value={formData.remarks} onChange={e => handleChange('remarks', e.target.value)} className="w-full h-[38px] px-3 bg-[var(--surface-50)] border border-[var(--border)] rounded-lg" placeholder="특이사항" /></div>
               </div>
             </div>
           </div>
         </main>
-      </div>
-
       {/* 코드 검색 모달 */}
       <CodeSearchModal
         isOpen={showCodeModal}
@@ -330,13 +354,6 @@ export default function ScheduleRegisterPage() {
         type="seaport"
       />
 
-      {/* 저장 확인 모달 */}
-      <UnsavedChangesModal
-        isOpen={showCloseModal}
-        onClose={handleModalClose}
-        onDiscard={handleDiscardChanges}
-        message="저장하지 않은 변경사항이 있습니다.\n이 페이지를 떠나시겠습니까?"
-      />
     </div>
   );
 }

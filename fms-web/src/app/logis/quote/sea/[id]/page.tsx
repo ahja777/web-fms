@@ -3,8 +3,7 @@
 import { useState, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import PageLayout from '@/components/PageLayout';
 import CloseConfirmModal from '@/components/CloseConfirmModal';
 import { useCloseConfirm } from '@/hooks/useCloseConfirm';
 import { LIST_PATHS } from '@/constants/paths';
@@ -109,15 +108,12 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
           <p className="mt-4 text-[var(--muted)]">데이터를 불러오는 중...</p>
         </div>
       </div>
-    );
-  }
+  );
+}
 
   if (!quote) {
     return (
-      <div className="min-h-screen bg-[var(--background)]">
-        <Sidebar />
-        <div className="ml-72">
-          <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" />
+          <PageLayout title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" showCloseButton={false} >
           <main className="p-6">
             <div className="card p-12 text-center">
               <svg className="w-16 h-16 text-[var(--muted)] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,23 +121,19 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
               </svg>
               <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">견적을 찾을 수 없습니다</h3>
               <p className="text-[var(--muted)] mb-6">요청하신 견적 정보가 존재하지 않습니다.</p>
-              <button onClick={handleList} className="px-6 py-2 bg-[#1A2744] text-white rounded-lg hover:bg-[#243354]">
+              <button onClick={handleList} className="px-6 py-2 bg-[var(--surface-100)] text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-200)]">
                 목록으로 돌아가기
               </button>
             </div>
           </main>
-        </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const status = statusConfig[quote.status];
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="ml-72">
-        <Header title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" />
+        <PageLayout title="견적관리 상세 (해상)" subtitle="물류견적관리  견적관리 (해상) > 상세조회" showCloseButton={false} >
 
         <main className="p-6">
           {/* 상단 버튼 */}
@@ -167,7 +159,7 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
                 </svg>
                 목록
               </button>
-              <button onClick={handleEdit} className="px-4 py-2 bg-[#1A2744] text-white font-semibold rounded-lg hover:bg-[#243354] transition-colors flex items-center gap-2">
+              <button onClick={handleEdit} className="px-4 py-2 bg-[var(--surface-100)] text-[var(--foreground)] font-semibold rounded-lg hover:bg-[var(--surface-200)] transition-colors flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -184,19 +176,19 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
             <div className="p-6">
               <div className="grid grid-cols-4 gap-6">
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">견적번호</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">견적번호</label>
                   <p className="text-[var(--foreground)] font-semibold text-lg">{quote.quoteNo}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">견적일자</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">견적일자</label>
                   <p className="text-[var(--foreground)]">{quote.quoteDate}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">요청번호</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">요청번호</label>
                   <p className="text-[var(--foreground)]">{quote.requestNo || '-'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">유효기간</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">유효기간</label>
                   <p className="text-[var(--foreground)]">{quote.validFrom} ~ {quote.validTo}</p>
                 </div>
               </div>
@@ -211,11 +203,11 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
             <div className="p-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">화주 (Shipper)</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">화주 (Shipper)</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.shipper}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">수하인 (Consignee)</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">수하인 (Consignee)</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.consignee}</p>
                 </div>
               </div>
@@ -230,27 +222,27 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
             <div className="p-6">
               <div className="grid grid-cols-4 gap-6">
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">출발항 (POL)</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">출발항 (POL)</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.pol}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">도착항 (POD)</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">도착항 (POD)</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.pod}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">선사</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">선사</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.carrier}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">무역조건</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">무역조건</label>
                   <p className="text-[var(--foreground)] font-medium">{quote.incoterms}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">컨테이너 유형</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">컨테이너 유형</label>
                   <p className="text-[var(--foreground)]">{quote.containerType}</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[var(--muted)] mb-1">컨테이너 수량</label>
+                  <label className="block text-sm text-[var(--foreground)] mb-1">컨테이너 수량</label>
                   <p className="text-[var(--foreground)]">{quote.containerQty} EA</p>
                 </div>
               </div>
@@ -278,8 +270,6 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
         </main>
-      </div>
-
       {/* 이메일 모달 */}
       <EmailModal
         isOpen={showEmailModal}
@@ -296,6 +286,6 @@ export default function QuoteSeaDetailPage({ params }: { params: Promise<{ id: s
         onClose={() => setShowCloseModal(false)}
         onConfirm={handleConfirmClose}
       />
-    </div>
+    </PageLayout>
   );
 }
